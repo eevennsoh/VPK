@@ -115,19 +115,19 @@ function generateAsapToken() {
 
 let buildAIGatewayPayload;
 try {
-    // Try Docker path first (./shared), then local dev path (../shared)
+    // Try Docker path first (./rovo), then local dev path (../rovo)
     let config;
     try {
-        config = require('./shared/rovo-config');
-        console.log('[STARTUP] rovo-config loaded from ./shared (Docker path)');
+        config = require('./rovo/config');
+        console.log('[STARTUP] config loaded from ./rovo (Docker path)');
     } catch (e1) {
-        config = require('../shared/rovo-config');
-        console.log('[STARTUP] rovo-config loaded from ../shared (local dev path)');
+        config = require('../rovo/config');
+        console.log('[STARTUP] config loaded from ../rovo (local dev path)');
     }
     buildAIGatewayPayload = config.buildAIGatewayPayload;
-    console.log('[STARTUP] rovo-config loaded successfully');
+    console.log('[STARTUP] rovo config loaded successfully');
 } catch (e) {
-    console.warn('[STARTUP] rovo-config failed to load:', e.message);
+    console.warn('[STARTUP] rovo config failed to load:', e.message);
     console.warn('[STARTUP] Using fallback functions - config did not load!');
     // Provide a fallback (OpenAI format)
     buildAIGatewayPayload = (message) => ({

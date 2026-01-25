@@ -10,7 +10,7 @@ If you're an AI agent helping a user switch models, **START HERE**:
 
 ### Step-by-Step Agent Workflow
 
-**STEP 1:** Read `shared/rovo-config.ts` and identify current provider:
+**STEP 1:** Read `rovo/config.ts` and identify current provider:
 - Contains `anthropic_version` → Currently using Claude
 - Contains `model: "gpt-` or `model: "o1-"` → Currently using OpenAI
 
@@ -43,12 +43,12 @@ Current: OpenAI + Target: OpenAI  → Edit 2 files (model only)
 ### Files to Edit (by scenario)
 
 **Same provider (2 files):**
-- `shared/rovo-config.ts` - change model ID only
-- `shared/rovo-config.js` - change model ID only
+- `rovo/config.ts` - change model ID only
+- `rovo/config.js` - change model ID only
 
 **Different provider (4 files):**
-- `shared/rovo-config.ts` - change model ID + payload structure + interface
-- `shared/rovo-config.js` - change model ID + payload structure
+- `rovo/config.ts` - change model ID + payload structure + interface
+- `rovo/config.js` - change model ID + payload structure
 - `app/api/rovo-chat/route.ts` - change endpoint URL + response parsing
 - `backend/server.js` - change endpoint URL + response parsing
 
@@ -70,7 +70,7 @@ Before following any steps, **identify what model type you're currently using an
 
 ### Current Model Type Check
 
-Look at `shared/rovo-config.ts` in the `buildAIGatewayPayload` function:
+Look at `rovo/config.ts` in the `buildAIGatewayPayload` function:
 
 **If you see:**
 ```typescript
@@ -160,7 +160,7 @@ Look for the `offerings` section in the output. This lists all whitelisted model
 
 ### 2.1 Update TypeScript Config
 
-Edit `shared/rovo-config.ts`:
+Edit `rovo/config.ts`:
 
 **Find the `buildAIGatewayPayload` function** and look for the `return` statement.
 
@@ -186,7 +186,7 @@ Find the line with `anthropic_version:` - the model is specified in the AI_GATEW
 
 ### 2.2 Update JavaScript Config (for Backend)
 
-Edit `shared/rovo-config.js`:
+Edit `rovo/config.js`:
 
 **Find the same section** (around line 79-108) and make the **same change**:
 ```javascript
@@ -343,7 +343,7 @@ Apply the **same changes** as above:
 
 ### 5.1 Update TypeScript Payload Interface
 
-Edit `shared/rovo-config.ts`:
+Edit `rovo/config.ts`:
 
 **Find the interface** (around line 84-95):
 
@@ -443,7 +443,7 @@ export function buildAIGatewayPayload(
 }
 ```
 
-**Repeat the same changes in `shared/rovo-config.js`**
+**Repeat the same changes in `rovo/config.js`**
 
 ---
 
@@ -514,8 +514,8 @@ After deploying:
 Before deploying your model change, ensure:
 
 - [ ] Checked whitelisted models for your use case
-- [ ] Updated model ID in `shared/rovo-config.ts`
-- [ ] Updated model ID in `shared/rovo-config.js`
+- [ ] Updated model ID in `rovo/config.ts`
+- [ ] Updated model ID in `rovo/config.js`
 - [ ] Updated endpoint URL in `app/api/rovo-chat/route.ts`
 - [ ] Updated endpoint URL in `backend/server.js`
 - [ ] Updated response parsing in `app/api/rovo-chat/route.ts`
@@ -536,7 +536,7 @@ Before deploying your model change, ensure:
 4. Ask: "Which of these whitelisted models do you want to use: [list them]"
 
 ### Phase 2: Determine Scope
-1. Read `shared/rovo-config.ts` 
+1. Read `rovo/config.ts` 
 2. Search for `anthropic_version` or look at the `model:` field
 3. If switching Claude ↔ OpenAI: Full change (all 4 files)
 4. If staying within provider: Minimal change (2 files)
@@ -545,11 +545,11 @@ Before deploying your model change, ensure:
 
 **Use these exact search strings when using the edit tool:**
 
-For `shared/rovo-config.ts`:
+For `rovo/config.ts`:
 - Search for: `return {` inside `buildAIGatewayPayload` function
 - Or search for: `export function buildAIGatewayPayload`
 
-For `shared/rovo-config.js`:
+For `rovo/config.js`:
 - Search for: `function buildAIGatewayPayload`
 - Replace the entire return statement
 

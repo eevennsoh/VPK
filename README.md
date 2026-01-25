@@ -108,8 +108,8 @@ For complete deployment instructions, see [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUI
 │   ├── server.js          # Main server with AI Gateway integration
 │   ├── Dockerfile         # Multi-stage Docker build
 │   └── package.json       # Backend dependencies
-├── shared/                # Shared modules
-│   └── rovo-config.js     # AI prompt configuration
+├── rovo/                  # Rovo AI modules
+│   └── config.js          # AI prompt configuration
 ├── scripts/               # Build and deploy scripts
 ├── service-descriptor.yml # Micros deployment config
 └── .env.local.example     # Environment template

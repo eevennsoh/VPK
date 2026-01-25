@@ -55,8 +55,8 @@ components/
 ├── ui/                 # shadcn components (button, card, input, etc.)
 └── *.tsx               # App components
 
-shared/
-└── rovo-config.js      # AI prompt builder, shared config
+rovo/
+└── config.js           # AI prompt builder, shared config
 
 scripts/                # Dev and deployment scripts
 lib/utils.ts            # Tailwind merge utility

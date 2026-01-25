@@ -11,7 +11,7 @@ COPY postcss.config.mjs ./
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 RUN npm install -g pnpm && pnpm install
 
-COPY shared ./shared
+COPY rovo ./rovo
 COPY app ./app
 COPY components ./components
 COPY lib ./lib
@@ -33,7 +33,7 @@ COPY backend/package*.json ./
 RUN npm ci --omit=dev
 
 COPY backend/server.js ./
-COPY shared ./shared
+COPY rovo ./rovo
 
 # Copy the Next.js export output (static HTML files)
 # The 'out' directory contains the exported static site
