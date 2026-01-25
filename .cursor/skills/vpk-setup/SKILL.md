@@ -103,13 +103,13 @@ These files are gitignored and **must be created** (using info from Step 0):
 
 ## Quick Troubleshooting
 
-| Issue | Quick Fix |
-|-------|-----------|
-| Auth errors during ASAP save | `atlas upgrade` |
-| "EADDRINUSE" error | `./.cursor/skills/vpk-setup/scripts/stop-dev.sh` |
-| "ASAP_PRIVATE_KEY: MISSING" | Check .env.local format - private key must be quoted and escaped |
-| No AI response | Verify health check passes |
-| **Mismatched ASAP KID** | **You generated timestamp twice! Regenerate with single timestamp** |
+| Issue                        | Quick Fix                                                           |
+| ---------------------------- | ------------------------------------------------------------------- |
+| Auth errors during ASAP save | `atlas upgrade`                                                     |
+| "EADDRINUSE" error           | `./.cursor/skills/vpk-setup/scripts/stop-dev.sh`                    |
+| "ASAP_PRIVATE_KEY: MISSING"  | Check .env.local format - private key must be quoted and escaped    |
+| No AI response               | Verify health check passes                                          |
+| **Mismatched ASAP KID**      | **You generated timestamp twice! Regenerate with single timestamp** |
 
 ## Next Steps
 
