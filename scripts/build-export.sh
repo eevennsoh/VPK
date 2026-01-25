@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# Build Export Script
+# This script builds Next.js in static export mode for production deployment
+# It temporarily moves API routes since they're not compatible with static export
+
+set -e  # Exit on any error
+
+echo "======================================"
+echo "Building Static Export for Production"
+echo "======================================"
+echo ""
+
+# Backup API routes directory (they're dev-only)
+# Move them OUTSIDE the app directory so Next.js doesn't see them
+echo "📦 Backing up API routes (dev-only)..."
+if [ -d "app/api" ]; then
+    mv app/api .api-routes-backup
+    echo "   ✓ Moved app/api → .api-routes-backup"
+fi
+
+# Set BUILD_MODE to trigger static export
+export BUILD_MODE=export
+
+echo ""
+echo "🔨 Building Next.js in static export mode..."
+echo "   BUILD_MODE=${BUILD_MODE}"
+echo ""
+
+# Clean previous build
+if [ -d "out" ]; then
+    echo "🧹 Cleaning previous build..."
+    rm -rf out
+fi
+
+# Build the Next.js app
+pnpm run build
+
+# Restore API routes
+echo ""
+echo "🔄 Restoring API routes..."
+if [ -d ".api-routes-backup" ]; then
+    mv .api-routes-backup app/api
+    echo "   ✓ Restored app/api"
+fi
+
+echo ""
+echo "✅ Build complete!"
+echo ""
+echo "📁 Static files exported to: ./out"
+echo "   These will be copied to /app/public in the Docker container"
+echo ""
+echo "ℹ️  API routes restored to app/api (for local development)"
+echo ""
+echo "🐳 Next step: Build Docker image"
+echo "   Run: docker build -f backend/Dockerfile -t your-image-name ."
+echo ""
+echo "======================================"
