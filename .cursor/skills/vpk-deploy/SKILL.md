@@ -60,8 +60,8 @@ fi
 Run the pre-deployment check script from this skill's scripts directory:
 
 ```bash
-# Script location: .claude/skills/vpk-deploy/scripts/deploy-check.sh
-./.claude/skills/vpk-deploy/scripts/deploy-check.sh
+# Script location: .cursor/skills/vpk-deploy/scripts/deploy-check.sh
+./.cursor/skills/vpk-deploy/scripts/deploy-check.sh
 ```
 
 The script validates:
@@ -91,11 +91,11 @@ fi
 Use the deploy script from this skill's scripts directory:
 
 ```bash
-# Script location: .claude/skills/vpk-deploy/scripts/deploy.sh
-./.claude/skills/vpk-deploy/scripts/deploy.sh <service-name> <version> [env]
+# Script location: .cursor/skills/vpk-deploy/scripts/deploy.sh
+./.cursor/skills/vpk-deploy/scripts/deploy.sh <service-name> <version> [env]
 
 # Example
-./.claude/skills/vpk-deploy/scripts/deploy.sh my-prototype 1.0.1
+./.cursor/skills/vpk-deploy/scripts/deploy.sh my-prototype 1.0.1
 
 # Default environment: pdev-west2
 ```

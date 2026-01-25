@@ -70,8 +70,8 @@ console.log('✓ Created .env.local with OpenAI URL');
 "
 
 # Start development servers (AI-friendly: won't block)
-# Script location: .claude/skills/vpk-setup/scripts/start-dev.sh
-./.claude/skills/vpk-setup/scripts/start-dev.sh --no-wait
+# Script location: .cursor/skills/vpk-setup/scripts/start-dev.sh
+./.cursor/skills/vpk-setup/scripts/start-dev.sh --no-wait
 
 # Verify backend health
 curl http://localhost:8080/api/health
@@ -106,7 +106,7 @@ These files are gitignored and **must be created** (using info from Step 0):
 | Issue | Quick Fix |
 |-------|-----------|
 | Auth errors during ASAP save | `atlas upgrade` |
-| "EADDRINUSE" error | `./.claude/skills/vpk-setup/scripts/stop-dev.sh` |
+| "EADDRINUSE" error | `./.cursor/skills/vpk-setup/scripts/stop-dev.sh` |
 | "ASAP_PRIVATE_KEY: MISSING" | Check .env.local format - private key must be quoted and escaped |
 | No AI response | Verify health check passes |
 | **Mismatched ASAP KID** | **You generated timestamp twice! Regenerate with single timestamp** |
