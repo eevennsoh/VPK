@@ -32,8 +32,9 @@ disable-model-invocation: true
 2. **Install dependencies** → `pnpm install`
 3. **Generate ASAP credentials** → See commands below
 4. **Create config files** → `.env.local` from `.asap-config`
-5. **Start servers** → Run `pnpm run dev` (if it fails, ask user to run manually)
-6. **Verify** → http://localhost:3000
+5. **Clear ports (first-time only)** → Kill zombie processes on 3000/8080
+6. **Start servers** → Run `pnpm run dev` (if it fails, ask user to run manually)
+7. **Verify** → http://localhost:3000
 
 ## Essential Commands
 
@@ -58,6 +59,11 @@ atlas asap key save --key YOUR-USE-CASE-ID/$TIMESTAMP --service YOUR-USE-CASE-ID
 node ./.cursor/skills/vpk-setup/scripts/create-env-local.js YOUR-USE-CASE-ID
 # Optional (explicit override of git config):
 # node ./.cursor/skills/vpk-setup/scripts/create-env-local.js YOUR-USE-CASE-ID your-email@atlassian.com
+
+# Clear default ports (FIRST-TIME SETUP ONLY)
+# This kills zombie processes from previous sessions blocking ports 3000/8080.
+# Only run during initial setup - NOT when running multiple VPK projects simultaneously.
+lsof -ti:3000,8080 | xargs kill -9 2>/dev/null || true
 
 # Start development servers
 # Try running this first. If it fails or blocks, ask user to run manually in their terminal
@@ -84,6 +90,7 @@ These files are gitignored and **must be created** (using info from Step 0):
 - [ ] Dependencies installed
 - [ ] **ASAP credentials generated (timestamp generated ONCE)**
 - [ ] `.env.local` created with OpenAI URL and user's email
+- [ ] **Ports cleared** (first-time only: kill zombies on 3000/8080)
 - [ ] Dev servers started (or user instructed to run `pnpm run dev` if auto-start failed)
 - [ ] Health check shows all env vars "SET"
 - [ ] Chat responds at http://localhost:3000
@@ -95,10 +102,10 @@ These files are gitignored and **must be created** (using info from Step 0):
 | Issue                        | Quick Fix                                                           |
 | ---------------------------- | ------------------------------------------------------------------- |
 | Auth errors during ASAP save | `atlas upgrade`                                                     |
-| "EADDRINUSE" error           | Kill processes on ports: `lsof -ti:3000,8080 | xargs kill -9`       |
+| "EADDRINUSE" error           | Already handled during setup; if running multiple VPK projects, this is expected - servers auto-find available ports |
 | Next.js lock error           | Stop servers, remove `.next/dev/lock`, start once                  |
 | Frontend 500 (providers)     | Ensure `components/providers.tsx` matches import casing           |
-| No available port (3000/8080)| Stop other dev servers using those port ranges                     |
+| No available port (3000/8080)| Normal when running multiple VPK projects - servers auto-find ports 3001+/8081+ |
 | "ASAP_PRIVATE_KEY: MISSING"  | Check .env.local format - private key must be quoted and escaped    |
 | No AI response               | Verify health check passes                                          |
 | **Mismatched ASAP KID**      | **You generated timestamp twice! Regenerate with single timestamp** |
