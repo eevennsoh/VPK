@@ -1,0 +1,1 @@
+.cursor/skills/vpk-deploy/references/GUIDE_DEPLOYMENT.md

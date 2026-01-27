@@ -1,0 +1,47 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getBackendUrl } from '@/app/api/_utils/backend-url';
+
+/**
+ * API proxy route that forwards suggested questions requests to the backend Express server
+ * 
+ * This route is ONLY used during local development (npm run dev).
+ * In production, this route does not exist - the frontend calls the backend directly
+ * since they're served from the same domain.
+ * 
+ * This allows the frontend (running on port 3000) to communicate with the backend
+ * (running on port 8080) without CORS issues, since both requests come from the
+ * same origin (localhost:3000).
+ */
+export async function POST(request: NextRequest) {
+    try {
+        const body = await request.json();
+
+        const backendUrl = getBackendUrl();
+        const url = `${backendUrl}/api/suggested-questions`;
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            return NextResponse.json(
+                { error: 'Backend request failed', details: errorText },
+                { status: response.status }
+            );
+        }
+
+        const data = await response.json();
+        return NextResponse.json(data);
+    } catch (error) {
+        console.error('Suggested questions proxy error:', error);
+        return NextResponse.json(
+            { error: 'Internal server error', details: error instanceof Error ? error.message : String(error) },
+            { status: 500 }
+        );
+    }
+}

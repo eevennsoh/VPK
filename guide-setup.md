@@ -1,0 +1,1 @@
+.cursor/skills/vpk-setup/references/GUIDE_SETUP.md
