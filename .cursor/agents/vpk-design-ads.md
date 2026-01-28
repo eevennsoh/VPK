@@ -147,11 +147,10 @@ Search for tokens, icons, and components. Always include at least 2 terms per ca
 
 ## Import Patterns
 
-### Tokens and Styling
+### Tokens
 
 ```tsx
 import { token } from "@atlaskit/tokens";
-import { css, cssMap } from "@atlaskit/css";
 ```
 
 ### Primitives
@@ -280,12 +279,14 @@ padding: token("space.600"); // 48px
 ## Border Tokens
 
 ```tsx
-// Border radius
-borderRadius: token("border.radius"); // 3px - Default
-borderRadius: token("border.radius.100"); // 4px
-borderRadius: token("border.radius.200"); // 8px
-borderRadius: token("border.radius.300"); // 12px
-borderRadius: token("border.radius.circle"); // 50%
+// Border radius - use semantic radius.* tokens
+borderRadius: token("radius.xsmall");   // 2px - badges, checkboxes
+borderRadius: token("radius.small");    // 4px - labels, lozenges
+borderRadius: token("radius.medium");   // 6px - buttons, inputs
+borderRadius: token("radius.large");    // 8px - cards, containers
+borderRadius: token("radius.xlarge");   // 12px - modals, tables
+borderRadius: token("radius.xxlarge");  // 16px - video players
+borderRadius: token("radius.full");     // circular - avatars, pills
 
 // Border width
 borderWidth: token("border.width"); // 1px
@@ -322,43 +323,35 @@ border: `${token("border.width")} solid ${token("color.border")}`;
 </Box>
 ```
 
-## Styling with @atlaskit/css
+## Styling with Tokens
+
+Use `token()` from `@atlaskit/tokens` for all style values:
 
 ```tsx
-import { css, cssMap } from '@atlaskit/css';
 import { token } from '@atlaskit/tokens';
 
-// Single style block
-const containerStyles = css({
-  padding: token('space.200'),
-  backgroundColor: token('elevation.surface'),
-  borderRadius: token('border.radius'),
-  border: `${token('border.width')} solid ${token('color.border')}`,
-});
-
-// Multiple related styles
-const styles = cssMap({
-  container: {
-    display: 'flex',
-    gap: token('space.100'),
+// Inline styles with tokens
+<div
+  style={{
     padding: token('space.200'),
-  },
-  header: {
-    font: token('font.heading.medium'),
-    color: token('color.text'),
-  },
-  content: {
-    font: token('font.body'),
-    color: token('color.text.subtle'),
-  },
-});
-
-// Usage
-<div className={containerStyles}>...</div>
-<div className={styles.container}>
-  <h2 className={styles.header}>Title</h2>
-  <p className={styles.content}>Content</p>
+    backgroundColor: token('elevation.surface'),
+    borderRadius: token('radius.small'),
+    border: `${token('border.width')} solid ${token('color.border')}`,
+  }}
+>
+  Content
 </div>
+
+// Or use primitive props directly (preferred)
+<Box
+  backgroundColor="elevation.surface.raised"
+  style={{
+    padding: token('space.200'),
+    borderRadius: token('radius.small'),
+  }}
+>
+  Content
+</Box>
 ```
 
 ## Accessibility Requirements
@@ -434,27 +427,22 @@ When generating UI text, follow these standards:
 ## Example: Complete Card Component
 
 ```tsx
-import { css, cssMap } from "@atlaskit/css";
 import { token } from "@atlaskit/tokens";
 import { Box, Stack, Inline, Text } from "@atlaskit/primitives";
 import Heading from "@atlaskit/heading";
 import Button from "@atlaskit/button/new";
 import EditIcon from "@atlaskit/icon/core/edit";
 
-const cardStyles = css({
-	padding: token("space.300"),
-	backgroundColor: token("elevation.surface.raised"),
-	borderRadius: token("border.radius.200"),
-	boxShadow: token("elevation.shadow.raised"),
-	transition: "box-shadow 0.2s ease-in-out",
-	"&:hover": {
-		boxShadow: token("elevation.shadow.overlay"),
-	},
-});
-
 export function FeatureCard({ title, description, onEdit }) {
 	return (
-		<Box xcss={cardStyles}>
+		<Box
+			backgroundColor="elevation.surface.raised"
+			style={{
+				padding: token("space.300"),
+				borderRadius: token("radius.large"),
+				boxShadow: token("elevation.shadow.raised"),
+			}}
+		>
 			<Stack space="space.200">
 				<Inline space="space.100" alignBlock="center" spread="space-between">
 					<Heading size="small">{title}</Heading>
@@ -488,7 +476,7 @@ When provided a Figma link or design image:
    - Colors → `color.*` tokens
    - Spacing → `space.*` tokens
    - Typography → `font.*` tokens
-   - Borders → `border.radius.*` tokens
+   - Borders → `radius.*` tokens (semantic radius tokens)
 
 2. **Identify components:**
    - Match UI patterns to ADS components
@@ -598,7 +586,7 @@ For detailed component documentation and examples:
 | Token Tables         | `.cursor/skills/vpk-design/references/tokens.md`            | Complete color, spacing, typography tokens             |
 | Component APIs       | `.cursor/skills/vpk-design/references/components.md`        | All component APIs with props                          |
 | Primitives           | `.cursor/skills/vpk-design/references/primitives.md`        | Box, Stack, Inline, Grid, Text, Pressable              |
-| Styling Patterns     | `.cursor/skills/vpk-design/references/styling.md`           | CSS-in-JS patterns, @atlaskit/css usage                |
+| Styling Patterns     | `.cursor/skills/vpk-design/references/styling.md`           | Styling patterns with design tokens                    |
 | Content Standards    | `.cursor/skills/vpk-design/references/content-standards.md` | Voice, tone, accessibility, inclusive language         |
 
 When you need comprehensive documentation beyond this reference, read the skill files or fetch https://atlassian.design/.

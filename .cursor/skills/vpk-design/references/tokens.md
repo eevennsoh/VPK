@@ -9,13 +9,13 @@ typically meaning the `token()` function call. See: https://atlassian.design/com
 Example:
 
 ```tsx
-import { css } from "@atlaskit/css";
 import { token } from "@atlaskit/tokens";
 
-const styles = css({
+// Use token() for all style values
+const style = {
 	backgroundColor: token("elevation.surface"),
 	color: token("color.text"),
-});
+};
 ```
 
 ## Tokens list
@@ -108,6 +108,17 @@ Text colors ensure readability and hierarchy in content:
 | `color.text.discovery`       | #5E4DB2     | #B8ACF6    | Discovery text                   |
 | `color.text.information`     | #0C66E4     | #85B8FF    | Information text                 |
 
+#### Link Colors
+
+Link colors for hyperlinks and interactive text:
+
+| Token                        | Light Value | Dark Value | Usage                                           |
+| ---------------------------- | ----------- | ---------- | ----------------------------------------------- |
+| `color.link`                 | #0C66E4     | #85B8FF    | Default/hovered links (add underline for hover) |
+| `color.link.pressed`         | #0055CC     | #579DFF    | Pressed links                                   |
+| `color.link.visited`         | #5E4DB2     | #B8ACF6    | Visited links                                   |
+| `color.link.visited.pressed` | #352C63     | #8270DB    | Pressed visited links                           |
+
 #### Icon Colors
 
 Icon colors maintain visual consistency with text colors:
@@ -188,6 +199,16 @@ Composite font tokens set size, weight, line-height, and family in one declarati
 | `font.body.small`      | 12px | 400    | 16px        | Secondary content       |
 | `font.code`            | 14px | 400    | 20px        | Code representation     |
 
+#### Metric Font Tokens
+
+For emphasizing numbers in data visualizations:
+
+| Token                | Size | Weight | Line Height | Usage                            |
+| -------------------- | ---- | ------ | ----------- | -------------------------------- |
+| `font.metric.large`  | 28px | 653    | 32px        | Large donut charts               |
+| `font.metric.medium` | 24px | 653    | 28px        | Medium donut charts              |
+| `font.metric.small`  | 16px | 653    | 20px        | Small donuts, single-value tiles |
+
 #### Font Weight Tokens
 
 Override composite token weights for emphasis:
@@ -248,20 +269,30 @@ Negative spacing tokens negate parent whitespace:
 
 ### Border Radius
 
-Border radius tokens define corner curvature using T-shirt sizing.
+Border radius tokens define corner curvature using semantic T-shirt sizing.
 
-| Token            | Value (px)  | Value (rem) | Usage                               |
-| ---------------- | ----------- | ----------- | ----------------------------------- |
-| `radius.xsmall`  | 2px         | 0.125rem    | Selection indicators                |
-| `radius.small`   | 4px         | 0.25rem     | Buttons/inputs                      |
-| `radius.medium`  | 6px         | 0.375rem    | Small cards                         |
-| `radius.large`   | 8px         | 0.5rem      | Cards/containers                    |
-| `radius.xlarge`  | 12px        | 0.75rem     | Modals                              |
-| `radius.xxlarge` | 16px        | 1rem        | Video players                       |
-| `radius.full`    | 624.9375rem | 624.9375rem | Circular elements (perfect circles) |
-| `radius.tile`    | 25%         | 25%         | Tile corners                        |
+| Token            | Value   | Usage                                                    |
+| ---------------- | ------- | -------------------------------------------------------- |
+| `radius.xsmall`  | 2px     | Badges, checkboxes, avatar labels, keyboard shortcuts    |
+| `radius.small`   | 4px     | Labels, lozenges, timestamps, tags, tooltip containers   |
+| `radius.medium`  | 6px     | Buttons, inputs, text areas, selects, navigation items   |
+| `radius.large`   | 8px     | Cards, in-page containers, floating UI, dropdown menus   |
+| `radius.xlarge`  | 12px    | Full-page containers, modals, Kanban columns, tables     |
+| `radius.xxlarge` | 16px    | Video player containers                                  |
+| `radius.full`    | 999px   | Avatars, user-related UI, emoji reactions, pill shapes   |
+| `radius.tile`    | 25%     | Tile component system exclusively                        |
 
-**Note:** The old `border.radius.*` tokens are deprecated. Use the new `radius.*` tokens instead.
+**CRITICAL:** The `border.radius.*` tokens are DEPRECATED and no longer in the official token set.
+Always use semantic `radius.*` tokens:
+
+| DEPRECATED                           | USE INSTEAD     |
+| ------------------------------------ | --------------- |
+| `border.radius.050`                  | `radius.xsmall` |
+| `border.radius`, `border.radius.100` | `radius.small`  |
+| `border.radius.200`                  | `radius.large`  |
+| `border.radius.300`                  | `radius.xlarge` |
+| `border.radius.400`                  | `radius.xxlarge`|
+| `border.radius.circle`               | `radius.full`   |
 
 ### Border Width
 
@@ -332,6 +363,33 @@ Skeleton states are for loading:
 | `color.skeleton`        | #091E4208   | #A1BDD908  | Loading state  |
 | `color.skeleton.subtle` | #091E4204   | #A1BDD904  | Loading effect |
 
+### Blanket Colors
+
+Use for screen overlays:
+
+| Token                    | Light Value | Dark Value | Usage                                             |
+| ------------------------ | ----------- | ---------- | ------------------------------------------------- |
+| `color.blanket`          | #091E427D   | #091E427D  | Screen overlay for modal dialogs                  |
+| `color.blanket.selected` | #388BFF14   | #388BFF14  | Overlay for selected states (e.g., Editor blocks) |
+| `color.blanket.danger`   | #EF5C4814   | #EF5C4814  | Overlay for danger states (e.g., deletion)        |
+
+### Chart Colors
+
+For data visualization only:
+
+| Token                             | Usage                       |
+| --------------------------------- | --------------------------- |
+| `color.chart.categorical.1` - `.8` | Sequential categorical data |
+| `color.chart.brand`               | Primary chart color         |
+| `color.chart.neutral`             | Secondary/to-do states      |
+| `color.chart.danger`              | Negative/off-track data     |
+| `color.chart.warning`             | Caution/at-risk data        |
+| `color.chart.success`             | Positive/on-track data      |
+| `color.chart.discovery`           | New status data             |
+| `color.chart.information`         | In-progress data            |
+
+Each chart color also has a `.hovered` variant and many have `.bold`, `.bolder`, `.boldest` variations.
+
 ### Opacity
 
 Opacity tokens control transparency:
@@ -349,13 +407,13 @@ You should match foreground and background color, eg. for dark background colors
 `token('color.text.inverse')` to better achieve contrast ratios.
 
 ```tsx
-import { css } from "@atlaskit/css";
 import { token } from "@atlaskit/tokens";
 
-const styles = css({
+// Use matching foreground/background token pairs
+const style = {
 	backgroundColor: token("color.background.brand.bold"),
 	color: token("color.text.inverse"),
-});
+};
 ```
 
 ### Semantic Tokens
@@ -368,51 +426,41 @@ Never use hardcoded color values as they will break dark mode support.
 
 ### Interactive States
 
-Always provide clear visual feedback for interactive elements:
+For interactive elements, use ADS components that handle states automatically:
 
 ```tsx
-import { cssMap } from "@atlaskit/css";
-import { token } from "@atlaskit/tokens";
+import Button from "@atlaskit/button/new";
+import { Pressable } from "@atlaskit/primitives";
 
-const styles = cssMap({
-	button: {
-		backgroundColor: token("color.background.brand.bold"),
-		color: token("color.text.inverse"),
-		"&:hover": {
-			backgroundColor: token("color.background.brand.bold.hovered"),
-		},
-		"&:focus": {
-			outline: `2px solid ${token("color.border.focused")}`,
-			outlineOffset: "2px",
-		},
-		"&:active": {
-			backgroundColor: token("color.background.brand.bold.pressed"),
-		},
-		"&:disabled": {
-			backgroundColor: token("color.background.disabled"),
-			color: token("color.text.disabled"),
-		},
-	},
-});
+// Button handles all interactive states (hover, focus, active, disabled)
+<Button appearance="primary">Click me</Button>
+<Button appearance="primary" isDisabled>Disabled</Button>
+
+// Pressable for custom interactive elements
+<Pressable onClick={handleClick}>
+	Custom interactive content
+</Pressable>
 ```
+
+Available state tokens (for reference):
+
+| State    | Background Token                           | Text Token                  |
+| -------- | ------------------------------------------ | --------------------------- |
+| Default  | `color.background.brand.bold`              | `color.text.inverse`        |
+| Hovered  | `color.background.brand.bold.hovered`      | -                           |
+| Pressed  | `color.background.brand.bold.pressed`      | -                           |
+| Disabled | `color.background.disabled`                | `color.text.disabled`       |
+| Focused  | -                                          | -                           |
+
+Focus border: `color.border.focused`
 
 ### Focus Management
 
-Ensure proper focus indicators for keyboard navigation:
+ADS components handle focus states automatically. The focus token for custom implementations:
 
 ```tsx
-import { cssMap } from "@atlaskit/css";
 import { token } from "@atlaskit/tokens";
 
-const styles = cssMap({
-	focusable: {
-		"&:focus-visible": {
-			outline: `2px solid ${token("color.border.focused")}`,
-			outlineOffset: "2px",
-		},
-		"&:focus:not(:focus-visible)": {
-			outline: "none",
-		},
-	},
-});
+// Focus indicator color
+const focusColor = token("color.border.focused");
 ```

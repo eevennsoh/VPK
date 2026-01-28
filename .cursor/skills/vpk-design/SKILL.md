@@ -31,7 +31,7 @@ For comprehensive documentation, see these reference files:
 | `references/tokens.md`            | Complete token tables (colors, spacing, typography, elevation, borders) |
 | `references/components.md`        | All component APIs with props and examples                              |
 | `references/primitives.md`        | Box, Stack, Inline, Grid, Text, Pressable, Anchor                       |
-| `references/styling.md`           | CSS-in-JS patterns, @atlaskit/css usage                                 |
+| `references/styling.md`           | Styling patterns with design tokens                                     |
 | `references/content-standards.md` | Voice, tone, accessibility, inclusive language                          |
 | `references/instructions.md`      | Component guidelines and decision trees                                 |
 | `references/examples.md`          | Code examples for common patterns                                       |
@@ -43,7 +43,6 @@ For comprehensive documentation, see these reference files:
 
 ```tsx
 import { token } from "@atlaskit/tokens";
-import { css, cssMap } from "@atlaskit/css";
 import { Stack, Inline, Box, Text } from "@atlaskit/primitives";
 import Button from "@atlaskit/button/new";
 import Heading from "@atlaskit/heading";
@@ -251,16 +250,18 @@ border: `${token("border.width")} solid ${token("color.border")}`;
 
 ### Interactive States
 
+Use primitives with built-in token props, or inline styles with `token()`:
+
 ```tsx
-const styles = css({
-	backgroundColor: token("color.background.neutral"),
-	"&:hover": {
-		backgroundColor: token("color.background.neutral.hovered"),
-	},
-	"&:active": {
-		backgroundColor: token("color.background.neutral.pressed"),
-	},
-});
+// Using Box with backgroundColor prop (preferred)
+<Box backgroundColor="color.background.neutral">Content</Box>
+
+// For hover/active states, use Pressable or Button components
+import { Pressable } from "@atlaskit/primitives";
+
+<Pressable onClick={handleClick}>
+  Interactive content
+</Pressable>
 ```
 
 ---

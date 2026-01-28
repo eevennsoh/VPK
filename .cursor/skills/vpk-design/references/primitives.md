@@ -37,10 +37,8 @@ These are available in two flavors:
 
 ### Styling
 
-- `@atlaskit/css` package: A bounded variant of Compiled CSS-in-JS replacing `xcss` from
-  `@atlaskit/primitives`
-- `xcss` function: The original bounded API built with Emotion, being replaced by the
-  `@atlaskit/css` package
+- `@atlaskit/tokens` package: Provides the `token()` function for accessing design tokens
+- `xcss` prop: Primitives accept an `xcss` prop for bounded style overrides using token values
 
 ---
 
@@ -51,21 +49,19 @@ These are available in two flavors:
 A fundamental layout primitive that provides a base for building other components.
 
 ```tsx
-import { cssMap } from "@atlaskit/css";
 import { Box } from "@atlaskit/primitives";
 import { token } from "@atlaskit/tokens";
 
 <Box backgroundColor="color.background.accent.blue.subtlest">Content</Box>;
 
 // A section with custom styling
-const styles = cssMap({
-	root: {
+<Box
+	as="section"
+	style={{
 		padding: token("space.200"),
 		border: `${token("border.width")} solid ${token("color.border")}`,
-	},
-});
-
-<Box xcss={styles.root} as="section">
+	}}
+>
 	Styled content
 </Box>;
 ```
@@ -119,20 +115,9 @@ A primitive for creating interactive elements with consistent press states.
 
 ```tsx
 import { Pressable } from '@atlaskit/primitives';
-import { cssMap } from '@atlaskit/css';
-import { token } from '@atlaskit/tokens';
 
-const styles = cssMap({
-  pressable: {
-    backgroundColor: token('color.background.brand.subtlest'),
-    '&:hover': {
-      backgroundColor: token('color.background.brand.subtlest.hovered')
-    }
-  }
-});
-
-<Pressable xcss={styles.pressable} onClick={() => console.log('Pressed!')}>
-  Hover me
+<Pressable onClick={() => console.log('Pressed!')}>
+  Click me
 </Pressable>
 ```
 
@@ -303,8 +288,6 @@ import { Bleed } from "@atlaskit/primitives";
 A component for creating grid-based layouts.
 
 ```tsx
-/** @jsx jsx */
-import { cssMap, jsx } from "@atlaskit/css";
 import { Grid } from "@atlaskit/primitives";
 
 // Basic grid
@@ -313,21 +296,15 @@ import { Grid } from "@atlaskit/primitives";
 	<div>Grid item 2</div>
 </Grid>;
 
-// With template areas
-const styles = cssMap({
-	grid: {
-		gridTemplateAreas: `
-			'header header'
-			'sidebar content'
-			'footer footer'
-		`,
-	},
-});
-<Grid xcss={styles.grid} gap="space.200">
-	<div style={{ gridArea: "header" }}>Header</div>
-	<div style={{ gridArea: "sidebar" }}>Sidebar</div>
-	<div style={{ gridArea: "content" }}>Content</div>
-	<div style={{ gridArea: "footer" }}>Footer</div>
+// With template columns via style prop
+<Grid
+	gap="space.200"
+	style={{
+		gridTemplateColumns: "repeat(2, 1fr)",
+	}}
+>
+	<div>Item 1</div>
+	<div>Item 2</div>
 </Grid>;
 ```
 
@@ -407,7 +384,7 @@ import { Hide } from '@atlaskit/primitives';
 
 ### StrictXCSSProp Type
 
-A type utility from `@atlaskit/css` that enforces strict typing for `xcss` styling props.
+A type utility that enforces strict typing for `xcss` styling props, ensuring only valid token values are used.
 
 #### General CSS Properties
 
@@ -490,25 +467,21 @@ import { Stack, Inline, Text } from "@atlaskit/primitives";
 ### A Grid of Icons
 
 ```tsx
-import { cssMap } from "@atlaskit/css";
 import { Box, Grid, Inline, Text } from "@atlaskit/primitives";
 import { token } from "@atlaskit/tokens";
 
-const styles = cssMap({
-	container: {
-		maxWidth: "1040px",
-		margin: "0 auto",
-		padding: token("space.600"),
-	},
-	grid: {
-		gridTemplateColumns: "repeat(2, 1fr)",
-		gap: token("space.200"),
-	},
-});
-
 export default (props: { icons: { icon: React.ReactNode; label: string }[] }) => (
-	<Box xcss={styles.container}>
-		<Grid xcss={styles.grid}>
+	<Box
+		style={{
+			maxWidth: "1040px",
+			margin: "0 auto",
+			padding: token("space.600"),
+		}}
+	>
+		<Grid
+			gap="space.200"
+			style={{ gridTemplateColumns: "repeat(2, 1fr)" }}
+		>
 			{props.icons.map((icon) => (
 				<Inline alignBlock="center" space="space.100">
 					<icon.icon />
@@ -524,23 +497,21 @@ export default (props: { icons: { icon: React.ReactNode; label: string }[] }) =>
 
 ```tsx
 import Avatar from '@atlaskit/avatar';
-import { cssMap } from '@atlaskit/css';
 import Heading from '@atlaskit/heading';
 import { Box, Stack, Inline, Text } from '@atlaskit/primitives';
 import { token } from '@atlaskit/tokens';
 
-const styles = cssMap({
-  card: {
+<Box
+  backgroundColor="elevation.surface.raised"
+  style={{
     padding: token('space.200'),
     borderRadius: token('radius.small'),
-  }
-});
-
-<Box backgroundColor="elevation.surface.raised" xcss={styles.card}>
+  }}
+>
   <Stack space="space.300">
     <Inline alignBlock="start" space="space.100">
       <Avatar />
-      <Heading>Title</Heading>
+      <Heading size="medium">Title</Heading>
     </Inline>
     <Text>Description</Text>
   </Stack>
@@ -552,13 +523,14 @@ const styles = cssMap({
 ## Best Practices
 
 1. Use `@atlaskit/primitives` for layout components
-2. Use `@atlaskit/css` for styling with `css()` and `cssMap()`
-3. Leverage design tokens for consistent styling
-4. Replace direct CSS variable usage such as `var(--ds-text)` with their associated token call such
+2. Use `token()` from `@atlaskit/tokens` for all style values
+3. Leverage primitive props when available (`backgroundColor`, `space`, `gap`)
+4. Use inline styles with `token()` when primitive props don't cover your needs
+5. Replace direct CSS variable usage such as `var(--ds-text)` with their associated token call such
    as `token('color.text')`
-5. Compose primitives and components together to create complex interfaces
-6. Use the appropriate primitive for the layout pattern (`Stack` for vertical, `Inline` for
+6. Compose primitives and components together to create complex interfaces
+7. Use the appropriate primitive for the layout pattern (`Stack` for vertical, `Inline` for
    horizontal)
-7. Use direct token strings in Primitive props (e.g., `space="space.200"`), but use `token()`
-   elsewhere
-8. Follow accessible and responsive design patterns
+8. Use direct token strings in Primitive props (e.g., `space="space.200"`), but use `token()`
+   in style objects
+9. Follow accessible and responsive design patterns

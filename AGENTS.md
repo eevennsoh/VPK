@@ -100,6 +100,37 @@ Dev proxy (Next.js forwards to backend):
 - **Shadows**: Use `token("elevation.shadow.raised")` or `token("elevation.shadow.overlay")` not hardcoded rgba
 - **Dates**: Use `Intl.DateTimeFormat(undefined, { dateStyle: 'medium' })` for locale-aware formatting
 
+## Frontend/UI Design
+
+**Use `/vpk-design` skill for comprehensive Atlassian Design System reference.**
+
+### Core Principle: ADS First, Always
+
+Always use Atlassian Design System (@atlaskit) components, tokens, and icons FIRST:
+
+1. **Components**: ADS components → shadcn for missing → custom as last resort
+2. **Styling**: Design tokens → Tailwind classes → inline styles as last resort
+3. **Icons**: ADS icons (@atlaskit/icon, @atlaskit/icon-lab) → lucide-react if not found
+
+### Quick Checklist
+
+- [ ] Using `@atlaskit/primitives` for layout (Box, Stack, Inline, Flex, Grid)
+- [ ] Using Heading and Text components (not raw `<h1>`, `<p>`, `<span>`)
+- [ ] Using design tokens via `token()` for spacing/colors (not hardcoded px/hex values)
+- [ ] Icons have meaningful `label` props for accessibility
+- [ ] Following sentence case for all UI text
+
+### Key Imports
+
+```tsx
+import { token } from "@atlaskit/tokens";
+import { Stack, Inline, Box, Flex, Text } from "@atlaskit/primitives";
+import Heading from "@atlaskit/heading";
+import Button from "@atlaskit/button/new";
+```
+
+See `.cursor/skills/vpk-design/` for complete reference documentation.
+
 ## Environment Variables
 
 Required in `.env.local`:
@@ -146,7 +177,7 @@ No test framework configured. This is a prototype kit.
 
 ## Gotchas
 
-- **ADS radius tokens**: Use semantic names like `token("radius.large")` NOT `token("border.radius.200")`. Available: `radius.xsmall` (2px), `radius.small` (4px), `radius.medium` (6px), `radius.large` (8px), `radius.xlarge` (12px), `radius.xxlarge` (16px)
+- **ADS radius tokens**: Use semantic names like `token("radius.large")` NOT `token("border.radius.200")`. Available: `radius.xsmall` (2px), `radius.small` (4px), `radius.medium` (6px), `radius.large` (8px), `radius.xlarge` (12px), `radius.xxlarge` (16px), `radius.full` (circular), `radius.tile` (25% for tiles)
 - **Icon accessibility**: Always provide meaningful `label` props to icons (e.g., `<EditIcon label="Edit item" />`). Empty labels (`label=""`) reduce accessibility
 - **Deploy via skill**: Use `/vpk-deploy` or `./.claude/skills/vpk-deploy/scripts/deploy.sh` directly (or `pnpm deploy:micros` for fast deploys)
 - **Dual proxy setup**: In dev, API calls go through Next.js proxy → Express. Check both layers when debugging
