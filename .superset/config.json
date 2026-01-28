@@ -1,0 +1,3 @@
+{
+	"setup": ["bash ./.superset/setup.sh"]
+}
