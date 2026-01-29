@@ -1,5 +1,8 @@
 # VPK
 
+> This file provides project context for AI assistants. Symlinked as `CLAUDE.md` and `.agent.md`.
+> Skills are defined in `.cursor/skills/`. Agents are defined in `.cursor/agents/`.
+
 Next.js 16 + Express backend with AI Gateway integration.
 
 ## Commands
@@ -25,12 +28,22 @@ lsof -ti:3000,8080 | xargs kill -9     # Kill lingering port processes
 
 ## Skills
 
-This project includes Claude skills for common workflows:
+| Skill | Command | Type | Purpose |
+|-------|---------|------|---------|
+| Setup | `/vpk-setup` | Workflow | Initial setup: ASAP credentials, .env.local, dev servers |
+| Deploy | `/vpk-deploy` | Workflow | Deploy to Atlassian Micros (auto-detects initial vs redeploy) |
+| Design | `/vpk-design` | Reference | ADS tokens, components, primitives, icons |
+| Share | `/vpk-share` | Utility | Export sanitized boilerplate for sharing |
 
-- `/vpk-setup` - Initial repository setup (ASAP credentials, .env.local, start servers)
-- `/vpk-deploy` - Deploy to Atlassian Micros (auto-detects initial vs redeploy)
-- `/vpk-design` - Atlassian Design System (ADS) reference (tokens, components, primitives)
-- `/vpk-share` - Share project or session context
+### Skill Types
+
+- **Workflow**: Multi-step procedures requiring user interaction
+- **Reference**: Documentation lookup (no side effects)
+- **Utility**: Single-purpose tools
+
+### Agents
+
+- **vpk-design-ads**: ADS UI specialist (invoked proactively for UI work)
 
 ## Architecture
 
@@ -185,3 +198,14 @@ No test framework configured. This is a prototype kit.
 - **Client providers in layout**: Keep layout.tsx as server component for metadata export. Use `components/providers.tsx` for client-side providers
 - **setState in useEffect**: ESLint rule `react-hooks/set-state-in-effect` prohibits calling setState synchronously in useEffect. Use useState initializer functions for localStorage reads
 - **ADS documentation**: Use `/vpk-design` skill for Atlassian Design System reference
+
+## Customization
+
+Create `.local.md` files alongside skills/agents for personal overrides (gitignored):
+
+```
+.cursor/skills/vpk-deploy/SKILL.local.md   # Your deploy preferences
+.cursor/agents/vpk-design-ads.local.md     # Your design preferences
+```
+
+These are merged with base definitions automatically.

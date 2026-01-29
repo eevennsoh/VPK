@@ -579,7 +579,6 @@ For detailed component documentation and examples:
 | Resource             | Path                                                        | Contents                                               |
 | -------------------- | ----------------------------------------------------------- | ------------------------------------------------------ |
 | Quick Reference      | `.cursor/skills/vpk-design/SKILL.md`                        | Core patterns, best practices, quick start             |
-| Core Principles      | `.cursor/skills/vpk-design/references/instructions.md`      | ADS First principle, decision tree, content guidelines |
 | Component Guidelines | `.cursor/skills/vpk-design/references/guidelines.md`        | Prop guidance, usage patterns, accessibility           |
 | Code Examples        | `.cursor/skills/vpk-design/references/examples.md`          | Component examples, props tables, migration diffs      |
 | Search Guide         | `.cursor/skills/vpk-design/references/search.md`            | Finding components, icons, tokens                      |
@@ -590,3 +589,7 @@ For detailed component documentation and examples:
 | Content Standards    | `.cursor/skills/vpk-design/references/content-standards.md` | Voice, tone, accessibility, inclusive language         |
 
 When you need comprehensive documentation beyond this reference, read the skill files or fetch https://atlassian.design/.
+
+## Related Skill
+
+This agent works alongside the `/vpk-design` skill. Use the skill for quick reference lookups; the agent handles proactive UI design work. Skill documentation is at `.cursor/skills/vpk-design/`.

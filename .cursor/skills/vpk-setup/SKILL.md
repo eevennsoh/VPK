@@ -2,6 +2,8 @@
 name: vpk-setup
 description: Initial repository setup - install dependencies, generate ASAP credentials, configure environment, and start dev servers
 disable-model-invocation: true
+prerequisites: []
+produces: [.env.local, .asap-config]
 ---
 
 # VPK Setup - Initial Repository Setup

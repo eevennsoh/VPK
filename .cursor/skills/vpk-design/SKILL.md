@@ -33,7 +33,7 @@ For comprehensive documentation, see these reference files:
 | `references/primitives.md`        | Box, Stack, Inline, Grid, Text, Pressable, Anchor                       |
 | `references/styling.md`           | Styling patterns with design tokens                                     |
 | `references/content-standards.md` | Voice, tone, accessibility, inclusive language                          |
-| `references/instructions.md`      | Component guidelines and decision trees                                 |
+| `references/guidelines.md`        | Component guidelines and decision trees                                 |
 | `references/examples.md`          | Code examples for common patterns                                       |
 | `references/search.md`            | How to find ADS components, icons, tokens                               |
 

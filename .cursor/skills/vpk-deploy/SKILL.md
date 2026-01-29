@@ -2,6 +2,10 @@
 name: vpk-deploy
 description: Deploy prototype to Atlassian Micros - auto-detects initial vs redeploy
 disable-model-invocation: true
+prerequisites:
+  skills: [vpk-setup]
+  files: [.env.local, .asap-config]
+produces: [.deploy.local]
 ---
 
 # VPK Deploy - Deploy to Micros
