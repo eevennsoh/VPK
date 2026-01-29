@@ -33,8 +33,8 @@ export function AddTodo({ onAdd }: AddTodoProps) {
 							type="submit"
 							appearance="primary"
 							iconBefore={AddIcon}
-							label="Add todo"
-						/>
+							aria-label="Add todo"
+						>{""}</Button>
 					}
 				/>
 			</Inline>

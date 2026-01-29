@@ -23,6 +23,7 @@
 		"@atlaskit/code": "^17.4.2",
 		"@atlaskit/css": "^0.19.1",
 		"@atlaskit/css-reset": "^7.3.11",
+		"@atlaskit/datetime-picker": "^17.4.4",
 		"@atlaskit/dropdown-menu": "^16.4.3",
 		"@atlaskit/flag": "^17.8.2",
 		"@atlaskit/form": "^15.3.3",
