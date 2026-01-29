@@ -182,9 +182,11 @@ interface FilterButtonGroupProps {
 function FilterButtonGroup({ label, options, value, onChange }: FilterButtonGroupProps) {
 	return (
 		<Inline alignBlock="center" space="space.100">
-			<Text size="small" color="color.text.subtle">
-				{label}:
-			</Text>
+			<span style={{ whiteSpace: "nowrap" }}>
+				<Text size="small" color="color.text.subtle">
+					{label}:
+				</Text>
+			</span>
 			<Inline space="space.050">
 				{options.map((option) => {
 					const isSelected = value === option.value;
@@ -254,9 +256,11 @@ export function TodoFilters({
 				</Inline>
 
 				<Inline space="space.100" alignBlock="center">
-					<Text size="small" color="color.text.subtle">
-						Sort:
-					</Text>
+					<span style={{ whiteSpace: "nowrap" }}>
+						<Text size="small" color="color.text.subtle">
+							Sort:
+						</Text>
+					</span>
 					<DropdownMenu
 						placement="bottom-end"
 						isOpen={isSortMenuOpen}
