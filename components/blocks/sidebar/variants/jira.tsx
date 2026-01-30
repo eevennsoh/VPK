@@ -38,7 +38,7 @@ interface JiraSidebarProps {
 	onSelectItem: (item: string) => void;
 }
 
-export function JiraSidebar({ selectedItem, onSelectItem }: JiraSidebarProps) {
+export function JiraSidebar({ selectedItem, onSelectItem }: Readonly<JiraSidebarProps>) {
 	const [isSpacesExpanded, setIsSpacesExpanded] = useState(true);
 
 	return (

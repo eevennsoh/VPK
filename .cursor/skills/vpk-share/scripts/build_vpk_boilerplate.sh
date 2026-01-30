@@ -269,4 +269,22 @@ if [[ -n "$sensitive_matches" ]]; then
 	exit 2
 fi
 
+# Initialize fresh git repo without remote origin
+# This prevents accidental pushes back to the original prototype kit repo
+if [[ "$dry_run" == true ]]; then
+	echo "[dry-run] Would initialize fresh git repo (no remote origin)"
+else
+	cd "$dest"
+	git init -q
+	git add -A
+	git commit -q -m "VPK boilerplate export"
+	echo "Initialized fresh git repo (no remote origin)"
+fi
+
+echo ""
 echo "Boilerplate export created at: $dest"
+echo ""
+echo "Next steps:"
+echo "  1. cd $dest"
+echo "  2. pnpm install"
+echo "  3. git remote add origin <your-new-repo-url>"

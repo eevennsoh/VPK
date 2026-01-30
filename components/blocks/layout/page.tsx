@@ -16,7 +16,7 @@ interface AppLayoutProps {
 	children: React.ReactNode;
 }
 
-export default function AppLayout({ product, children }: AppLayoutProps) {
+export default function AppLayout({ product, children }: Readonly<AppLayoutProps>) {
 	const { isVisible } = useSidebar();
 	const { isOpen, closeChat } = useRovoChat();
 	const sidebarWidth = isVisible ? "230px" : "0px";

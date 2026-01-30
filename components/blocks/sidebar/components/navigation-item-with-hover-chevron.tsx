@@ -15,7 +15,7 @@ export function NavigationItemWithHoverChevron({
 	isExpanded = false,
 	hasActions = false,
 	onClick,
-}: NavigationItemWithHoverChevronProps) {
+}: Readonly<NavigationItemWithHoverChevronProps>) {
 	const [isHovered, setIsHovered] = useState(false);
 
 	return (

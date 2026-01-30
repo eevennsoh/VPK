@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { token } from "@atlaskit/tokens";
 import { IconButton } from "@atlaskit/button/new";
-import { Text } from "@atlaskit/primitives/compiled";
+import { Text } from "@atlaskit/primitives";
 
 // Icons
 import ShowMoreHorizontalIcon from "@atlaskit/icon/core/show-more-horizontal";
@@ -38,7 +38,7 @@ interface FilterItemProps {
 /**
  * Individual filter list item component with selection, hover, and interaction states
  */
-const FilterListItem: React.FC<FilterItemProps> = ({ item, isSelected, onClick }) => {
+const FilterListItem: React.FC<Readonly<FilterItemProps>> = ({ item, isSelected, onClick }) => {
 	const [isHovered, setIsHovered] = useState(false);
 	const Icon = item.icon;
 
@@ -149,7 +149,7 @@ interface FilterPanelProps {
 /**
  * Filter panel component showing product and category filters
  */
-export default function FilterPanel({ selectedFilter, onFilterChange }: FilterPanelProps) {
+export default function FilterPanel({ selectedFilter, onFilterChange }: Readonly<FilterPanelProps>) {
 	const [showMoreProducts, setShowMoreProducts] = useState(false);
 
 	// Product filters with correct logo imports

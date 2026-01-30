@@ -2,7 +2,7 @@
 
 import React from "react";
 import dynamic from "next/dynamic";
-import { Inline } from "@atlaskit/primitives/compiled";
+import { Inline } from "@atlaskit/primitives";
 import { token } from "@atlaskit/tokens";
 import Button from "@atlaskit/button/new";
 import { IconButton } from "@atlaskit/button/new";
@@ -35,7 +35,7 @@ interface BoardToolbarProps {
 	avatars: AvatarData[];
 }
 
-const BoardToolbar: React.FC<BoardToolbarProps> = ({ avatars }) => {
+const BoardToolbar: React.FC<Readonly<BoardToolbarProps>> = ({ avatars }) => {
 	return (
 		<div
 			style={{

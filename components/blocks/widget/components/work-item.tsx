@@ -88,7 +88,7 @@ function formatDate(dateString: string) {
 	}
 }
 
-export function WorkItemRow({ item, isLast, onClick }: WorkItemRowProps) {
+export function WorkItemRow({ item, isLast, onClick }: Readonly<WorkItemRowProps>) {
 	const handleKeyDown = (e: React.KeyboardEvent) => {
 		if (e.key === "Enter" || e.key === " ") {
 			e.preventDefault();

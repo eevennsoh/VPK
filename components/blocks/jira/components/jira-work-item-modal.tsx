@@ -38,7 +38,7 @@ export default function JiraWorkItemModal({
 	onClose,
 	workItemTitle = "Work item name",
 	workItemCode = "CAID-118",
-}: JiraWorkItemModalProps) {
+}: Readonly<JiraWorkItemModalProps>) {
 	return (
 		<WorkItemModalProvider
 			isOpen={isOpen}

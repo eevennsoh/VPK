@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Inline } from "@atlaskit/primitives/compiled";
+import { Inline } from "@atlaskit/primitives";
 import { token } from "@atlaskit/tokens";
 import Button from "@atlaskit/button/new";
 import Badge from "@atlaskit/badge";
@@ -13,7 +13,7 @@ interface BoardColumnProps {
 	children: React.ReactNode;
 }
 
-const BoardColumn: React.FC<BoardColumnProps> = ({ title, count, children }) => {
+const BoardColumn: React.FC<Readonly<BoardColumnProps>> = ({ title, count, children }) => {
 	return (
 		<div
 			style={{

@@ -23,7 +23,7 @@ interface ChatHeaderProps {
 	onClose?: () => void;
 }
 
-export default function ChatHeader({ onClose }: ChatHeaderProps) {
+export default function ChatHeader({ onClose }: Readonly<ChatHeaderProps>) {
 	const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
 	const dropdownId = useId();
 

@@ -25,7 +25,7 @@ export default function RovoChatHeader({
 	variant,
 	onVariantChange,
 	onFullScreen,
-}: RovoChatHeaderProps) {
+}: Readonly<RovoChatHeaderProps>) {
 	const { setMessages } = useRovoChat();
 	const [isVariantMenuOpen, setIsVariantMenuOpen] = useState(false);
 	const [hoveredVariant, setHoveredVariant] = useState<string | null>(null);

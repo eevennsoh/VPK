@@ -19,7 +19,7 @@ export function NavigationItem({
 	hasExternalLink = false,
 	hasActions = false,
 	onClick,
-}: NavigationItemProps) {
+}: Readonly<NavigationItemProps>) {
 	const [isHovered, setIsHovered] = useState(false);
 
 	const content = (

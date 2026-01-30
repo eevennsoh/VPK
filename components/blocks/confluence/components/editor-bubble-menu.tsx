@@ -29,50 +29,13 @@ import TextHeadingFiveIcon from "@atlaskit/icon-lab/core/text-heading-five";
 import TextHeadingSixIcon from "@atlaskit/icon-lab/core/text-heading-six";
 import QuotationMarkIcon from "@atlaskit/icon/core/quotation-mark";
 import TextStyleIcon from "@atlaskit/icon/core/text-style";
+import { TEXT_COLORS, HIGHLIGHT_COLORS, DROPDOWN_POSITIONS } from "../data/editor-colors";
 
 interface EditorBubbleMenuProps {
 	editor: Editor;
 }
 
-// Color definitions using ADS tokens
-const TEXT_COLORS = {
-	default: { token: "color.text", value: "#172B4D" },
-	blue: { token: "color.text.accent.blue.bolder", value: "#0052CC" },
-	teal: { token: "color.text.accent.teal.bolder", value: "#008DA6" },
-	green: { token: "color.text.accent.green.bolder", value: "#00875A" },
-	yellow: { token: "color.text.accent.orange.bolder", value: "#FF8B00" },
-	red: { token: "color.text.accent.red.bolder", value: "#DE350B" },
-	purple: { token: "color.text.accent.purple.bolder", value: "#5E4DB2" },
-	gray: { token: "color.text.subtle", value: "#6B778C" },
-	blueLight: { token: "color.text.accent.blue", value: "#0065FF" },
-	tealLight: { token: "color.text.accent.teal", value: "#00A3BF" },
-	greenLight: { token: "color.text.accent.green", value: "#36B37E" },
-	yellowLight: { token: "color.text.accent.orange", value: "#FFAB00" },
-	redLight: { token: "color.text.accent.red", value: "#FF5630" },
-	purpleLight: { token: "color.text.accent.purple", value: "#6554C0" },
-	white: { token: "elevation.surface", value: "#FFFFFF" },
-	blueSubtle: { token: "color.text.accent.blue", value: "#B3D4FF" },
-	tealSubtle: { token: "color.text.accent.teal", value: "#B3F5FF" },
-	greenSubtle: { token: "color.text.accent.green", value: "#ABF5D1" },
-	yellowSubtle: { token: "color.text.accent.orange", value: "#FFF0B3" },
-	redSubtle: { token: "color.text.accent.red", value: "#FFBDAD" },
-	purpleSubtle: { token: "color.text.accent.purple", value: "#EAE6FF" },
-};
-
-const HIGHLIGHT_COLORS = {
-	none: { token: "color.background.neutral.subtle", value: "transparent" },
-	purple: { token: "color.background.accent.purple.subtlest", value: "#EAE6FF" },
-	red: { token: "color.background.accent.red.subtlest", value: "#FFBDAD" },
-	yellow: { token: "color.background.accent.yellow.subtlest", value: "#FFF0B3" },
-	yellowAlt: {
-		token: "color.background.accent.yellow.subtlest",
-		value: "#FFF4B3",
-	},
-	green: { token: "color.background.accent.green.subtlest", value: "#D3F1A7" },
-	teal: { token: "color.background.accent.teal.subtlest", value: "#B3F5FF" },
-};
-
-export default function EditorBubbleMenu({ editor }: EditorBubbleMenuProps) {
+export default function EditorBubbleMenu({ editor }: Readonly<EditorBubbleMenuProps>) {
 	const [show, setShow] = React.useState(false);
 	const [position, setPosition] = React.useState({ top: 0, left: 0 });
 	const menuRef = React.useRef<HTMLDivElement>(null);
@@ -125,16 +88,7 @@ export default function EditorBubbleMenu({ editor }: EditorBubbleMenuProps) {
 
 	// Fixed dropdown positions
 	const getDropdownPosition = (dropdownType: string) => {
-		// Fixed positions for each dropdown
-		const positions = {
-			textStyle: { top: 40, left: 276 },
-			bold: { top: 40, left: 324 },
-			list: { top: 40, left: 356 },
-			align: { top: 40, left: 404 },
-			color: { top: 40, left: 440 },
-		};
-
-		return positions[dropdownType as keyof typeof positions] || { top: 40, left: 280 };
+		return DROPDOWN_POSITIONS[dropdownType as keyof typeof DROPDOWN_POSITIONS] || { top: 40, left: 280 };
 	};
 
 	React.useEffect(() => {

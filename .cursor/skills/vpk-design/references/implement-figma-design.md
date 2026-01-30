@@ -75,6 +75,26 @@ The Figma MCP server outputs React + Tailwind. Translate to VPK conventions usin
 
 Compare final UI against the Figma screenshot for 1:1 fidelity.
 
+**Browser-based validation (if dev server running):**
+
+```
+# Capture implementation screenshot
+browser_navigate(url="http://localhost:3000/[route]")
+browser_wait_for(state="networkidle")
+browser_take_screenshot(path="./screenshots/implementation-light.png")
+
+# Test dark mode
+browser_evaluate(expression="localStorage.setItem('ui-theme', 'dark')")
+browser_navigate(url="http://localhost:3000/[route]")
+browser_wait_for(state="networkidle")
+browser_take_screenshot(path="./screenshots/implementation-dark.png")
+
+# Cleanup
+browser_close()
+```
+
+Compare implementation screenshots against Figma screenshot side-by-side.
+
 ---
 
 ## Translation Rules
@@ -267,6 +287,8 @@ User says: "Build this dashboard: https://figma.com/design/pR8mNv5KqXzGwY2JtCfL4
 - [ ] Component is under 150 lines (split if needed)
 - [ ] Props interface is defined with `Readonly<>`
 - [ ] Visual output matches Figma screenshot 1:1
+- [ ] Implementation screenshot captured via browser tools
+- [ ] Dark mode renders correctly
 
 ## Additional Resources
 

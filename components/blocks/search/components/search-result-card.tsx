@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { token } from "@atlaskit/tokens";
 import { IconButton } from "@atlaskit/button/new";
 import Button from "@atlaskit/button/new";
-import { Text } from "@atlaskit/primitives/compiled";
+import { Text } from "@atlaskit/primitives";
 
 // Icons
 import LinkIcon from "@atlaskit/icon/core/link";
@@ -54,7 +54,7 @@ const highlightSearchTerms = (text: string, searchTerms: string[] = []) => {
 	);
 };
 
-export default function SearchResultCard({ icon: Icon = PagesIcon, iconColor = token("color.icon.information"), title, metadata, excerpt, searchTerms = [], onClick }: SearchResultCardProps) {
+export default function SearchResultCard({ icon: Icon = PagesIcon, iconColor = token("color.icon.information"), title, metadata, excerpt, searchTerms = [], onClick }: Readonly<SearchResultCardProps>) {
 	const [isCardHovered, setIsCardHovered] = useState(false);
 	const [isTitleHovered, setIsTitleHovered] = useState(false);
 

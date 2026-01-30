@@ -3,7 +3,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { token } from "@atlaskit/tokens";
 import { useRovoChat, Message } from "@/app/contexts/context-rovo-chat";
-import { API_ENDPOINTS } from "@/lib/api-config";
 import { useStreamingChat } from "@/app/hooks/use-streaming-chat";
 import Image from "next/image";
 import RovoChatInput from "./components/rovo-chat-input";
@@ -18,15 +17,10 @@ import EditIcon from "@atlaskit/icon/core/edit";
 import ShowMoreHorizontalIcon from "@atlaskit/icon/core/show-more-horizontal";
 import ArrowLeftIcon from "@atlaskit/icon/core/arrow-left";
 import DiscoverMoreExamples from "./components/discover-more-examples";
+import { useSpeechRecognition } from "./hooks/use-speech-recognition";
+import { useSuggestedQuestions } from "./hooks/use-suggested-questions";
+import { useStreamingCallbacks } from "./hooks/use-streaming-callbacks";
 import styles from "./rovo.module.css";
-
-// TypeScript declarations for Speech Recognition API
-declare global {
-	interface Window {
-		SpeechRecognition: any;
-		webkitSpeechRecognition: any;
-	}
-}
 
 // Hoisted styles - prevents object recreation on each render
 const containerStyles = {
@@ -56,8 +50,6 @@ export default function RovoView() {
 	console.log("[RovoView] Component rendering/mounting");
 
 	const [prompt, setPrompt] = useState("");
-	const [isListening, setIsListening] = useState(false);
-	const [interimText, setInterimText] = useState("");
 	const [webResultsEnabled, setWebResultsEnabled] = useState(false);
 	const [companyKnowledgeEnabled, setCompanyKnowledgeEnabled] = useState(true);
 	const [selectedReasoning, setSelectedReasoning] = useState("deep-research");
@@ -66,11 +58,17 @@ export default function RovoView() {
 	const [isClosingMore, setIsClosingMore] = useState(false);
 	const [isChatMode, setIsChatMode] = useState(false);
 	const [userName, setUserName] = useState<string>("");
-	const recognitionRef = useRef<any>(null);
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const { messages, setMessages, pendingPrompt, setPendingPrompt } = useRovoChat();
 	const hasProcessedPendingPrompt = useRef(false);
 	const { streamMessage, abort } = useStreamingChat();
+
+	// Use extracted hooks
+	const { isListening, interimText, toggleDictation } = useSpeechRecognition({
+		onFinalTranscript: (transcript) => setPrompt((prev) => prev + transcript),
+	});
+	const { fetchSuggestedQuestions } = useSuggestedQuestions({ setMessages });
+	const { createStreamingCallbacks } = useStreamingCallbacks({ setMessages, fetchSuggestedQuestions });
 
 	// Parse URL parameter for name
 	useEffect(() => {
@@ -89,90 +87,6 @@ export default function RovoView() {
 	}, [abort]);
 
 	console.log("[RovoView] Current state - pendingPrompt:", pendingPrompt, "messages:", messages.length, "isChatMode:", isChatMode);
-
-	const fetchSuggestedQuestions = useCallback(async (userMessage: string, history: Message[], assistantResponse: string, messageId: string) => {
-		try {
-			setMessages((prev) => prev.map((msg) => (msg.id === messageId ? { ...msg, loadingSuggestions: true } : msg)));
-
-			const response = await fetch(API_ENDPOINTS.SUGGESTED_QUESTIONS, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					message: userMessage,
-					conversationHistory: history.slice(-6),
-					assistantResponse: assistantResponse,
-				}),
-			});
-
-			if (response.ok) {
-				const data = await response.json();
-				setMessages((prev) =>
-					prev.map((msg) =>
-						msg.id === messageId
-							? {
-									...msg,
-									suggestedQuestions: data.questions,
-									loadingSuggestions: false,
-								}
-							: msg
-					)
-				);
-			} else {
-				setMessages((prev) => prev.map((msg) => (msg.id === messageId ? { ...msg, loadingSuggestions: false } : msg)));
-			}
-		} catch (error) {
-			console.error("Failed to fetch suggested questions:", error);
-			setMessages((prev) => prev.map((msg) => (msg.id === messageId ? { ...msg, loadingSuggestions: false } : msg)));
-		}
-	}, [setMessages]);
-
-	// Create streaming callbacks - memoized to avoid recreation
-	const createStreamingCallbacks = useCallback((promptText: string, history: Message[]) => ({
-		onStreamStart: (assistantMessageId: string) => {
-			const assistantMessage: Message = {
-				id: assistantMessageId,
-				type: "assistant",
-				content: "",
-				isStreaming: true,
-			};
-			setMessages((prev) => [...prev, assistantMessage]);
-		},
-		onStreamUpdate: (assistantMessageId: string, update: Partial<Message>) => {
-			setMessages((prev) =>
-				prev.map((msg) =>
-					msg.id === assistantMessageId ? { ...msg, ...update } : msg
-				)
-			);
-		},
-		onStreamComplete: (assistantMessageId: string, finalContent: string, widget?: { type: string; data: unknown }) => {
-			setMessages((prev) =>
-				prev.map((msg) =>
-					msg.id === assistantMessageId
-						? {
-								...msg,
-								content: finalContent,
-								widget: widget,
-								widgetLoading: false,
-								isStreaming: false,
-							}
-						: msg
-				)
-			);
-			// Fetch suggested questions after response is complete
-			fetchSuggestedQuestions(promptText, history, finalContent, assistantMessageId);
-		},
-		onError: (assistantMessageId: string, errorMessage: string) => {
-			setMessages((prev) =>
-				prev.map((msg) =>
-					msg.id === assistantMessageId
-						? { ...msg, content: errorMessage, isStreaming: false }
-						: msg
-				)
-			);
-		},
-	}), [setMessages, fetchSuggestedQuestions]);
 
 	const handleSubmit = useCallback(async () => {
 		if (!prompt.trim()) return;
@@ -204,22 +118,6 @@ export default function RovoView() {
 			createStreamingCallbacks(currentPrompt, recentHistory)
 		);
 	}, [prompt, isChatMode, messages, userName, setMessages, streamMessage, createStreamingCallbacks]);
-
-	const toggleDictation = () => {
-		if (!recognitionRef.current) {
-			alert("Speech recognition is not supported in your browser");
-			return;
-		}
-
-		if (isListening) {
-			recognitionRef.current.stop();
-			setIsListening(false);
-			setInterimText("");
-		} else {
-			recognitionRef.current.start();
-			setIsListening(true);
-		}
-	};
 
 	const handleSuggestionClick = (suggestion: string) => {
 		setPrompt(suggestion);
@@ -264,61 +162,6 @@ export default function RovoView() {
 		setPrompt("");
 		setIsChatMode(false);
 	};
-
-	// Initialize speech recognition
-	useEffect(() => {
-		if (typeof window !== "undefined") {
-			const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-			if (SpeechRecognition) {
-				const recognition = new SpeechRecognition();
-				recognition.continuous = true;
-				recognition.interimResults = true;
-				recognition.lang = "en-US";
-
-				recognition.onresult = (event: any) => {
-					let finalTranscript = "";
-					let interimTranscript = "";
-
-					for (let i = event.resultIndex; i < event.results.length; i++) {
-						const transcript = event.results[i][0].transcript;
-						if (event.results[i].isFinal) {
-							finalTranscript += transcript;
-						} else {
-							interimTranscript += transcript;
-						}
-					}
-
-					// Update interim text for live display
-					setInterimText(interimTranscript);
-
-					// Only update the actual value when we have final results
-					if (finalTranscript) {
-						setPrompt((prev) => prev + finalTranscript);
-						setInterimText(""); // Clear interim text after adding final text
-					}
-				};
-
-				recognition.onerror = (event: any) => {
-					console.error("Speech recognition error:", event.error);
-					setIsListening(false);
-					setInterimText("");
-				};
-
-				recognition.onend = () => {
-					setIsListening(false);
-					setInterimText("");
-				};
-
-				recognitionRef.current = recognition;
-			}
-		}
-
-		return () => {
-			if (recognitionRef.current) {
-				recognitionRef.current.stop();
-			}
-		};
-	}, []);
 
 	// Reset to initial state when messages are cleared
 	useEffect(() => {
@@ -450,10 +293,7 @@ export default function RovoView() {
 								prompt={prompt}
 								interimText={interimText}
 								isListening={isListening}
-								onPromptChange={(newPrompt) => {
-									setPrompt(newPrompt);
-									setInterimText("");
-								}}
+								onPromptChange={setPrompt}
 								onSubmit={handleSubmit}
 								onToggleDictation={toggleDictation}
 								contextEnabled={contextEnabled}
@@ -566,10 +406,7 @@ export default function RovoView() {
 							prompt={prompt}
 							interimText={interimText}
 							isListening={isListening}
-							onPromptChange={(newPrompt) => {
-								setPrompt(newPrompt);
-								setInterimText("");
-							}}
+							onPromptChange={setPrompt}
 							onSubmit={handleSubmit}
 							onToggleDictation={toggleDictation}
 							contextEnabled={contextEnabled}

@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Stack, Inline } from "@atlaskit/primitives/compiled";
-import { Text } from "@atlaskit/primitives/compiled";
+import { Stack, Inline, Text } from "@atlaskit/primitives";
 import { token } from "@atlaskit/tokens";
 import Avatar from "@atlaskit/avatar";
 import Tag from "@atlaskit/tag";
@@ -36,7 +35,7 @@ interface KanbanCardProps {
 	onClick?: () => void;
 }
 
-const KanbanCard: React.FC<KanbanCardProps> = ({ title, code, tags, priority, avatarSrc, onClick }) => {
+const KanbanCard: React.FC<Readonly<KanbanCardProps>> = ({ title, code, tags, priority, avatarSrc, onClick }) => {
 	const [isHovered, setIsHovered] = useState(false);
 	const [isMounted, setIsMounted] = useState(false);
 

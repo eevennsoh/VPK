@@ -2,7 +2,7 @@
 
 import React, { forwardRef } from "react";
 import { token } from "@atlaskit/tokens";
-import { Stack } from "@atlaskit/primitives/compiled";
+import { Stack } from "@atlaskit/primitives";
 import { IconButton } from "@atlaskit/button/new";
 import Button from "@atlaskit/button/new";
 import Heading from "@atlaskit/heading";
@@ -35,7 +35,7 @@ const actionIcons = [
 	TagIcon,
 ];
 
-const RovoChatMessages = forwardRef<HTMLDivElement, RovoChatMessagesProps>(
+const RovoChatMessages = forwardRef<HTMLDivElement, Readonly<RovoChatMessagesProps>>(
 	({ messages, variant, hasChatStarted, onSuggestedQuestionClick, userName }, ref) => {
 		return (
 			<div

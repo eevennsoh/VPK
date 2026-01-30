@@ -1,9 +1,8 @@
 "use client";
 
 import React from "react";
-import { Stack, Inline } from "@atlaskit/primitives/compiled";
+import { Stack, Inline, Text } from "@atlaskit/primitives";
 import Heading from "@atlaskit/heading";
-import { Text } from "@atlaskit/primitives/compiled";
 import { token } from "@atlaskit/tokens";
 import { IconButton } from "@atlaskit/button/new";
 import Tabs, { Tab, TabList, TabPanel } from "@atlaskit/tabs";
@@ -25,7 +24,7 @@ interface JiraHeaderProps {
 	onTabChange: (tabIndex: number) => void;
 }
 
-const JiraHeader: React.FC<JiraHeaderProps> = ({ selectedTab, onTabChange }) => {
+const JiraHeader: React.FC<Readonly<JiraHeaderProps>> = ({ selectedTab, onTabChange }) => {
 	return (
 		<div
 			style={{

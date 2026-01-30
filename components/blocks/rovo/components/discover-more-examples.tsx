@@ -10,15 +10,9 @@ import ChevronUpIcon from "@atlaskit/icon/core/chevron-up";
 import Textfield from "@atlaskit/textfield";
 import Checkbox from "@atlaskit/checkbox";
 import ExampleCard from "./example-card";
+import { Example, DEFAULT_EXAMPLES, USE_CASE_OPTIONS, ROLE_OPTIONS } from "../data/examples";
 
-export interface Example {
-	iconPath: string;
-	title: string;
-	description: string;
-	useCase: string;
-	role: string;
-	prompt?: string; // Optional custom prompt, defaults to title + description
-}
+export type { Example };
 
 export interface DiscoverMoreExamplesProps {
 	onExampleClick: (prompt: string) => void;
@@ -27,22 +21,7 @@ export interface DiscoverMoreExamplesProps {
 	isClosing?: boolean;
 }
 
-const defaultExamples: Example[] = [
-	{ iconPath: "/rovoillustrations/form.svg", title: "Analyze customer feedback", description: "Gather and synthesize customer feedback on product/feature", useCase: "Analysis", role: "Product Manager" },
-	{ iconPath: "/rovoillustrations/lightbulb.svg", title: "Brainstorm ideas for project", description: "We're running a brainstorming session on topic/problem/goal", useCase: "Brainstorming", role: "Product Manager" },
-	{ iconPath: "/rovoillustrations/visible.svg", title: "Compare Jira work item", description: "Review the summary, description, and comments of the current request", useCase: "Analysis", role: "Developer" },
-	{ iconPath: "/rovoillustrations/check.svg", title: "Convert request into JQL", description: "Write a JQL query to find all unresolved bugs assigned to my team", useCase: "Analysis", role: "Developer" },
-	{ iconPath: "/rovoillustrations/form.svg", title: "Create a document", description: "Generate a Confluence page summarizing information", useCase: "Documentation", role: "Product Manager" },
-	{ iconPath: "/rovoillustrations/shapes.svg", title: "Create A/B testing plan", description: "Create a detailed A/B testing plan for project/feature", useCase: "Planning", role: "Product Manager" },
-	{ iconPath: "/rovoillustrations/check.svg", title: "Create an effective OKR", description: "Help me create an effective OKR for my team", useCase: "Planning", role: "Product Manager" },
-	{ iconPath: "/rovoillustrations/visible.svg", title: "Create background research plan", description: "Create a first draft or conduct background research on topic/work", useCase: "Planning", role: "Product Manager" },
-	{ iconPath: "/rovoillustrations/download.svg", title: "Create customer onboarding steps", description: "As a customer success lead, outline a clear customer onboarding", useCase: "Planning", role: "Customer Success" },
-];
-
-const useCaseOptions = ["Analysis", "Brainstorming", "Documentation", "Planning"];
-const roleOptions = ["Product Manager", "Developer", "Designer", "Customer Success"];
-
-export default function DiscoverMoreExamples({ onExampleClick, onClose, examples = defaultExamples, isClosing = false }: DiscoverMoreExamplesProps) {
+export default function DiscoverMoreExamples({ onExampleClick, onClose, examples = DEFAULT_EXAMPLES, isClosing = false }: Readonly<DiscoverMoreExamplesProps>) {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [showUseCasesMenu, setShowUseCasesMenu] = useState(false);
 	const [showRolesMenu, setShowRolesMenu] = useState(false);
@@ -190,7 +169,7 @@ export default function DiscoverMoreExamples({ onExampleClick, onClose, examples
 										padding: "8px",
 									}}
 								>
-									{useCaseOptions.map((useCase) => (
+									{USE_CASE_OPTIONS.map((useCase) => (
 										<div key={useCase} style={{ padding: "4px 0" }}>
 											<Checkbox
 												label={useCase}
@@ -242,7 +221,7 @@ export default function DiscoverMoreExamples({ onExampleClick, onClose, examples
 										padding: "8px",
 									}}
 								>
-									{roleOptions.map((role) => (
+									{ROLE_OPTIONS.map((role) => (
 										<div key={role} style={{ padding: "4px 0" }}>
 											<Checkbox
 												label={role}

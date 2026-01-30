@@ -53,7 +53,7 @@ const styles = {
 	},
 } as const;
 
-export default function WorkItemsWidget({ data, onInsert, showInsertMenu, moreMenu }: WorkItemsWidgetProps) {
+export default function WorkItemsWidget({ data, onInsert, showInsertMenu, moreMenu }: Readonly<WorkItemsWidgetProps>) {
 	if (!data || !data.items || !Array.isArray(data.items)) {
 		return <div style={styles.errorState}>Error: Invalid widget data</div>;
 	}

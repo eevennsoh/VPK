@@ -51,7 +51,7 @@ interface TopNavigationProps {
 	product: Product;
 }
 
-export default function TopNavigation({ product }: TopNavigationProps) {
+export default function TopNavigation({ product }: Readonly<TopNavigationProps>) {
 	const [searchValue, setSearchValue] = useState("");
 	const [isAppSwitcherOpen, setIsAppSwitcherOpen] = useState(false);
 	const [windowWidth, setWindowWidth] = useState(0);

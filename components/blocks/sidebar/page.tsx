@@ -14,7 +14,7 @@ interface SidebarProps {
 	product: Product;
 }
 
-export default function Sidebar({ product }: SidebarProps) {
+export default function Sidebar({ product }: Readonly<SidebarProps>) {
 	const [selectedItem, setSelectedItem] = useState(product === "confluence" ? "Demo Live page" : "Vitafleet Q4 Launch");
 	const { isVisible, isHovered, setHovered, setCurrentRoute } = useSidebar();
 	const shouldShow = isVisible || isHovered;

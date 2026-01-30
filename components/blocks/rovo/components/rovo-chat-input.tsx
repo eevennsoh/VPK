@@ -8,14 +8,9 @@ import CustomizeIcon from "@atlaskit/icon/core/customize";
 import MicrophoneIcon from "@atlaskit/icon/core/microphone";
 import ArrowUpIcon from "@atlaskit/icon/core/arrow-up";
 import CrossIcon from "@atlaskit/icon/core/cross";
-import UploadIcon from "@atlaskit/icon/core/upload";
-import LinkIcon from "@atlaskit/icon/core/link";
-import MentionIcon from "@atlaskit/icon/core/mention";
-import PageIcon from "@atlaskit/icon/core/page";
-import LocationIcon from "@atlaskit/icon/core/location";
-import BoardIcon from "@atlaskit/icon/core/board";
-import Tag from "@atlaskit/tag";
 import CustomizeMenu from "./customize-menu";
+import InputAddMenu from "./input-add-menu";
+import InputContextBar from "./input-context-bar";
 
 interface RovoChatInputProps {
 	prompt: string;
@@ -55,7 +50,7 @@ export default function RovoChatInput({
 	onCompanyKnowledgeChange,
 	customHeight,
 	hideUsesAI = false,
-}: RovoChatInputProps) {
+}: Readonly<RovoChatInputProps>) {
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
 	const [isCustomizeMenuOpen, setIsCustomizeMenuOpen] = useState(false);
@@ -78,51 +73,7 @@ export default function RovoChatInput({
 		<div style={{ padding: "0 12px" }}>
 			{/* Context Bar */}
 			{contextEnabled && (product === "confluence" || product === "jira") && (
-				<div
-					style={{
-						backgroundColor: token("color.background.neutral"),
-						borderRadius: token("radius.xlarge"),
-						paddingTop: token("space.050"),
-						paddingBottom: token("space.050"),
-						paddingInline: token("space.150"),
-						marginBottom: token("space.150"),
-						display: "flex",
-						alignItems: "center",
-					}}
-				>
-					<div style={{ display: "flex", alignItems: "center", gap: token("space.050") }}>
-						<div
-							style={{
-								width: "12px",
-								height: "12px",
-								display: "flex",
-								alignItems: "center",
-								justifyContent: "center",
-							}}
-						>
-							<LocationIcon label="Context" size="small" color={token("color.icon.subtlest")} />
-						</div>
-						<span
-							style={{
-								font: token("font.body.small"),
-								color: token("color.text.subtle"),
-							}}
-						>
-							Context:
-						</span>
-						<Tag
-							text={product === "confluence" ? "Demo Live page" : "Vitafleet Q4 launch"}
-							color="blue"
-							elemBefore={
-								product === "confluence" ? (
-									<PageIcon label="Page" size="small" color={token("color.icon.brand")} />
-								) : (
-									<BoardIcon label="Board" size="small" color={token("color.icon.brand")} />
-								)
-							}
-						/>
-					</div>
-				</div>
+				<InputContextBar product={product} />
 			)}
 
 			<div
@@ -226,136 +177,7 @@ export default function RovoChatInput({
 								shape="circle"
 								onClick={() => setIsAddMenuOpen(!isAddMenuOpen)}
 							/>
-							{isAddMenuOpen && (
-								<>
-									<div
-										style={{
-											position: "fixed",
-											top: 0,
-											left: 0,
-											right: 0,
-											bottom: 0,
-											zIndex: 400,
-										}}
-										onClick={() => setIsAddMenuOpen(false)}
-									/>
-									<div
-										style={{
-											position: "fixed",
-											bottom: "94px",
-											right: "160px",
-											backgroundColor: token("elevation.surface.overlay"),
-											borderRadius: token("radius.large"),
-											boxShadow: token("elevation.shadow.overlay"),
-											border: `1px solid ${token("color.border")}`,
-											minWidth: "200px",
-											zIndex: 500,
-											padding: "4px",
-										}}
-									>
-										<div
-											style={{
-												padding: "6px 12px",
-												cursor: "pointer",
-												borderRadius: token("radius.small"),
-												display: "flex",
-												alignItems: "center",
-												gap: "8px",
-											}}
-											onClick={() => setIsAddMenuOpen(false)}
-											onMouseEnter={(e) =>
-												(e.currentTarget.style.backgroundColor = token(
-													"color.background.neutral.subtle.hovered"
-												))
-											}
-											onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-										>
-											<UploadIcon label="Upload file" />
-											<span>Upload file</span>
-										</div>
-										<div
-											style={{
-												padding: "6px 12px",
-												cursor: "pointer",
-												borderRadius: token("radius.small"),
-												display: "flex",
-												alignItems: "center",
-												gap: "8px",
-											}}
-											onClick={() => setIsAddMenuOpen(false)}
-											onMouseEnter={(e) =>
-												(e.currentTarget.style.backgroundColor = token(
-													"color.background.neutral.subtle.hovered"
-												))
-											}
-											onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-										>
-											<LinkIcon label="Add link" />
-											<span>Add a link</span>
-										</div>
-										<div
-											style={{
-												padding: "6px 12px",
-												cursor: "pointer",
-												borderRadius: token("radius.small"),
-												display: "flex",
-												alignItems: "center",
-												gap: "8px",
-											}}
-											onClick={() => setIsAddMenuOpen(false)}
-											onMouseEnter={(e) =>
-												(e.currentTarget.style.backgroundColor = token(
-													"color.background.neutral.subtle.hovered"
-												))
-											}
-											onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-										>
-											<MentionIcon label="Mention someone" />
-											<span>Mention someone</span>
-										</div>
-										<div
-											style={{
-												padding: "6px 12px",
-												cursor: "pointer",
-												borderRadius: token("radius.small"),
-												display: "flex",
-												alignItems: "center",
-												gap: "8px",
-											}}
-											onClick={() => setIsAddMenuOpen(false)}
-											onMouseEnter={(e) =>
-												(e.currentTarget.style.backgroundColor = token(
-													"color.background.neutral.subtle.hovered"
-												))
-											}
-											onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-										>
-											<AddIcon label="More formatting" />
-											<span>More formatting</span>
-										</div>
-										<div
-											style={{
-												padding: "6px 12px",
-												cursor: "pointer",
-												borderRadius: token("radius.small"),
-												display: "flex",
-												alignItems: "center",
-												gap: "8px",
-											}}
-											onClick={() => setIsAddMenuOpen(false)}
-											onMouseEnter={(e) =>
-												(e.currentTarget.style.backgroundColor = token(
-													"color.background.neutral.subtle.hovered"
-												))
-											}
-											onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-										>
-											<PageIcon label="Add current page as context" />
-											<span>Add current page as context</span>
-										</div>
-									</div>
-								</>
-							)}
+							{isAddMenuOpen && <InputAddMenu onClose={() => setIsAddMenuOpen(false)} />}
 						</div>
 						<div style={{ position: "relative" }}>
 							<IconButton

@@ -5,15 +5,13 @@ import { token } from "@atlaskit/tokens";
 import Toggle from "@atlaskit/toggle";
 import Heading from "@atlaskit/heading";
 import { DropdownItem } from "@atlaskit/dropdown-menu";
-import RandomizeIcon from "@atlaskit/icon-lab/core/randomize";
-import ZoomInIcon from "@atlaskit/icon/core/zoom-in";
-import TelescopeIcon from "@atlaskit/icon-lab/core/telescope";
 import GlobeIcon from "@atlaskit/icon/core/globe";
 import OfficeBuildingIcon from "@atlaskit/icon/core/office-building";
 import AppsIcon from "@atlaskit/icon/core/apps";
 import SettingsIcon from "@atlaskit/icon/core/settings";
 import ChevronRightIcon from "@atlaskit/icon/core/chevron-right";
 import AddIcon from "@atlaskit/icon/core/add";
+import { REASONING_OPTIONS } from "../data/customize-menu-options";
 
 interface CustomizeMenuProps {
 	selectedReasoning: string;
@@ -33,7 +31,7 @@ export default function CustomizeMenu({
 	companyKnowledgeEnabled,
 	onCompanyKnowledgeChange,
 	onClose,
-}: CustomizeMenuProps) {
+}: Readonly<CustomizeMenuProps>) {
 	return (
 		<>
 			<div
@@ -75,94 +73,41 @@ export default function CustomizeMenu({
 							marginTop: token("space.100"),
 						}}
 					>
-						<div style={{ paddingTop: token("space.100"), paddingBottom: token("space.100") }}>
-							<DropdownItem
-								elemBefore={
-									<div
-										style={{
-											width: "32px",
-											height: "32px",
-											borderRadius: token("radius.full"),
-											backgroundColor:
-												selectedReasoning === "let-rovo-decide"
-													? token("color.background.selected")
-													: token("color.background.neutral"),
-											display: "flex",
-											alignItems: "center",
-											justifyContent: "center",
+						{REASONING_OPTIONS.map((option) => {
+							const IconComponent = option.icon;
+							const isSelected = selectedReasoning === option.id;
+							return (
+								<div key={option.id} style={{ paddingTop: token("space.100"), paddingBottom: token("space.100") }}>
+									<DropdownItem
+										elemBefore={
+											<div
+												style={{
+													width: "32px",
+													height: "32px",
+													borderRadius: token("radius.full"),
+													backgroundColor: isSelected
+														? token("color.background.selected")
+														: token("color.background.neutral"),
+													display: "flex",
+													alignItems: "center",
+													justifyContent: "center",
+												}}
+											>
+												<IconComponent label={option.label} />
+											</div>
+										}
+										elemAfter={option.id === "deep-research" && isSelected ? <AddIcon label="Selected" /> : null}
+										description={option.description}
+										onClick={() => {
+											onReasoningChange(option.id);
+											onClose();
 										}}
 									>
-										<RandomizeIcon label="Let Rovo decide" />
-									</div>
-								}
-								description="Rovo picks reasoning for the job"
-								onClick={() => {
-									onReasoningChange("let-rovo-decide");
-									onClose();
-								}}
-							>
-								Let Rovo decide
-							</DropdownItem>
-						</div>
-						<div style={{ paddingTop: token("space.100"), paddingBottom: token("space.100") }}>
-							<DropdownItem
-								elemBefore={
-									<div
-										style={{
-											width: "32px",
-											height: "32px",
-											borderRadius: token("radius.full"),
-											backgroundColor:
-												selectedReasoning === "think-deeper"
-													? token("color.background.selected")
-													: token("color.background.neutral"),
-											display: "flex",
-											alignItems: "center",
-											justifyContent: "center",
-										}}
-									>
-										<ZoomInIcon label="Think deeper" />
-									</div>
-								}
-								description="Longer thinking for robust responses"
-								onClick={() => {
-									onReasoningChange("think-deeper");
-									onClose();
-								}}
-							>
-								Think deeper
-							</DropdownItem>
-						</div>
-						<div style={{ paddingTop: token("space.100"), paddingBottom: token("space.100") }}>
-							<DropdownItem
-								elemBefore={
-									<div
-										style={{
-											width: "32px",
-											height: "32px",
-											borderRadius: token("radius.full"),
-											backgroundColor:
-												selectedReasoning === "deep-research"
-													? token("color.background.selected")
-													: token("color.background.neutral"),
-											display: "flex",
-											alignItems: "center",
-											justifyContent: "center",
-										}}
-									>
-										<TelescopeIcon label="Deep research" />
-									</div>
-								}
-								elemAfter={selectedReasoning === "deep-research" ? <AddIcon label="Selected" /> : null}
-								description="Synthesize insights and create reports"
-								onClick={() => {
-									onReasoningChange("deep-research");
-									onClose();
-								}}
-							>
-								Deep research
-							</DropdownItem>
-						</div>
+										{option.label}
+									</DropdownItem>
+								</div>
+							);
+						})}
 					</div>
 				</div>
 

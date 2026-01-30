@@ -1,6 +1,6 @@
 ---
 name: vpk-share
-description: Create a sanitized boilerplate export of the VPK repo for reuse or sharing. Use when you need to strip credentials, local-only files, build artifacts, and caches before pushing a clean template back to the single source of truth repo (unless another destination is specified). Triggers include requests to “make a boilerplate,” “clean repo for sharing,” “remove secrets,” “prepare template,” or “export a clean copy.”
+description: Create a sanitized boilerplate export of the VPK repo for reuse or sharing. Use when you need to strip credentials, local-only files, build artifacts, and caches before creating a clean template. Triggers include requests to "make a boilerplate," "clean repo for sharing," "remove secrets," "prepare template," or "export a clean copy."
 argument-hint: "reset (clean in-place) | export (copy to dest)"
 disable-model-invocation: true
 ---
@@ -9,7 +9,7 @@ disable-model-invocation: true
 
 ## Overview
 
-Create a clean, shareable VPK boilerplate by removing credentials, local-only files, and build artifacts, then exporting a fresh copy ready to push back to the single source of truth repo.
+Create a clean, shareable VPK boilerplate by removing credentials, local-only files, and build artifacts, then exporting a fresh copy with no git remote origin (prevents accidental pushes back to the original repo).
 
 ## Quick start
 
@@ -84,11 +84,17 @@ Notes:
 - Verify there are no secrets or credentials in the export.
 - Confirm `pnpm install` and `pnpm run dev` work from the export.
 
-### 5) Push to the single source of truth repo (default)
+### 5) Set up your new remote
 
-- Use the default remote unless the user specifies another destination.
-- Default remote: `https://github.com/eevennsoh/VPK`
-- Tag or release as a template if desired.
+The exported boilerplate has a fresh git repo with no remote origin. Add your own:
+
+```bash
+cd /path/to/VPK-boilerplate
+git remote add origin <your-new-repo-url>
+git push -u origin main
+```
+
+This prevents accidental pushes back to the original prototype kit repo.
 
 ## Resources
 

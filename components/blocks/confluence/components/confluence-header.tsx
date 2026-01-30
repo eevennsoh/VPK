@@ -2,7 +2,7 @@
 
 import React from "react";
 import dynamic from "next/dynamic";
-import { Text } from "@atlaskit/primitives/compiled";
+import { Text } from "@atlaskit/primitives";
 import { token } from "@atlaskit/tokens";
 import Button, { IconButton, SplitButton } from "@atlaskit/button/new";
 import DropdownMenu, { DropdownItem, DropdownItemGroup } from "@atlaskit/dropdown-menu";

@@ -9,7 +9,7 @@ These rules define how to translate Figma designs into code for this project.
 3. **Get visual reference** — Run `get_screenshot` for the node variant
 4. **Download assets** — Only after getting context and screenshot
 5. **Implement** — Translate output into VPK conventions (see rules below)
-6. **Validate** — Compare final UI against Figma for 1:1 fidelity
+6. **Validate** — Compare final UI against Figma using Playwright MCP browser tools for screenshot comparison
 
 ## Translation Rules
 
@@ -144,3 +144,5 @@ export default function ComponentName({ title, variant = "default", onAction }: 
 - [ ] Component is under 150 lines (split if needed)
 - [ ] Props interface is defined with `Readonly<>`
 - [ ] Visual output matches Figma screenshot 1:1
+- [ ] Screenshot comparison via Playwright MCP browser tools
+- [ ] Dark mode verification completed

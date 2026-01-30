@@ -5,7 +5,7 @@ import { token } from "@atlaskit/tokens";
 import { IconButton } from "@atlaskit/button/new";
 import Button from "@atlaskit/button/new";
 import Breadcrumbs, { BreadcrumbsItem } from "@atlaskit/breadcrumbs";
-import { Text, Stack, Inline } from "@atlaskit/primitives/compiled";
+import { Text, Stack, Inline } from "@atlaskit/primitives";
 import Heading from "@atlaskit/heading";
 import Link from "@atlaskit/link";
 import Avatar from "@atlaskit/avatar";

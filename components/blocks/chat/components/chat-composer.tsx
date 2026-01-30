@@ -68,7 +68,7 @@ const textareaCSS = `
 	}
 `;
 
-export default function ChatComposer({ onSubmit }: ChatComposerProps) {
+export default function ChatComposer({ onSubmit }: Readonly<ChatComposerProps>) {
 	const [prompt, setPrompt] = useState("");
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 

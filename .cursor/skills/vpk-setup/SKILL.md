@@ -34,9 +34,8 @@ produces: [.env.local, .asap-config]
 2. **Install dependencies** → `pnpm install`
 3. **Generate ASAP credentials** → See commands below
 4. **Create config files** → `.env.local` from `.asap-config`
-5. **Clear ports (first-time only)** → Kill zombie processes on 3000/8080
-6. **Start servers** → Run `pnpm run dev` (if it fails, ask user to run manually)
-7. **Verify** → http://localhost:3000
+5. **Start servers** → Run `pnpm run dev` (auto-finds available ports if defaults are busy)
+6. **Verify** → http://localhost:3000 (or the port shown in terminal output)
 
 ## Essential Commands
 
@@ -62,16 +61,12 @@ node ./.cursor/skills/vpk-setup/scripts/create-env-local.js YOUR-USE-CASE-ID
 # Optional (explicit override of git config):
 # node ./.cursor/skills/vpk-setup/scripts/create-env-local.js YOUR-USE-CASE-ID your-email@atlassian.com
 
-# Clear default ports (FIRST-TIME SETUP ONLY)
-# This kills zombie processes from previous sessions blocking ports 3000/8080.
-# Only run during initial setup - NOT when running multiple VPK projects simultaneously.
-lsof -ti:3000,8080 | xargs kill -9 2>/dev/null || true
-
 # Start development servers
+# Port auto-discovery: If 3000/8080 are busy, servers automatically use 3001+/8081+
 # Try running this first. If it fails or blocks, ask user to run manually in their terminal
 pnpm run dev
 
-# Verify backend health
+# Verify backend health (use the port shown in terminal output if not 8080)
 curl http://localhost:8080/api/health
 ```
 
@@ -119,10 +114,9 @@ For detailed model switching instructions, see [references/guide-model-switch.md
 - [ ] Dependencies installed
 - [ ] **ASAP credentials generated (timestamp generated ONCE)**
 - [ ] `.env.local` created with Claude/Bedrock URL and user's email
-- [ ] **Ports cleared** (first-time only: kill zombies on 3000/8080)
 - [ ] Dev servers started (or user instructed to run `pnpm run dev` if auto-start failed)
 - [ ] Health check shows all env vars "SET"
-- [ ] Chat responds at http://localhost:3000
+- [ ] Chat responds at http://localhost:3000 (or auto-assigned port)
 
 **✅ Setup Complete!** Prototype is running locally with AI Gateway authentication.
 
@@ -131,15 +125,23 @@ For detailed model switching instructions, see [references/guide-model-switch.md
 | Issue                        | Quick Fix                                                           |
 | ---------------------------- | ------------------------------------------------------------------- |
 | Auth errors during ASAP save | `atlas upgrade`                                                     |
-| "EADDRINUSE" error           | Already handled during setup; if running multiple VPK projects, this is expected - servers auto-find available ports |
-| Next.js lock error           | Stop servers, remove `.next/dev/lock`, start once                  |
+| "EADDRINUSE" error           | Servers auto-find available ports (3001+/8081+). If still failing, run with `--force-kill`: `./.cursor/skills/vpk-setup/scripts/start-dev.sh --force-kill` |
+| Next.js lock error           | Remove stale lock: `rm -f .next/dev/lock` then restart              |
+| Zombie processes blocking ports | Force kill: `lsof -ti:3000,8080 \| xargs kill -9` (requires full permissions) |
 | Frontend 500 (providers)     | Ensure `components/providers.tsx` matches import casing           |
-| No available port (3000/8080)| Normal when running multiple VPK projects - servers auto-find ports 3001+/8081+ |
 | "ASAP_PRIVATE_KEY: MISSING"  | Check .env.local format - private key must be quoted and escaped    |
 | No AI response               | Verify health check passes                                          |
 | **Mismatched ASAP KID**      | **You generated timestamp twice! Regenerate with single timestamp** |
 | "Model Id [X] not found"     | Model not whitelisted. Run `atlas ml aigateway usecase view --id YOUR-USE-CASE-ID -e stg-west` to check available models |
 | Want to switch models        | See [Model Switching Guide](references/guide-model-switch.md)     |
+
+### Port Auto-Discovery
+
+VPK dev servers automatically find available ports if defaults are in use:
+- **Frontend**: Tries ports 3000-3019 (configurable via `PORT` env var)
+- **Backend**: Tries ports 8080-8099 (configurable via `BACKEND_PORT` env var)
+
+The actual ports are shown in terminal output when servers start. If a non-default port is used, you'll see a message like `"Port 3000 in use. Using 3001 instead."`
 
 ## Next Steps
 

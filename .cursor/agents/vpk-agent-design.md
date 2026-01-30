@@ -81,7 +81,8 @@ When invoked to design or implement UI:
 2. **Search ADS MCP** - Use `ads_plan` to find relevant tokens, icons, and components
 3. **Implement with ADS patterns** - Use proper imports, tokens, and components
 4. **Verify accessibility** - Ensure all interactive elements have proper labels
-5. **Suggest next steps** - Recommend accessibility analysis and testing
+5. **Visual testing** - If dev server is running, capture screenshots in light/dark mode
+6. **Suggest next steps** - Recommend accessibility analysis and testing
 
 ## Context Detection
 
@@ -502,9 +503,82 @@ await ads_analyze_a11y({
 
 **Next steps:**
 
-- Test locally with the dev server
-- Run accessibility analysis
-- Commit changes when ready
+1. Run accessibility analysis with `ads_analyze_a11y`
+2. Visual testing (if dev server running) — capture light/dark mode screenshots
+3. Commit changes when ready
+
+## Visual Testing
+
+After implementing components, validate visually using Playwright MCP browser tools.
+
+### When to Run Visual Tests
+
+- After implementing new UI components
+- After modifying existing component styling
+- When implementing Figma designs (compare against Figma screenshot)
+- When fixing dark mode issues
+
+### Quick Test Commands
+
+```
+# Open page and wait for load
+browser_navigate(url="http://localhost:3000/jira")
+browser_wait_for(state="networkidle")
+
+# Light mode
+browser_evaluate(expression="localStorage.setItem('ui-theme', 'light')")
+browser_navigate(url="http://localhost:3000/jira")
+browser_wait_for(state="networkidle")
+browser_take_screenshot(path="./screenshots/jira-light.png")
+
+# Dark mode
+browser_evaluate(expression="localStorage.setItem('ui-theme', 'dark')")
+browser_navigate(url="http://localhost:3000/jira")
+browser_wait_for(state="networkidle")
+browser_take_screenshot(path="./screenshots/jira-dark.png")
+
+# Cleanup
+browser_close()
+```
+
+### Route Mapping
+
+| Block Location                  | Test URL                           |
+| ------------------------------- | ---------------------------------- |
+| `components/blocks/jira/`       | `http://localhost:3000/jira`       |
+| `components/blocks/confluence/` | `http://localhost:3000/confluence` |
+| `components/blocks/rovo/`       | `http://localhost:3000/rovo`       |
+| `components/blocks/search/`     | `http://localhost:3000/search`     |
+| `components/blocks/widget/`     | `http://localhost:3000/widgets`    |
+
+### Figma Comparison Workflow
+
+When implementing Figma designs:
+
+1. Get Figma screenshot: `get_screenshot(fileKey=":fileKey", nodeId=":nodeId")`
+2. Capture implementation screenshot using browser tools
+3. Compare side-by-side for layout, spacing, colors, typography
+
+### Visual Test Checklist
+
+- [ ] Light mode screenshot captured
+- [ ] Dark mode screenshot captured
+- [ ] Implementation matches Figma design (if applicable)
+- [ ] All ADS tokens render correctly in both themes
+- [ ] No visual regressions
+
+### Example Output
+
+After visual testing, report:
+
+```
+Visual Testing Complete:
+- Light mode: ./screenshots/jira-light.png ✓
+- Dark mode: ./screenshots/jira-dark.png ✓
+- Figma comparison: Layout matches, spacing verified
+```
+
+**Note:** If dev server is not running, skip visual testing and note it in next steps.
 
 ## Troubleshooting / Edge Cases
 
@@ -587,6 +661,7 @@ For detailed component documentation and examples:
 | Primitives           | `.cursor/skills/vpk-design/references/primitives.md`        | Box, Stack, Inline, Grid, Text, Pressable              |
 | Styling Patterns     | `.cursor/skills/vpk-design/references/styling.md`           | Styling patterns with design tokens                    |
 | Content Standards    | `.cursor/skills/vpk-design/references/content-standards.md` | Voice, tone, accessibility, inclusive language         |
+| Visual Testing       | `.cursor/skills/vpk-design/references/visual-testing.md`    | Playwright MCP browser tools for theme validation      |
 
 When you need comprehensive documentation beyond this reference, read the skill files or fetch https://atlassian.design/.
 

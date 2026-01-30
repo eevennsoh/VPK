@@ -11,7 +11,7 @@ export interface ExampleCardProps {
 	onClick?: () => void;
 }
 
-export default function ExampleCard({ iconPath, title, description, onClick }: ExampleCardProps) {
+export default function ExampleCard({ iconPath, title, description, onClick }: Readonly<ExampleCardProps>) {
 	return (
 		<div
 			style={{

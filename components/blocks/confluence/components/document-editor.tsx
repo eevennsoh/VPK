@@ -24,41 +24,8 @@ import ImageIcon from "@atlaskit/icon/core/image";
 import RovoIcon from "@atlaskit/icon-lab/core/rovo";
 import EditorBubbleMenu from "./editor-bubble-menu";
 import LivePageIcon from "@/components/ui/icon-livepage";
+import { INITIAL_CONTENT, DEFAULT_DOCUMENT } from "../data/editor-content";
 import "../confluence/editor-styles.css";
-
-const initialContent = `
-  <p>This is a rich text editor built with Tiptap. You can format your text in various ways:</p>
-  
-  <h2>Text Formatting</h2>
-  <p>You can make text <strong>bold</strong>, <em>italic</em>, <u>underline</u>, or <s>strikethrough</s>.</p>
-  
-  <h2>Lists</h2>
-  <p>Create bulleted lists:</p>
-  <ul>
-    <li>First item</li>
-    <li>Second item</li>
-    <li>Third item</li>
-  </ul>
-  
-  <p>Or numbered lists:</p>
-  <ol>
-    <li>Step one</li>
-    <li>Step two</li>
-    <li>Step three</li>
-  </ol>
-  
-  <h2>Code Blocks</h2>
-  <pre><code>function hello() {
-  console.log('Hello, world!');
-}</code></pre>
-  
-  <h2>Blockquotes</h2>
-  <blockquote>
-    <p>This is a blockquote. Use it for important callouts or quotes.</p>
-  </blockquote>
-  
-  <p>Start editing to see the magic happen!</p>
-`;
 
 export default function DocumentEditor() {
 	const titleRef = useRef<HTMLDivElement>(null);
@@ -84,7 +51,7 @@ export default function DocumentEditor() {
 				multicolor: true,
 			}),
 		],
-		content: initialContent,
+		content: INITIAL_CONTENT,
 		immediatelyRender: false,
 		editorProps: {
 			attributes: {
@@ -236,7 +203,7 @@ export default function DocumentEditor() {
 							cursor: "text",
 						}}
 					>
-						Demo Live page
+						{DEFAULT_DOCUMENT.title}
 					</div>
 				</div>
 
@@ -259,8 +226,8 @@ export default function DocumentEditor() {
 							}}
 						>
 							<img
-								src="/people/Avatar-1.png"
-								alt="Charlie Atlas"
+								src={DEFAULT_DOCUMENT.author.avatar}
+								alt={DEFAULT_DOCUMENT.author.name}
 								style={{
 									width: 16,
 									height: 16,
@@ -268,7 +235,7 @@ export default function DocumentEditor() {
 									objectFit: "cover",
 								}}
 							/>
-							By Charlie Atlas
+							By {DEFAULT_DOCUMENT.author.name}
 						</span>
 					</Button>
 
@@ -281,7 +248,7 @@ export default function DocumentEditor() {
 								marginLeft: token("space.100"),
 							}}
 						>
-							3 min
+							{DEFAULT_DOCUMENT.readTime}
 						</span>
 					</Button>
 

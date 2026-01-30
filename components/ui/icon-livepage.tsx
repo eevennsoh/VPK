@@ -7,7 +7,7 @@ interface LivePageIconProps {
 	color?: string;
 }
 
-export default function LivePageIcon({ size = 26, color }: LivePageIconProps) {
+export default function LivePageIcon({ size = 26, color }: Readonly<LivePageIconProps>) {
 	const fillColor = color || token("color.icon");
 
 	return (

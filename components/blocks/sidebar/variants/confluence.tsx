@@ -40,7 +40,7 @@ interface ConfluenceSidebarProps {
 	onSelectItem: (item: string) => void;
 }
 
-export function ConfluenceSidebar({ selectedItem, onSelectItem }: ConfluenceSidebarProps) {
+export function ConfluenceSidebar({ selectedItem, onSelectItem }: Readonly<ConfluenceSidebarProps>) {
 	const [isContentExpanded, setIsContentExpanded] = useState(true);
 	const [searchValue, setSearchValue] = useState("");
 

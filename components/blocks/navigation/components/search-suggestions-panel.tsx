@@ -12,6 +12,7 @@ import PersonIcon from "@atlaskit/icon/core/person";
 import ChevronDownIcon from "@atlaskit/icon/core/chevron-down";
 import PageIcon from "@atlaskit/icon/core/page";
 import CustomizeIcon from "@atlaskit/icon/core/customize";
+import { RECENT_SEARCHES, RECENT_ITEMS } from "../data/search-data";
 
 interface SearchSuggestionsPanelProps {
 	isVisible: boolean;
@@ -24,7 +25,7 @@ interface SearchSuggestionsPanelProps {
 	onRecentSearchClick?: (query: string) => void;
 }
 
-const SearchSuggestionsPanel = forwardRef<HTMLDivElement, SearchSuggestionsPanelProps>(
+const SearchSuggestionsPanel = forwardRef<HTMLDivElement, Readonly<SearchSuggestionsPanelProps>>(
 	(
 		{
 			isVisible,
@@ -50,36 +51,6 @@ const SearchSuggestionsPanel = forwardRef<HTMLDivElement, SearchSuggestionsPanel
 		}, [isVisible]);
 
 		if (!isVisible) return null;
-
-		const recentSearches = ["2026 OKR planning", "Boysenberry", "JSM AI Control Tower"];
-
-		const recentItems = [
-			{
-				title: "DAC1: At T'25, combine Search and Chat into Home",
-				metadata: "Page • Platform Apps",
-				timestamp: "You viewed 19 hours ago",
-			},
-			{
-				title: "KG x DH 1:1 notes",
-				metadata: "Page • David Hoang",
-				timestamp: "You viewed 19 hours ago",
-			},
-			{
-				title: "Global - Flex Wallet: Powering your lifestyle",
-				metadata: "Page • G'day.",
-				timestamp: "You viewed 20 hours ago",
-			},
-			{
-				title: "Personal Development - Learning Budget - A little guidance",
-				metadata: "Page • Employee Resource Groups",
-				timestamp: "You viewed 20 hours ago",
-			},
-			{
-				title: "Fireside Chat with David & Siva",
-				metadata: "Page • Design",
-				timestamp: "You viewed 1 day ago",
-			},
-		];
 
 		return (
 			<div
@@ -208,7 +179,7 @@ const SearchSuggestionsPanel = forwardRef<HTMLDivElement, SearchSuggestionsPanel
 
 					{/* Recent Search Items */}
 					<div style={{ padding: "0 8px" }}>
-						{recentSearches.map((search, index) => (
+						{RECENT_SEARCHES.map((search, index) => (
 							<div
 								key={index}
 								style={{
@@ -259,7 +230,7 @@ const SearchSuggestionsPanel = forwardRef<HTMLDivElement, SearchSuggestionsPanel
 							RECENT
 						</div>
 
-						{recentItems.map((item, index) => (
+						{RECENT_ITEMS.map((item, index) => (
 							<div
 								key={index}
 								style={{

@@ -37,6 +37,7 @@ For comprehensive documentation, see these reference files:
 | `references/examples.md`              | Code examples for common patterns                                       |
 | `references/search.md`                | How to find ADS components, icons, tokens                               |
 | `references/implement-figma-design.md`| Figma-to-code workflow, MCP tools, and Tailwind-to-ADS translation      |
+| `references/visual-testing.md`        | Visual testing with Playwright MCP for theme and Figma validation       |
 
 ---
 
@@ -302,6 +303,47 @@ Use sentence case with verb + noun pattern:
 - [ ] Importing from `@atlaskit/primitives` paths
 - [ ] Icons have required `label` prop
 - [ ] Following sentence case for UI text
+
+---
+
+## Visual Testing
+
+After implementing components, validate visually using Playwright MCP browser tools.
+
+### Quick Commands
+
+```
+# Open page
+browser_navigate(url="http://localhost:3000/jira")
+browser_wait_for(state="networkidle")
+
+# Light mode screenshot
+browser_evaluate(expression="localStorage.setItem('ui-theme', 'light')")
+browser_navigate(url="http://localhost:3000/jira")
+browser_wait_for(state="networkidle")
+browser_take_screenshot(path="./screenshots/jira-light.png")
+
+# Dark mode screenshot
+browser_evaluate(expression="localStorage.setItem('ui-theme', 'dark')")
+browser_navigate(url="http://localhost:3000/jira")
+browser_wait_for(state="networkidle")
+browser_take_screenshot(path="./screenshots/jira-dark.png")
+
+# Cleanup
+browser_close()
+```
+
+### Route Mapping
+
+| Block Location                  | Test URL                           |
+| ------------------------------- | ---------------------------------- |
+| `components/blocks/jira/`       | `http://localhost:3000/jira`       |
+| `components/blocks/confluence/` | `http://localhost:3000/confluence` |
+| `components/blocks/rovo/`       | `http://localhost:3000/rovo`       |
+| `components/blocks/search/`     | `http://localhost:3000/search`     |
+| `components/blocks/widget/`     | `http://localhost:3000/widgets`    |
+
+See `references/visual-testing.md` for comprehensive visual testing documentation.
 
 ---
 

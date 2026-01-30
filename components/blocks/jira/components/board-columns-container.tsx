@@ -9,7 +9,7 @@ interface BoardColumnsContainerProps {
 	onCardClick: (title: string, code: string) => void;
 }
 
-const BoardColumnsContainer: React.FC<BoardColumnsContainerProps> = ({ onCardClick }) => {
+const BoardColumnsContainer: React.FC<Readonly<BoardColumnsContainerProps>> = ({ onCardClick }) => {
 	return (
 		<div
 			style={{

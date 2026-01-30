@@ -147,7 +147,7 @@ function LoadingWidget({ widgetType }: { widgetType?: string }) {
 	return <div style={styles.loadingWidget}>{getMessage()}</div>;
 }
 
-export default function ChatPanel({ onClose }: ChatPanelProps) {
+export default function ChatPanel({ onClose }: Readonly<ChatPanelProps>) {
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const { messages, setMessages } = useChat();
 	const { customPrompt } = useSystemPrompt();

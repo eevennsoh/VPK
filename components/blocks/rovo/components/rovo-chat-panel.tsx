@@ -8,26 +8,18 @@ import { API_ENDPOINTS } from "@/lib/api-config";
 import RovoChatHeader from "./rovo-chat-header";
 import RovoChatMessages from "./rovo-chat-messages";
 import RovoChatInput from "./rovo-chat-input";
-
-declare global {
-	interface Window {
-		SpeechRecognition: any;
-		webkitSpeechRecognition: any;
-	}
-}
+import { useSpeechRecognition } from "../hooks/use-speech-recognition";
+import { useSuggestedQuestions } from "../hooks/use-suggested-questions";
 
 interface RovoChatPanelProps {
 	onClose: () => void;
 	product: "home" | "jira" | "confluence" | "rovo";
 }
 
-export default function RovoChatPanel({ onClose, product }: RovoChatPanelProps) {
+export default function RovoChatPanel({ onClose, product }: Readonly<RovoChatPanelProps>) {
 	const router = useRouter();
 	const [prompt, setPrompt] = useState("");
 	const scrollRef = useRef<HTMLDivElement>(null);
-	const recognitionRef = useRef<any>(null);
-	const [isListening, setIsListening] = useState(false);
-	const [interimText, setInterimText] = useState("");
 	const [variant, setVariant] = useState<"sidepanel" | "floating">("sidepanel");
 	const [webResultsEnabled, setWebResultsEnabled] = useState(false);
 	const [companyKnowledgeEnabled, setCompanyKnowledgeEnabled] = useState(true);
@@ -36,6 +28,12 @@ export default function RovoChatPanel({ onClose, product }: RovoChatPanelProps) 
 	const { messages, setMessages } = useRovoChat();
 
 	const [contextEnabled, setContextEnabled] = useState(product === "confluence" || product === "jira");
+
+	// Use extracted hooks
+	const { isListening, interimText, toggleDictation } = useSpeechRecognition({
+		onFinalTranscript: (transcript) => setPrompt((prev) => prev + transcript),
+	});
+	const { fetchSuggestedQuestions } = useSuggestedQuestions({ setMessages });
 
 	useEffect(() => {
 		if (typeof window !== "undefined") {
@@ -52,55 +50,6 @@ export default function RovoChatPanel({ onClose, product }: RovoChatPanelProps) 
 			scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
 		}
 	}, [messages]);
-
-	const fetchSuggestedQuestions = async (
-		userMessage: string,
-		history: Message[],
-		assistantResponse: string,
-		messageId: string
-	) => {
-		try {
-			setMessages((prev) =>
-				prev.map((msg) => (msg.id === messageId ? { ...msg, loadingSuggestions: true } : msg))
-			);
-
-			const response = await fetch(API_ENDPOINTS.SUGGESTED_QUESTIONS, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					message: userMessage,
-					conversationHistory: history.slice(-6),
-					assistantResponse: assistantResponse,
-				}),
-			});
-
-			if (response.ok) {
-				const data = await response.json();
-				setMessages((prev) =>
-					prev.map((msg) =>
-						msg.id === messageId
-							? {
-									...msg,
-									suggestedQuestions: data.questions,
-									loadingSuggestions: false,
-								}
-							: msg
-					)
-				);
-			} else {
-				setMessages((prev) =>
-					prev.map((msg) => (msg.id === messageId ? { ...msg, loadingSuggestions: false } : msg))
-				);
-			}
-		} catch (error) {
-			console.error("Failed to fetch suggested questions:", error);
-			setMessages((prev) =>
-				prev.map((msg) => (msg.id === messageId ? { ...msg, loadingSuggestions: false } : msg))
-			);
-		}
-	};
 
 	const getContextDescription = () => {
 		if (!contextEnabled) return "";
@@ -307,74 +256,6 @@ export default function RovoChatPanel({ onClose, product }: RovoChatPanelProps) 
 		}
 	};
 
-	useEffect(() => {
-		if (typeof window !== "undefined") {
-			const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-			if (SpeechRecognition) {
-				const recognition = new SpeechRecognition();
-				recognition.continuous = true;
-				recognition.interimResults = true;
-				recognition.lang = "en-US";
-
-				recognition.onresult = (event: any) => {
-					let finalTranscript = "";
-					let interimTranscript = "";
-
-					for (let i = event.resultIndex; i < event.results.length; i++) {
-						const transcript = event.results[i][0].transcript;
-						if (event.results[i].isFinal) {
-							finalTranscript += transcript;
-						} else {
-							interimTranscript += transcript;
-						}
-					}
-
-					setInterimText(interimTranscript);
-
-					if (finalTranscript) {
-						setPrompt((prev) => prev + finalTranscript);
-						setInterimText("");
-					}
-				};
-
-				recognition.onerror = (event: any) => {
-					console.error("Speech recognition error:", event.error);
-					setIsListening(false);
-					setInterimText("");
-				};
-
-				recognition.onend = () => {
-					setIsListening(false);
-					setInterimText("");
-				};
-
-				recognitionRef.current = recognition;
-			}
-		}
-
-		return () => {
-			if (recognitionRef.current) {
-				recognitionRef.current.stop();
-			}
-		};
-	}, []);
-
-	const toggleDictation = () => {
-		if (!recognitionRef.current) {
-			alert("Speech recognition is not supported in your browser");
-			return;
-		}
-
-		if (isListening) {
-			recognitionRef.current.stop();
-			setIsListening(false);
-			setInterimText("");
-		} else {
-			recognitionRef.current.start();
-			setIsListening(true);
-		}
-	};
-
 	const hasChatStarted = messages.length > 0;
 
 	return (
@@ -505,10 +386,7 @@ export default function RovoChatPanel({ onClose, product }: RovoChatPanelProps) 
 				prompt={prompt}
 				interimText={interimText}
 				isListening={isListening}
-				onPromptChange={(newPrompt) => {
-					setPrompt(newPrompt);
-					setInterimText("");
-				}}
+				onPromptChange={setPrompt}
 				onSubmit={handleSubmit}
 				onToggleDictation={toggleDictation}
 				contextEnabled={contextEnabled}
