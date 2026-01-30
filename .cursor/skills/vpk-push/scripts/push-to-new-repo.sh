@@ -3,12 +3,13 @@ set -euo pipefail
 
 show_help() {
 	cat <<'USAGE'
-Usage: push-to-new-repo.sh <repo-name> [options]
+Usage: push-to-new-repo.sh [repo-name] [options]
 
 Create a new GitHub repository and push all local changes to it.
 
 Arguments:
-	repo-name     Name for the new GitHub repository
+	repo-name     Name for the new GitHub repository (optional)
+	              If not provided, defaults to vpk-YYYYMMDD-HHMMSS
 
 Options:
 	--public      Create a public repository (default: private)
@@ -21,6 +22,7 @@ Prerequisites:
 	- Git initialized in current directory
 
 Examples:
+	push-to-new-repo.sh                      # Uses vpk-{timestamp}
 	push-to-new-repo.sh my-app
 	push-to-new-repo.sh my-app --public
 	push-to-new-repo.sh my-app --message "First commit"
@@ -68,11 +70,10 @@ while [[ $# -gt 0 ]]; do
 	esac
 done
 
+# Generate default repo name if not provided
 if [[ -z "$repo_name" ]]; then
-	echo "Error: Repository name is required" >&2
-	echo "" >&2
-	show_help >&2
-	exit 1
+	repo_name="vpk-$(date +%Y%m%d-%H%M%S)"
+	echo "No repo name provided, using default: $repo_name"
 fi
 
 # Check prerequisites
