@@ -1,4 +1,4 @@
-# VPK
+# VPK (Venn Prototype Kit)
 
 > This file provides project context for AI assistants. Symlinked as `CLAUDE.md` and `.agent.md`.
 > Skills are defined in `.cursor/skills/`. Agents are defined in `.cursor/agents/`.

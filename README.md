@@ -1,4 +1,4 @@
-# VPK
+# VPK (Venn Prototype Kit)
 
 Next.js 16 + Express backend with AI Gateway integration, deployable to Atlassian Micros.
 
