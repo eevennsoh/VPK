@@ -3,6 +3,7 @@ import "@atlaskit/css-reset";
 import "./globals.css";
 import "@/lib/platform-feature-flags";
 import { Providers } from "@/app/providers";
+import { Agentation } from "agentation";
 
 export const metadata: Metadata = {
 	title: "V—P—K: Venn Prototype Kit",
@@ -24,6 +25,7 @@ export default function RootLayout({
 			</head>
 			<body className="font-sans antialiased">
 				<Providers>{children}</Providers>
+				{process.env.NODE_ENV === "development" && <Agentation />}
 			</body>
 		</html>
 	);
