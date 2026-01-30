@@ -8,6 +8,7 @@ import { RovoChatProvider } from "@/app/contexts/context-rovo-chat";
 
 export function Providers({ children }: { children: React.ReactNode }) {
 	return (
+		// Enable new Shape token from Atlassian Design System
 		<AppProvider defaultTheme={{ shape: "shape" }}>
 			<ThemeWrapper>
 				<SidebarProvider>

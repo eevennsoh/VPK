@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import { token } from "@atlaskit/tokens";
 import ChatHeader from "./components/chat-header";
 import ChatGreeting from "./components/chat-greeting";
-import ChatComposer from "./components/chat-composer";
+import ChatComposer from "@/components/blocks/chat-composer/page";
 import { useChat, Message } from "@/app/contexts/context-chat";
 import { useSystemPrompt } from "@/app/contexts/context-system-prompt";
 import { useStreamingChat } from "@/app/hooks/use-streaming-chat";
@@ -82,7 +82,7 @@ const styles = {
 	},
 	chatPanel: {
 		width: "100%",
-		minWidth: "400px",
+		maxWidth: "400px",
 		height: "100vh",
 		maxHeight: "800px",
 		backgroundColor: token("elevation.surface"),
@@ -100,18 +100,18 @@ const styles = {
 	},
 	messagesContainer: {
 		padding: token("space.150"),
+		paddingBottom: token("space.400"), // 32px gap from ChatComposer
 		display: "flex",
 		flexDirection: "column" as const,
 		gap: token("space.300"),
-		paddingBottom: token("space.1000"),
 		flex: 1,
+		justifyContent: "flex-end",
 	},
 	emptyState: {
 		display: "flex",
 		flexDirection: "column" as const,
 		alignItems: "center",
-		justifyContent: "center",
-		flex: 1,
+		width: "100%",
 	},
 	userBubble: {
 		backgroundColor: token("color.background.brand.bold"),
@@ -147,8 +147,12 @@ function LoadingWidget({ widgetType }: { widgetType?: string }) {
 	return <div style={styles.loadingWidget}>{getMessage()}</div>;
 }
 
-export default function ChatPanel({ onClose }: Readonly<ChatPanelProps>) {
+export default function ChatPanel({ onClose }: ChatPanelProps) {
 	const scrollRef = useRef<HTMLDivElement>(null);
+	const [prompt, setPrompt] = useState("");
+	const [selectedReasoning, setSelectedReasoning] = useState("deep-research");
+	const [webResultsEnabled, setWebResultsEnabled] = useState(false);
+	const [companyKnowledgeEnabled, setCompanyKnowledgeEnabled] = useState(true);
 	const { messages, setMessages } = useChat();
 	const { customPrompt } = useSystemPrompt();
 	const { streamMessage, abort } = useStreamingChat();
@@ -174,8 +178,11 @@ export default function ChatPanel({ onClose }: Readonly<ChatPanelProps>) {
 		}
 	}, [messages]);
 
-	const handleSubmit = useCallback(async (promptText: string) => {
-		if (!promptText.trim()) return;
+	const handleSubmit = useCallback(async () => {
+		if (!prompt.trim()) return;
+
+		const promptText = prompt;
+		setPrompt("");
 
 		// Add user message
 		const userMessage: Message = {
@@ -235,7 +242,7 @@ export default function ChatPanel({ onClose }: Readonly<ChatPanelProps>) {
 				},
 			}
 		);
-	}, [messages, customPrompt, setMessages, streamMessage]);
+	}, [prompt, messages, customPrompt, setMessages, streamMessage]);
 
 	return (
 		<div style={styles.chatPanel}>
@@ -281,7 +288,24 @@ export default function ChatPanel({ onClose }: Readonly<ChatPanelProps>) {
 				</div>
 			</div>
 
-			<ChatComposer onSubmit={handleSubmit} />
+			<ChatComposer
+				prompt={prompt}
+				onPromptChange={setPrompt}
+				onSubmit={handleSubmit}
+				showAddMenu={true}
+				showCustomizeMenu={true}
+				showPlanMode={true}
+				showMicrophone={false}
+				showDisclaimer={true}
+				customizeMenuProps={{
+					selectedReasoning,
+					onReasoningChange: setSelectedReasoning,
+					webResultsEnabled,
+					onWebResultsChange: setWebResultsEnabled,
+					companyKnowledgeEnabled,
+					onCompanyKnowledgeChange: setCompanyKnowledgeEnabled,
+				}}
+			/>
 		</div>
 	);
 }
