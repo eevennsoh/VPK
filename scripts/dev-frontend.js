@@ -1,0 +1,101 @@
+const net = require("node:net");
+const { spawn } = require("node:child_process");
+
+const basePort = Number.parseInt(process.env.PORT ?? "3000", 10);
+const maxTries = Number.parseInt(process.env.PORT_SEARCH_MAX ?? "20", 10);
+
+const unsupportedErrors = new Set([
+	"EADDRNOTAVAIL",
+	"EAFNOSUPPORT",
+	"EPROTONOSUPPORT",
+	"ENOTSUP",
+]);
+
+const canListen = (options, { allowUnsupported = false } = {}) =>
+	new Promise((resolve) => {
+		const server = net.createServer();
+		server.unref();
+		server.once("error", (err) => {
+			if (err.code === "EADDRINUSE" || err.code === "EACCES") {
+				resolve(false);
+				return;
+			}
+			if (allowUnsupported && unsupportedErrors.has(err.code)) {
+				resolve(true);
+				return;
+			}
+			resolve(false);
+		});
+		server.once("listening", () => {
+			server.close(() => resolve(true));
+		});
+		server.listen(options);
+	});
+
+const isPortAvailable = async (port) => {
+	const ipv4Available = await canListen({ port, host: "0.0.0.0" }, {
+		allowUnsupported: true,
+	});
+	if (!ipv4Available) {
+		return false;
+	}
+
+	const ipv6Available = await canListen(
+		{ port, host: "::", ipv6Only: true },
+		{ allowUnsupported: true }
+	);
+
+	return ipv6Available !== false;
+};
+
+const findAvailablePort = async () => {
+	for (let attempt = 0; attempt < maxTries; attempt += 1) {
+		const port = basePort + attempt;
+		if (await isPortAvailable(port)) {
+			return port;
+		}
+	}
+
+	throw new Error(
+		`No available port found from ${basePort} to ${basePort + maxTries - 1}.`
+	);
+};
+
+const run = async () => {
+	const port = await findAvailablePort();
+
+	if (port !== basePort) {
+		console.log(`Port ${basePort} in use. Using ${port} instead.`);
+	}
+
+	const nextBin = require.resolve("next/dist/bin/next");
+	const child = spawn(
+		process.execPath,
+		[nextBin, "dev", "--turbopack", "--port", String(port), "--hostname", "localhost"],
+		{
+			stdio: "inherit",
+			env: { ...process.env, PORT: String(port) },
+		}
+	);
+
+	const forwardSignal = (signal) => {
+		child.kill(signal);
+	};
+
+	process.on("SIGINT", forwardSignal);
+	process.on("SIGTERM", forwardSignal);
+
+	child.on("exit", (code, signal) => {
+		if (signal) {
+			process.kill(process.pid, signal);
+			return;
+		}
+
+		process.exit(code ?? 0);
+	});
+};
+
+run().catch((error) => {
+	console.error(error);
+	process.exit(1);
+});
