@@ -1,0 +1,23 @@
+/* =================================================================
+   Global Styles
+   
+   Import order:
+   1. tailwind-theme.css - ADS token mappings for Tailwind
+   2. shadcn-theme.css   - shadcn/ui semantic color tokens
+   3. tailwindcss        - Generate utilities from collected themes
+   ================================================================= */
+
+@import "./tailwind-theme.css";
+@import "./shadcn-theme.css";
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@layer base {
+	* {
+		@apply border-border outline-ring/50;
+	}
+	body {
+		@apply bg-background text-foreground;
+	}
+}

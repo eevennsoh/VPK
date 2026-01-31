@@ -1,0 +1,58 @@
+/* =================================================================
+   shadcn/ui Theme Variables
+   
+   Semantic color tokens for shadcn components mapped to ADS tokens.
+   Light/dark mode handled automatically via @atlaskit/tokens.
+   ================================================================= */
+
+@theme inline {
+	/* -----------------------------------------------------------------
+	   Semantic Colors (mapped to ADS tokens)
+	   ----------------------------------------------------------------- */
+	--color-background: var(--ds-elevation-surface, #FFFFFF);
+	--color-foreground: var(--ds-text, #172B4D);
+	--color-card: var(--ds-elevation-surface-raised, #FFFFFF);
+	--color-card-foreground: var(--ds-text, #172B4D);
+	--color-popover: var(--ds-elevation-surface-overlay, #FFFFFF);
+	--color-popover-foreground: var(--ds-text, #172B4D);
+	--color-primary: var(--ds-background-brand-bold, #0C66E4);
+	--color-primary-foreground: var(--ds-text-inverse, #FFFFFF);
+	--color-secondary: var(--ds-elevation-surface, #FFFFFF);
+	--color-secondary-foreground: var(--ds-text-subtle, #44546F);
+	--color-muted: var(--ds-background-accent-gray-subtlest, #F1F2F4);
+	--color-muted-foreground: var(--ds-text-subtlest, #626F86);
+	--color-accent: var(--ds-background-neutral, #091E420F);
+	--color-accent-foreground: var(--ds-text-subtle, #44546F);
+	--color-destructive: var(--ds-background-danger-bold, #C9372C);
+	--color-border: var(--ds-border, #091E4224);
+	--color-input: var(--ds-border-input, #8590A2);
+	--color-ring: var(--ds-border-focused, #388BFF);
+
+	/* -----------------------------------------------------------------
+	   Chart Colors
+	   ----------------------------------------------------------------- */
+	--color-chart-1: var(--ds-chart-categorical-1, #2898BD);
+	--color-chart-2: var(--ds-chart-categorical-2, #5E4DB2);
+	--color-chart-3: var(--ds-chart-categorical-3, #E56910);
+	--color-chart-4: var(--ds-chart-categorical-4, #943D73);
+	--color-chart-5: var(--ds-chart-categorical-5, #09326C);
+
+	/* -----------------------------------------------------------------
+	   Sidebar Colors
+	   ----------------------------------------------------------------- */
+	--color-sidebar: var(--ds-elevation-surface, #FFFFFF);
+	--color-sidebar-foreground: var(--ds-text, #172B4D);
+	--color-sidebar-primary: var(--ds-background-brand-bold, #0C66E4);
+	--color-sidebar-primary-foreground: var(--ds-text-inverse, #FFFFFF);
+	--color-sidebar-accent: var(--ds-background-neutral-subtle-hovered, #091E420F);
+	--color-sidebar-accent-foreground: var(--ds-text, #172B4D);
+	--color-sidebar-border: var(--ds-border, #091E4224);
+	--color-sidebar-ring: var(--ds-border-focused, #388BFF);
+}
+
+/* -----------------------------------------------------------------
+   Base Values
+   ----------------------------------------------------------------- */
+:root {
+	--radius: var(--ds-radius-medium, 0.375rem); /* 6px - ADS medium */
+}
