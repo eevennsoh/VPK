@@ -31,17 +31,50 @@ produces: [.env.local, .asap-config]
 ## Quick Workflow
 
 1. **Check prerequisites** → Node.js 18+, Atlas CLI, YubiKey enrolled
-2. **Install dependencies** → `pnpm install`
-3. **Generate ASAP credentials** → See commands below
-4. **Create config files** → `.env.local` from `.asap-config`
-5. **Start servers** → Run `pnpm run dev` (auto-finds available ports if defaults are busy)
-6. **Verify** → http://localhost:3000 (or the port shown in terminal output)
+2. **Preflight cleanup** → If `node_modules` exists, clean Next.js cache (see below)
+3. **Install dependencies** → `pnpm install` (skip if `node_modules` already exists)
+4. **Generate ASAP credentials** → See commands below
+5. **Create config files** → `.env.local` from `.asap-config`
+6. **Start servers** → Run `pnpm run dev` (auto-finds available ports if defaults are busy)
+7. **Verify** → http://localhost:3000 (or the port shown in terminal output)
+
+## Preflight Cleanup (when node_modules exists)
+
+If `node_modules/` already exists, the user may have run `pnpm install` and `pnpm run dev` manually before invoking `/vpk-setup`. In this case, **always** perform proactive cleanup before starting dev servers to avoid stale lock files and corrupted Turbopack cache:
+
+```bash
+# Check if node_modules exists
+if [ -d "node_modules" ]; then
+  echo "node_modules exists - performing preflight cleanup..."
+  
+  # Remove stale Next.js dev lock (prevents "is another instance running?" error)
+  rm -f .next/dev/lock
+  
+  # Clear Turbopack/Next.js cache (prevents corrupted database errors)
+  rm -rf .next
+  
+  echo "Cleanup complete. Skipping pnpm install."
+fi
+```
+
+This prevents common issues:
+- `Unable to acquire lock at .next/dev/lock`
+- `Failed to restore task data (corrupted database or bug)`
+- `ArrayLengthMismatch` Turbopack errors
 
 ## Essential Commands
 
 ```bash
-# Install dependencies
-pnpm install
+# Preflight cleanup (if node_modules exists)
+# Skip pnpm install; just clean stale Next.js state
+if [ -d "node_modules" ]; then
+  rm -f .next/dev/lock
+  rm -rf .next
+fi
+
+# Install dependencies (skip if node_modules exists)
+# Only run if node_modules does NOT exist
+[ ! -d "node_modules" ] && pnpm install
 
 # Generate ASAP credentials (CRITICAL: generate timestamp ONCE!)
 # Replace YOUR-USE-CASE-ID with the user's provided use case ID
@@ -76,7 +109,6 @@ These files are gitignored and **must be created** (using info from Step 0):
 
 1. **`.asap-config`** - Generate with `atlas asap key generate` (see above)
 2. **`.env.local`** - Needs user's email; Default uses **Claude via Bedrock**: `https://ai-gateway.us-east-1.staging.atl-paas.net/v1/bedrock/model/anthropic.claude-3-5-haiku-20241022-v1:0/invoke-with-response-stream`
-3. **`.vscode/mcp.json`** - Needs Figma token if user wants it; Copy from `.vscode/mcp.json.example`
 
 **Note:** Deployment files (like `service-descriptor.yml`) are handled by `/vpk-deploy` skill.
 
@@ -109,9 +141,10 @@ For detailed model switching instructions, see [references/guide-model-switch.md
 
 ## Setup Checklist
 
-- [ ] **User info collected** (email, use case ID, optional Figma token)
+- [ ] **User info collected** (email, use case ID)
 - [ ] Node.js 18+, Atlas CLI, YubiKey enrolled
-- [ ] Dependencies installed
+- [ ] **Preflight cleanup** (if `node_modules` exists: remove `.next/dev/lock` and `.next/`)
+- [ ] Dependencies installed (skip if `node_modules` already exists)
 - [ ] **ASAP credentials generated (timestamp generated ONCE)**
 - [ ] `.env.local` created with Claude/Bedrock URL and user's email
 - [ ] Dev servers started (or user instructed to run `pnpm run dev` if auto-start failed)
@@ -127,6 +160,7 @@ For detailed model switching instructions, see [references/guide-model-switch.md
 | Auth errors during ASAP save | `atlas upgrade`                                                     |
 | "EADDRINUSE" error           | Servers auto-find available ports (3001+/8081+). If still failing, run with `--force-kill`: `./.cursor/skills/vpk-setup/scripts/start-dev.sh --force-kill` |
 | Next.js lock error           | Remove stale lock: `rm -f .next/dev/lock` then restart              |
+| Turbopack cache corrupted    | Clear cache: `rm -rf .next` then restart                            |
 | Zombie processes blocking ports | Force kill: `lsof -ti:3000,8080 \| xargs kill -9` (requires full permissions) |
 | Frontend 500 (providers)     | Ensure `components/providers.tsx` matches import casing           |
 | "ASAP_PRIVATE_KEY: MISSING"  | Check .env.local format - private key must be quoted and escaped    |
