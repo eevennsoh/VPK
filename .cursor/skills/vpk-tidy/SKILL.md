@@ -4,6 +4,7 @@ description: >-
   This skill should be used when the user asks to "tidy up a component", "refactor component",
   "clean up React code", "make component reusable", "extract components", "modularize code",
   or wants to improve component organization, reusability, and maintainability.
+argument-hint: "[<component-path>] [--commit]"
 ---
 
 # React Component Tidy
@@ -18,6 +19,115 @@ This skill helps tidy up React components by:
 2. **Extending when needed** - Modify existing components to support new use cases
 3. **Extracting new primitives** - Break down code into modular, reusable pieces
 4. **Following folder conventions** - Place components in the correct location
+
+---
+
+## Quick Start
+
+| Command | Action |
+|---------|--------|
+| `/vpk-tidy <path>` | Refactor a React component following architectural rules |
+| `/vpk-tidy --commit` | Improve AGENTS.md and README.md, then commit documentation changes |
+
+---
+
+## Commit Workflow (`--commit`)
+
+When invoked with `--commit`, vpk-tidy switches from component refactoring to documentation tidying. This runs a quality improvement pass on project documentation.
+
+### What It Does
+
+1. **Audit AGENTS.md** - Runs claude-md-improver quality assessment
+2. **Apply improvements** - Makes targeted updates to AGENTS.md
+3. **Sync README.md** - Updates README to reflect any relevant AGENTS.md changes
+4. **Commit changes** - Creates a git commit with documentation updates
+
+### Agent Instructions for Commit Mode
+
+1. **Run claude-md-improver assessment on AGENTS.md**
+   - Discover: Find AGENTS.md (should be at project root)
+   - Assess: Evaluate against quality criteria (commands, architecture, gotchas, conciseness, currency, actionability)
+   - Report: Output quality score and specific issues
+
+2. **Present quality report to user**
+
+   ```
+   ## AGENTS.md Quality Report
+
+   **Score: XX/100 (Grade: X)**
+
+   | Criterion | Score | Notes |
+   |-----------|-------|-------|
+   | Commands/workflows | X/20 | ... |
+   | Architecture clarity | X/20 | ... |
+   | Non-obvious patterns | X/15 | ... |
+   | Conciseness | X/15 | ... |
+   | Currency | X/15 | ... |
+   | Actionability | X/15 | ... |
+
+   **Issues found:**
+   - [list]
+
+   **Recommended improvements:**
+   - [list]
+   ```
+
+3. **Ask for confirmation before proceeding**
+
+   ```yaml
+   header: "Apply improvements?"
+   question: "Apply the suggested improvements to AGENTS.md and README.md?"
+   options:
+     - label: "Yes, apply and commit"
+       description: "Make changes and create a git commit"
+     - label: "Apply without committing"
+       description: "Make changes but skip the git commit"
+     - label: "Cancel"
+       description: "Don't make any changes"
+   ```
+
+4. **Apply AGENTS.md improvements**
+   - Make targeted additions/corrections based on assessment
+   - Focus on: stale commands, missing gotchas, outdated architecture descriptions
+   - Keep changes minimal and high-value
+
+5. **Sync README.md**
+   - Compare AGENTS.md sections with README.md
+   - Update README.md with any divergent information:
+     - Commands section (if different)
+     - Architecture section (if changed)
+     - Skills table (if new skills added)
+   - README should remain user-facing (less detailed than AGENTS.md)
+
+6. **Commit changes** (if user approved)
+
+   ```bash
+   git add AGENTS.md README.md
+   git commit -m "docs: tidy AGENTS.md and README.md"
+   ```
+
+7. **Report summary**
+   - List files modified
+   - Summarize key changes
+   - Show commit hash (if committed)
+
+### Quality Criteria Reference
+
+| Criterion | Weight | What to Check |
+|-----------|--------|---------------|
+| Commands/workflows | 20 | Build/test/deploy commands present and working |
+| Architecture clarity | 20 | Directory structure explained, entry points identified |
+| Non-obvious patterns | 15 | Gotchas, quirks, workarounds documented |
+| Conciseness | 15 | No filler, each line adds value |
+| Currency | 15 | Reflects actual codebase state |
+| Actionability | 15 | Commands are copy-paste ready |
+
+### Files Affected
+
+| File | What Gets Updated |
+|------|-------------------|
+| `AGENTS.md` | Commands, architecture, gotchas, code style, skills table |
+| `README.md` | Synced summaries: commands, architecture, skills |
 
 ---
 
@@ -413,3 +523,4 @@ For detailed guidance, see:
 
 - **`references/patterns.md`** - Advanced composition patterns with full examples
 - **`/vpk-design`** - ADS components, tokens, and styling guidelines
+- **`/claude-md-improver`** - Quality criteria and templates for CLAUDE.md files (used by `--commit`)
