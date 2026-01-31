@@ -1,7 +1,7 @@
 #!/bin/bash
-# sync-merge.sh - Merge orphan branches (no common history) back to main
+# sync-pull-orphan.sh - Pull orphan branches (no common history) into main
 #
-# Usage: sync-merge.sh [branch-name] [options]
+# Usage: sync-pull-orphan.sh [branch-name] [options]
 #   --dry-run       Preview only, don't make changes
 #   --auto-merge    Automatically merge the PR after creation
 #   --cleanup       Delete the rebased branch after merge
@@ -49,7 +49,7 @@ while [[ $# -gt 0 ]]; do
 	esac
 done
 
-echo -e "${BLUE}=== VPK Sync: Merge Orphan Branch ===${NC}"
+echo -e "${BLUE}=== VPK Sync: Pull Orphan Branch ===${NC}"
 
 # Fetch latest from origin
 echo -e "${YELLOW}Fetching latest from origin...${NC}"
