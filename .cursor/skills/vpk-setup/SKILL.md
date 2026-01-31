@@ -1,6 +1,9 @@
 ---
 name: vpk-setup
-description: Initial repository setup - install dependencies, generate ASAP credentials, configure environment, and start dev servers
+description: >-
+  This skill should be used when the user asks to "set up", "get started", "first time setup",
+  "configure VPK", "install dependencies", "generate ASAP credentials", "configure environment",
+  "start dev servers", "fix ASAP errors", or wants to set up a new VPK project from scratch.
 disable-model-invocation: true
 prerequisites: []
 produces: [.env.local, .asap-config]

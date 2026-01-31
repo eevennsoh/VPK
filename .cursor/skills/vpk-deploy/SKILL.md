@@ -1,6 +1,10 @@
 ---
 name: vpk-deploy
-description: Deploy prototype to Atlassian Micros - auto-detects initial vs redeploy
+description: >-
+  This skill should be used when the user asks to "deploy", "deploy to Micros",
+  "push to production", "deploy my prototype", "check deployment status",
+  "redeploy changes", "set up deployment", or wants to deploy their VPK prototype
+  to Atlassian Micros infrastructure. Auto-detects initial vs redeploy workflows.
 disable-model-invocation: true
 argument-hint: "[--status] [--initial] [--redeploy]"
 prerequisites:

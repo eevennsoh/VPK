@@ -1,6 +1,9 @@
 ---
 name: vpk-sync
-description: Synchronize changes between your VPK prototype and the upstream VPK prototype kit. Use when the user asks to "sync with VPK", "pull updates", "push changes", "contribute back", "merge orphan branch", or wants to keep their prototype in sync with VPK.
+description: >-
+  This skill should be used when the user asks to "sync with VPK", "pull updates",
+  "push changes", "contribute back", "merge orphan branch", "update from VPK",
+  "get latest VPK", or wants to keep their prototype in sync with upstream VPK.
 argument-hint: "[--pull] [--push] [--merge] [--init] [--status]"
 ---
 
@@ -338,83 +341,12 @@ git cherry-pick --skip
 
 ---
 
-## Configuration
+## References
 
-### `.vpk-sync.json`
+For detailed documentation, see:
 
-Created by init, stores sync preferences (gitignored):
-
-```json
-{
-  "upstream": {
-    "url": "https://github.com/eevennsoh/VPK",
-    "defaultBranch": "main"
-  },
-  "sync": {
-    "strategy": "merge",
-    "excludePaths": []
-  },
-  "push": {
-    "useFork": false,
-    "forkRemote": "origin"
-  }
-}
-```
-
-### Configuration Options
-
-| Option | Default | Description |
-|--------|---------|-------------|
-| `upstream.url` | - | Upstream repository URL |
-| `upstream.defaultBranch` | `main` | Branch to sync with |
-| `sync.strategy` | `merge` | `merge` or `rebase` |
-| `sync.excludePaths` | `[]` | Additional paths to exclude |
-| `push.useFork` | `false` | Push via fork instead of direct |
-| `push.forkRemote` | `origin` | Remote name for fork |
-
----
-
-## Script Reference
-
-### sync-init.sh
-
-```bash
-sync-init.sh [upstream-url] [options]
-  --branch NAME    Default branch (default: main)
-  --strategy STR   merge or rebase (default: merge)
-  --dry-run        Preview only
-```
-
-### sync-pull.sh
-
-```bash
-sync-pull.sh [options]
-  --rebase         Use rebase instead of merge
-  --stash          Auto-stash uncommitted changes
-  --paths "..."    Only sync specific paths (space-separated)
-  --dry-run        Preview only
-```
-
-### sync-push.sh
-
-```bash
-sync-push.sh [options]
-  --branch NAME    Branch name for PR
-  --title "..."    PR title
-  --body "..."     PR body/description
-  --paths "..."    Only push specific paths (space-separated)
-  --use-fork       Push via fork
-  --dry-run        Preview only
-```
-
-### sync-merge.sh
-
-```bash
-sync-merge.sh [branch-name] [options]
-  --dry-run        Preview only, don't make changes
-  --auto-merge     Automatically merge the PR after creation
-  --cleanup        Delete the rebased branch after merge
-```
+- [`references/configuration.md`](references/configuration.md) - `.vpk-sync.json` format and options
+- [`references/scripts.md`](references/scripts.md) - Script usage and examples
 
 ---
 

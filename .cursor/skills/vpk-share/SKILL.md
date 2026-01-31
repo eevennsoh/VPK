@@ -1,6 +1,9 @@
 ---
 name: vpk-share
-description: Create and share VPK projects. Use when the user asks to "create a new project", "create a repo", "export boilerplate", "share VPK", "reset project", "clean project", or wants to create a GitHub repository from VPK.
+description: >-
+  This skill should be used when the user asks to "create a new project", "create a repo",
+  "export boilerplate", "share VPK", "reset project", "clean project", "initialize new repo",
+  "start fresh", "clean slate", or wants to create a GitHub repository from VPK.
 argument-hint: "[--create <name>] [--export] [--reset] [--no-upstream] [--public]"
 ---
 
@@ -299,6 +302,68 @@ See `/vpk-sync` skill for full sync documentation.
 → Removes .env files, node_modules, .next, etc.
 → Project is clean
 → Run `pnpm install` to restore
+```
+
+---
+
+## Troubleshooting
+
+### "gh: command not found" or "gh auth" errors
+
+GitHub CLI is not installed or authenticated:
+
+```bash
+# Install gh (macOS)
+brew install gh
+
+# Authenticate
+gh auth login
+```
+
+### "Directory already exists"
+
+The target directory `../<project-name>` already exists:
+
+```bash
+# Option 1: Remove existing directory
+rm -rf ../<project-name>
+
+# Option 2: Choose a different name
+/vpk-share --create my-app-v2
+```
+
+### "Not a git repository"
+
+You must be inside a git repository to use `--create` or `--export`:
+
+```bash
+# Check if you're in a git repo
+git status
+
+# If not, initialize git first
+git init
+git add -A
+git commit -m "Initial commit"
+```
+
+### "Permission denied" on GitHub
+
+You don't have permission to create repositories:
+
+```bash
+# Check your authentication
+gh auth status
+
+# Re-authenticate if needed
+gh auth login
+```
+
+### Script fails silently
+
+Run with `--dry-run` to see what would happen without making changes:
+
+```bash
+bash .cursor/skills/vpk-share/scripts/build_vpk_boilerplate.sh --create my-app --dry-run
 ```
 
 ---

@@ -1,10 +1,10 @@
 ---
 name: vpk-design
 description: >-
-  Atlassian Design System (ADS) patterns, components, and tokens. Use when implementing
-  @atlaskit components, design tokens, primitives, or icons. Triggers: "use ADS",
-  "add Atlassian component", "style with tokens", "ADS button/form/table", "add icon",
-  "use primitives", "design system", "implement design", "Figma to code", "build Figma design".
+  This skill should be used when the user asks to "use ADS", "add Atlassian component",
+  "style with tokens", "ADS button/form/table", "add icon", "use primitives",
+  "design system", "implement design", "Figma to code", "build Figma design",
+  "add @atlaskit", "use design tokens", or wants to implement UI using the Atlassian Design System.
 ---
 
 # Atlassian Design System Quick Reference

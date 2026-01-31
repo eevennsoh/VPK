@@ -3,8 +3,9 @@ name: vpk-tidy
 description: >-
   This skill should be used when the user asks to "tidy up a component", "refactor component",
   "clean up React code", "make component reusable", "extract components", "modularize code",
+  "simplify code", "improve code clarity", "refine code", "reduce complexity",
   or wants to improve component organization, reusability, and maintainability.
-argument-hint: "[<component-path>] [--commit]"
+argument-hint: "<component-path>"
 ---
 
 # React Component Tidy
@@ -24,110 +25,9 @@ This skill helps tidy up React components by:
 
 ## Quick Start
 
-| Command | Action |
-|---------|--------|
-| `/vpk-tidy <path>` | Refactor a React component following architectural rules |
-| `/vpk-tidy --commit` | Improve AGENTS.md and README.md, then commit documentation changes |
-
----
-
-## Commit Workflow (`--commit`)
-
-When invoked with `--commit`, vpk-tidy switches from component refactoring to documentation tidying. This runs a quality improvement pass on project documentation.
-
-### What It Does
-
-1. **Audit AGENTS.md** - Runs claude-md-improver quality assessment
-2. **Apply improvements** - Makes targeted updates to AGENTS.md
-3. **Sync README.md** - Updates README to reflect any relevant AGENTS.md changes
-4. **Commit changes** - Creates a git commit with documentation updates
-
-### Agent Instructions for Commit Mode
-
-1. **Run claude-md-improver assessment on AGENTS.md**
-   - Discover: Find AGENTS.md (should be at project root)
-   - Assess: Evaluate against quality criteria (commands, architecture, gotchas, conciseness, currency, actionability)
-   - Report: Output quality score and specific issues
-
-2. **Present quality report to user**
-
-   ```
-   ## AGENTS.md Quality Report
-
-   **Score: XX/100 (Grade: X)**
-
-   | Criterion | Score | Notes |
-   |-----------|-------|-------|
-   | Commands/workflows | X/20 | ... |
-   | Architecture clarity | X/20 | ... |
-   | Non-obvious patterns | X/15 | ... |
-   | Conciseness | X/15 | ... |
-   | Currency | X/15 | ... |
-   | Actionability | X/15 | ... |
-
-   **Issues found:**
-   - [list]
-
-   **Recommended improvements:**
-   - [list]
-   ```
-
-3. **Ask for confirmation before proceeding**
-
-   ```yaml
-   header: "Apply improvements?"
-   question: "Apply the suggested improvements to AGENTS.md and README.md?"
-   options:
-     - label: "Yes, apply and commit"
-       description: "Make changes and create a git commit"
-     - label: "Apply without committing"
-       description: "Make changes but skip the git commit"
-     - label: "Cancel"
-       description: "Don't make any changes"
-   ```
-
-4. **Apply AGENTS.md improvements**
-   - Make targeted additions/corrections based on assessment
-   - Focus on: stale commands, missing gotchas, outdated architecture descriptions
-   - Keep changes minimal and high-value
-
-5. **Sync README.md**
-   - Compare AGENTS.md sections with README.md
-   - Update README.md with any divergent information:
-     - Commands section (if different)
-     - Architecture section (if changed)
-     - Skills table (if new skills added)
-   - README should remain user-facing (less detailed than AGENTS.md)
-
-6. **Commit changes** (if user approved)
-
-   ```bash
-   git add AGENTS.md README.md
-   git commit -m "docs: tidy AGENTS.md and README.md"
-   ```
-
-7. **Report summary**
-   - List files modified
-   - Summarize key changes
-   - Show commit hash (if committed)
-
-### Quality Criteria Reference
-
-| Criterion | Weight | What to Check |
-|-----------|--------|---------------|
-| Commands/workflows | 20 | Build/test/deploy commands present and working |
-| Architecture clarity | 20 | Directory structure explained, entry points identified |
-| Non-obvious patterns | 15 | Gotchas, quirks, workarounds documented |
-| Conciseness | 15 | No filler, each line adds value |
-| Currency | 15 | Reflects actual codebase state |
-| Actionability | 15 | Commands are copy-paste ready |
-
-### Files Affected
-
-| File | What Gets Updated |
-|------|-------------------|
-| `AGENTS.md` | Commands, architecture, gotchas, code style, skills table |
-| `README.md` | Synced summaries: commands, architecture, skills |
+```bash
+/vpk-tidy <path>   # Refactor component with full cleanup
+```
 
 ---
 
@@ -260,16 +160,16 @@ function Navigation() {
 
 ### 4. Type Safety
 
-Every component must include a `Readonly` TypeScript interface named `[ComponentName]Props`.
+Every component must define a TypeScript interface named `[ComponentName]Props` and use `Readonly<>` wrapper in the function parameter.
 
 ```tsx
 // Required pattern for all components
-interface Readonly<ComponentNameProps> {
+interface ComponentNameProps {
   // Props definition
 }
 
 // Example
-interface Readonly<CardProps> {
+interface CardProps {
   title: string;
   description?: string;
   variant?: 'default' | 'elevated' | 'outlined';
@@ -289,10 +189,101 @@ export function Card({
 ```
 
 **Type rules:**
-- Use `Readonly<>` wrapper for all props interfaces
+- Define interface as `[ComponentName]Props`, use `Readonly<>` in function parameter
 - Export props interface when component is exported
 - Use discriminated unions for variant props
 - Avoid `any` - use `unknown` with type guards if needed
+
+---
+
+## Code Simplification Rules
+
+Apply these refinements to improve code clarity while preserving functionality:
+
+### 1. Clarity Over Brevity
+
+Prefer explicit, readable code over compact solutions. Avoid nested ternary operators.
+
+```tsx
+// Bad: Nested ternary
+const status = isLoading ? 'loading' : isError ? 'error' : isSuccess ? 'success' : 'idle';
+
+// Good: Explicit conditions
+function getStatus() {
+  if (isLoading) return 'loading';
+  if (isError) return 'error';
+  if (isSuccess) return 'success';
+  return 'idle';
+}
+```
+
+### 2. Reduce Unnecessary Complexity
+
+Eliminate redundant nesting and simplify conditionals.
+
+```tsx
+// Bad: Deeply nested callbacks
+useEffect(() => {
+  fetchData().then(data => {
+    processData(data).then(result => {
+      saveResult(result).then(() => {
+        notifyUser();
+      });
+    });
+  });
+}, []);
+
+// Good: Flat async/await
+useEffect(() => {
+  async function loadAndProcess() {
+    const data = await fetchData();
+    const result = await processData(data);
+    await saveResult(result);
+    notifyUser();
+  }
+  loadAndProcess();
+}, []);
+```
+
+### 3. Extract Complex Conditions
+
+Move complex boolean expressions to named variables.
+
+```tsx
+// Bad: Inline complex condition
+if (user && user.permissions && user.permissions.includes('admin') && !user.suspended) {
+  showAdminPanel();
+}
+
+// Good: Named condition
+const canAccessAdmin = user?.permissions?.includes('admin') && !user?.suspended;
+if (canAccessAdmin) {
+  showAdminPanel();
+}
+```
+
+### 4. Project Standards
+
+- Use `function` keyword over arrow functions for top-level functions
+- Use explicit return type annotations for exported functions
+- Follow proper import sorting (ES modules)
+- Maintain consistent naming conventions
+
+### 5. Preserve Helpful Abstractions
+
+Don't remove abstractions that improve organization - only eliminate truly redundant ones.
+
+**What to simplify:**
+- Nested ternary operators → switch/if-else chains
+- Deeply nested callbacks → named async functions
+- Redundant wrappers → inline when clearer
+- Inconsistent patterns → align with project standards
+
+**What to preserve:**
+- Helpful abstractions that improve organization
+- Type safety (don't weaken types for brevity)
+- Readable structure (don't over-compress)
+- Useful comments that explain "why"
 
 ---
 
@@ -414,7 +405,7 @@ function CardFooter({ children }: Readonly<CardFooterProps>) {
 }
 
 // Public API uses slots
-interface Readonly<CardProps> {
+interface CardProps {
   title: string;
   actions?: React.ReactNode;
   children: React.ReactNode;
@@ -478,6 +469,15 @@ Refactor the component structure:
 2. Lift shared state to common ancestors
 3. Compose complex UIs from internal sub-components
 
+### Step 5: Apply Simplification Rules
+
+After structural refactoring, apply code clarity improvements:
+
+1. Replace nested ternaries with if/else or switch
+2. Flatten nested callbacks with async/await
+3. Extract complex conditions to named variables
+4. Align with project coding standards
+
 ---
 
 ## Component Placement Guidelines
@@ -499,7 +499,16 @@ Refactor the component structure:
 - [ ] Component is <150 lines (or split into sub-components)
 - [ ] Business logic extracted to custom hooks
 - [ ] Static data moved to data files
-- [ ] Props interface uses `Readonly<ComponentNameProps>` pattern
+- [ ] Props interface defined as `ComponentNameProps`, used as `Readonly<ComponentNameProps>` in function
+
+### Code Simplification
+
+- [ ] No nested ternary operators
+- [ ] No unnecessary nesting (max 3 levels)
+- [ ] Complex conditions extracted to named variables
+- [ ] Consistent function declaration style
+- [ ] Helpful abstractions preserved
+- [ ] Code is readable without being overly compact
 
 ### Composition Patterns
 
@@ -523,4 +532,3 @@ For detailed guidance, see:
 
 - **`references/patterns.md`** - Advanced composition patterns with full examples
 - **`/vpk-design`** - ADS components, tokens, and styling guidelines
-- **`/claude-md-improver`** - Quality criteria and templates for CLAUDE.md files (used by `--commit`)
