@@ -100,9 +100,21 @@ VPK includes AI-assisted skills for common workflows:
 | Deploy | `/vpk-deploy` | Workflow  | Deploy to Atlassian Micros (auto-detects initial vs redeploy) |
 | Design | `/vpk-design` | Reference | ADS tokens, components, primitives, icons                     |
 | Tidy   | `/vpk-tidy`   | Utility   | Refactor React components for reusability and modularity      |
-| Share  | `/vpk-share`  | Utility   | Export sanitized boilerplate for sharing                      |
+| Share  | `/vpk-share`  | Utility   | Create GitHub repos with VPK sync, export boilerplate, reset  |
+| Sync   | `/vpk-sync`   | Utility   | Sync changes with upstream VPK (pull updates, push via PR)    |
 
 Skills are defined in `.cursor/skills/`.
+
+### Agents
+
+VPK includes specialized AI agents that are invoked proactively:
+
+| Agent | Purpose |
+|-------|---------|
+| vpk-agent-design | ADS UI specialist for component design and Figma implementation |
+| vpk-agent-tidy | React refactoring specialist for code cleanup and modularization |
+
+Agents are defined in `.cursor/agents/`.
 
 ## Deployment to Micros
 
@@ -251,3 +263,16 @@ lsof -ti:3000,8080 | xargs kill -9
 - Check principal is whitelisted for your use case
 
 For more help, see the troubleshooting sections in [guide-setup.md](./.cursor/skills/vpk-setup/references/guide-setup.md) or [guide-deployment.md](./.cursor/skills/vpk-deploy/references/guide-deployment.md).
+
+**Dev server not starting:**
+
+- Check ports: `lsof -ti:3000,8080`
+- Kill processes: `lsof -ti:3000,8080 | xargs kill -9`
+
+**"Cannot find module" errors:**
+
+- Reinstall: `rm -rf node_modules && pnpm install`
+
+**Theme not persisting:**
+
+- Clear localStorage: `localStorage.removeItem('ui-theme')` and refresh

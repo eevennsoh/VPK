@@ -178,6 +178,18 @@ AppProvider (ADS foundation)
 - `app/api/suggested-questions/route.ts`
 - `app/api/health/route.ts`
 
+### Route Mapping
+
+| Route | Block Location | Description |
+|-------|----------------|-------------|
+| `/` | `app/page.tsx` | Home/landing |
+| `/chat` | `components/blocks/chat/` | Chat interface |
+| `/confluence` | `components/blocks/confluence/` | Document editing |
+| `/jira` | `components/blocks/jira/` | Kanban board |
+| `/rovo` | `components/blocks/rovo/` | Full AI chat |
+| `/search` | `components/blocks/search/` | Search results |
+| `/widgets` | `components/blocks/widget/` | Embeddable widgets |
+
 ---
 
 ## Code Style
@@ -280,7 +292,23 @@ Uses Atlassian's micros infrastructure.
 
 ## Testing
 
-No test framework configured. This is a prototype kit.
+No automated test framework configured. This is a prototype kit.
+
+### Visual Testing
+
+Use the `/agent-browser` skill for visual validation:
+
+1. Start dev server: `pnpm run dev`
+2. Invoke `/agent-browser` and describe what to test in natural language
+3. Capture screenshots in light/dark mode and compare against Figma designs
+
+Example:
+```
+/agent-browser
+"Take screenshots of http://localhost:3000/jira in both light and dark mode"
+```
+
+See `.cursor/skills/vpk-design/references/visual-testing.md` for detailed workflow.
 
 ---
 
@@ -299,14 +327,24 @@ No test framework configured. This is a prototype kit.
 
 ---
 
+## Gotchas
+
 ### Dual Proxy Setup
 
 In dev, API calls go through Next.js proxy → Express. Check both layers when debugging.
 
 ### Context Providers
 
-- Chat state: `app/contexts/context-chat.tsx`
-- Theme state: `components/utils/theme-wrapper.tsx`
+| Context | File | Purpose |
+|---------|------|---------|
+| Chat panel | `app/contexts/context-chat.tsx` | Generic chat panel state |
+| Rovo chat | `app/contexts/context-rovo-chat.tsx` | AI chat with streaming/widgets |
+| Sidebar | `app/contexts/context-sidebar.tsx` | Sidebar visibility and route |
+| System prompt | `app/contexts/context-system-prompt.tsx` | Custom AI prompts |
+| Work item modal | `app/contexts/context-work-item-modal.tsx` | Work item detail modal |
+| Theme | `components/utils/theme-wrapper.tsx` | Light/dark/system mode |
+
+**Active in provider tree:** AppProvider → ThemeWrapper → SidebarProvider → RovoChatProvider → SystemPromptProvider
 
 ### Client Providers in Layout
 

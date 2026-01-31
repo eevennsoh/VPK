@@ -77,20 +77,21 @@ Compare final UI against the Figma screenshot for 1:1 fidelity.
 
 **Browser-based validation (if dev server running):**
 
+Use the `/agent-browser` skill with natural language prompts:
+
 ```
-# Capture implementation screenshot
-browser_navigate(url="http://localhost:3000/[route]")
-browser_wait_for(state="networkidle")
-browser_take_screenshot(path="./screenshots/implementation-light.png")
+/agent-browser
+"Take a screenshot of http://localhost:3000/[route] in light mode"
+```
 
-# Test dark mode
-browser_evaluate(expression="localStorage.setItem('ui-theme', 'dark')")
-browser_navigate(url="http://localhost:3000/[route]")
-browser_wait_for(state="networkidle")
-browser_take_screenshot(path="./screenshots/implementation-dark.png")
+```
+/agent-browser
+"Set localStorage 'ui-theme' to 'dark', reload the page, and take a screenshot"
+```
 
-# Cleanup
-browser_close()
+```
+/agent-browser
+"Compare the implementation at http://localhost:3000/[route] against the Figma screenshot"
 ```
 
 Compare implementation screenshots against Figma screenshot side-by-side.
@@ -287,7 +288,7 @@ User says: "Build this dashboard: https://figma.com/design/pR8mNv5KqXzGwY2JtCfL4
 - [ ] Component is under 150 lines (split if needed)
 - [ ] Props interface is defined with `Readonly<>`
 - [ ] Visual output matches Figma screenshot 1:1
-- [ ] Implementation screenshot captured via browser tools
+- [ ] Implementation screenshot captured via /agent-browser
 - [ ] Dark mode renders correctly
 
 ## Additional Resources
