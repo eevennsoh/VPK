@@ -1,6 +1,10 @@
-# Visual Testing with Playwright MCP
+# Visual Testing with /agent-browser
 
-Automated visual testing workflow for VPK components using the Playwright MCP browser tools.
+Automated visual testing workflow for VPK components using the `/agent-browser` skill.
+
+## Overview
+
+The `/agent-browser` skill provides browser automation capabilities powered by Playwright. Instead of calling Playwright MCP tools directly, describe what you want to test in natural language.
 
 ## Prerequisites
 
@@ -9,33 +13,20 @@ Automated visual testing workflow for VPK components using the Playwright MCP br
    pnpm run dev
    ```
 
-2. **Playwright MCP server connected** — tools prefixed with `mcp__plugin_playwright_playwright__`
+2. **Browser skill available** — invoke with `/agent-browser`
+
+---
 
 ## Core Workflow
 
-### 1. Open Page
+Invoke the skill and describe your testing needs:
 
 ```
-browser_navigate(url="http://localhost:3000/jira")
+/agent-browser
+"Navigate to http://localhost:3000/jira and take a screenshot"
 ```
 
-Wait for the page to fully load:
-
-```
-browser_wait_for(state="networkidle")
-```
-
-### 2. Capture Screenshot
-
-```
-browser_take_screenshot(path="./screenshots/jira-light.png")
-```
-
-### 3. Close Browser
-
-```
-browser_close()
-```
+The skill handles browser launch, navigation, waiting, and cleanup automatically.
 
 ---
 
@@ -58,45 +49,22 @@ browser_close()
 
 VPK uses `ThemeWrapper` which persists theme to localStorage with key `ui-theme`.
 
-### Light Mode
+### Example Prompts
+
+**Light and dark mode screenshots:**
 
 ```
-browser_navigate(url="http://localhost:3000/jira")
-browser_wait_for(state="networkidle")
-browser_evaluate(expression="localStorage.setItem('ui-theme', 'light')")
-browser_navigate(url="http://localhost:3000/jira")
-browser_wait_for(state="networkidle")
-browser_take_screenshot(path="./screenshots/jira-light.png")
+/agent-browser
+"Take screenshots of http://localhost:3000/jira in both light and dark mode.
+Set localStorage 'ui-theme' to 'light', take a screenshot, then set it to 'dark' and take another."
 ```
 
-### Dark Mode
+**Single theme test:**
 
 ```
-browser_evaluate(expression="localStorage.setItem('ui-theme', 'dark')")
-browser_navigate(url="http://localhost:3000/jira")
-browser_wait_for(state="networkidle")
-browser_take_screenshot(path="./screenshots/jira-dark.png")
-```
-
-### Complete Theme Test Sequence
-
-```
-# Open and set light mode
-browser_navigate(url="http://localhost:3000/jira")
-browser_wait_for(state="networkidle")
-browser_evaluate(expression="localStorage.setItem('ui-theme', 'light')")
-browser_navigate(url="http://localhost:3000/jira")
-browser_wait_for(state="networkidle")
-browser_take_screenshot(path="./screenshots/jira-light.png")
-
-# Switch to dark mode
-browser_evaluate(expression="localStorage.setItem('ui-theme', 'dark')")
-browser_navigate(url="http://localhost:3000/jira")
-browser_wait_for(state="networkidle")
-browser_take_screenshot(path="./screenshots/jira-dark.png")
-
-# Cleanup
-browser_close()
+/agent-browser
+"Navigate to http://localhost:3000/confluence, set localStorage 'ui-theme' to 'dark',
+reload the page, and take a screenshot."
 ```
 
 ---
@@ -105,75 +73,47 @@ browser_close()
 
 After implementing a Figma design, validate visually:
 
-### 1. Get Figma Screenshot
+1. **Get Figma screenshot** using Figma MCP: `get_screenshot(fileKey=":fileKey", nodeId=":nodeId")`
 
-```
-get_screenshot(fileKey=":fileKey", nodeId=":nodeId")
-```
+2. **Capture implementation:**
+   ```
+   /agent-browser
+   "Take a screenshot of http://localhost:3000/[route] in light mode"
+   ```
 
-### 2. Capture Implementation
-
-```
-browser_navigate(url="http://localhost:3000/[route]")
-browser_wait_for(state="networkidle")
-browser_take_screenshot(path="./screenshots/implementation.png")
-```
-
-### 3. Compare Side-by-Side
-
-View both screenshots and check:
-
-- Layout alignment
-- Spacing consistency
-- Color accuracy
-- Typography matching
-- Icon placement
+3. **Compare side-by-side** — check for:
+   - Layout alignment
+   - Spacing consistency
+   - Color accuracy
+   - Typography matching
+   - Icon placement
 
 ---
 
-## Advanced Patterns
-
-### Capture Specific Element
-
-```
-browser_snapshot()  # Get page structure
-browser_click(element="[data-testid='feature-card']")
-browser_take_screenshot(path="./screenshots/feature-card.png")
-```
-
-### Capture After Interaction
-
-```
-browser_navigate(url="http://localhost:3000/jira")
-browser_wait_for(state="networkidle")
-browser_click(element="[data-testid='open-modal']")
-browser_wait_for(state="networkidle")
-browser_take_screenshot(path="./screenshots/modal-open.png")
-```
+## Advanced Testing
 
 ### Responsive Testing
 
 ```
-# Desktop
-browser_resize(width=1440, height=900)
-browser_take_screenshot(path="./screenshots/desktop.png")
+/agent-browser
+"Test http://localhost:3000/jira at desktop (1440x900), tablet (768x1024),
+and mobile (375x812) sizes. Take a screenshot at each size."
+```
 
-# Tablet
-browser_resize(width=768, height=1024)
-browser_take_screenshot(path="./screenshots/tablet.png")
+### Interactive Element Testing
 
-# Mobile
-browser_resize(width=375, height=812)
-browser_take_screenshot(path="./screenshots/mobile.png")
+```
+/agent-browser
+"Navigate to http://localhost:3000/jira, click the 'Create' button,
+wait for the modal to appear, and take a screenshot."
 ```
 
 ### Form Interaction
 
 ```
-browser_fill_form(selector="#search-input", value="test query")
-browser_press_key(key="Enter")
-browser_wait_for(state="networkidle")
-browser_take_screenshot(path="./screenshots/search-results.png")
+/agent-browser
+"Go to http://localhost:3000/search, type 'test query' in the search input,
+press Enter, wait for results, and take a screenshot."
 ```
 
 ---
@@ -189,34 +129,18 @@ browser_take_screenshot(path="./screenshots/search-results.png")
 pnpm run dev
 ```
 
-### Page Not Fully Loaded
-
-**Symptom:** Screenshot shows loading state or incomplete UI.
-
-**Solution:** Use appropriate wait strategy:
-```
-browser_wait_for(state="networkidle")
-```
-
-Or wait for specific elements:
-```
-browser_wait_for(selector="[data-testid='main-content']")
-```
-
 ### Theme Not Applied
 
-**Symptom:** Screenshot shows wrong theme after localStorage change.
+**Symptom:** Screenshot shows wrong theme.
 
-**Solution:** Reload the page after setting localStorage:
+**Solution:** Ensure you reload the page after setting localStorage:
 ```
-browser_evaluate(expression="localStorage.setItem('ui-theme', 'dark')")
-browser_navigate(url="http://localhost:3000/jira")
-browser_wait_for(state="networkidle")
+"Set localStorage 'ui-theme' to 'dark', then reload the page and take a screenshot"
 ```
 
 ### Screenshots Directory
 
-Screenshots are saved to `./screenshots/` by default. Create this directory if it doesn't exist:
+Screenshots are typically saved to `./screenshots/`. Create this directory if needed:
 ```bash
 mkdir -p screenshots
 ```
@@ -229,22 +153,7 @@ Before completing visual testing:
 
 - [ ] Light mode screenshot captured
 - [ ] Dark mode screenshot captured
-- [ ] Implementation matches Figma design
+- [ ] Implementation matches Figma design (if applicable)
 - [ ] All ADS tokens render correctly in both themes
 - [ ] Interactive states work as expected
 - [ ] No visual regressions from previous implementation
-
----
-
-## Quick Reference
-
-| Action | Command |
-| ------ | ------- |
-| Open page | `browser_navigate(url="...")` |
-| Wait for load | `browser_wait_for(state="networkidle")` |
-| Take screenshot | `browser_take_screenshot(path="...")` |
-| Set light mode | `browser_evaluate(expression="localStorage.setItem('ui-theme', 'light')")` |
-| Set dark mode | `browser_evaluate(expression="localStorage.setItem('ui-theme', 'dark')")` |
-| Click element | `browser_click(element="...")` |
-| Resize viewport | `browser_resize(width=..., height=...)` |
-| Close browser | `browser_close()` |

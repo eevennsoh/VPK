@@ -522,7 +522,7 @@ await ads_analyze_a11y({
 
 ## Visual Testing
 
-After implementing components, validate visually using Playwright MCP browser tools.
+After implementing components, validate visually using the `/agent-browser` skill.
 
 ### When to Run Visual Tests
 
@@ -531,27 +531,26 @@ After implementing components, validate visually using Playwright MCP browser to
 - When implementing Figma designs (compare against Figma screenshot)
 - When fixing dark mode issues
 
-### Quick Test Commands
+### How to Use
+
+Invoke the skill and describe your testing needs in natural language:
 
 ```
-# Open page and wait for load
-browser_navigate(url="http://localhost:3000/jira")
-browser_wait_for(state="networkidle")
+/agent-browser
+"Take screenshots of http://localhost:3000/jira in both light and dark mode"
+```
 
-# Light mode
-browser_evaluate(expression="localStorage.setItem('ui-theme', 'light')")
-browser_navigate(url="http://localhost:3000/jira")
-browser_wait_for(state="networkidle")
-browser_take_screenshot(path="./screenshots/jira-light.png")
+### Example Prompts
 
-# Dark mode
-browser_evaluate(expression="localStorage.setItem('ui-theme', 'dark')")
-browser_navigate(url="http://localhost:3000/jira")
-browser_wait_for(state="networkidle")
-browser_take_screenshot(path="./screenshots/jira-dark.png")
+**Theme testing:**
+```
+"Navigate to http://localhost:3000/jira, set localStorage 'ui-theme' to 'light',
+take a screenshot, then switch to dark mode and take another screenshot"
+```
 
-# Cleanup
-browser_close()
+**Figma comparison:**
+```
+"Take a screenshot of http://localhost:3000/confluence in light mode"
 ```
 
 ### Route Mapping
@@ -569,7 +568,7 @@ browser_close()
 When implementing Figma designs:
 
 1. Get Figma screenshot: `get_screenshot(fileKey=":fileKey", nodeId=":nodeId")`
-2. Capture implementation screenshot using browser tools
+2. Capture implementation screenshot using `/agent-browser`
 3. Compare side-by-side for layout, spacing, colors, typography
 
 ### Visual Test Checklist
@@ -674,7 +673,7 @@ For detailed component documentation and examples:
 | Primitives           | `.cursor/skills/vpk-design/references/primitives.md`        | Box, Stack, Inline, Grid, Text, Pressable              |
 | Styling Patterns     | `.cursor/skills/vpk-design/references/styling.md`           | Styling patterns with design tokens                    |
 | Content Standards    | `.cursor/skills/vpk-design/references/content-standards.md` | Voice, tone, accessibility, inclusive language         |
-| Visual Testing       | `.cursor/skills/vpk-design/references/visual-testing.md`    | Playwright MCP browser tools for theme validation      |
+| Visual Testing       | `.cursor/skills/vpk-design/references/visual-testing.md`    | /agent-browser skill for theme and Figma validation    |
 
 When you need comprehensive documentation beyond this reference, read the skill files or fetch https://atlassian.design/.
 

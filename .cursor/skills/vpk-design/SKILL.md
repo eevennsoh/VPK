@@ -37,7 +37,7 @@ For comprehensive documentation, see these reference files:
 | `references/examples.md`              | Code examples for common patterns                                       |
 | `references/search.md`                | How to find ADS components, icons, tokens                               |
 | `references/implement-figma-design.md`| Figma-to-code workflow, MCP tools, and Tailwind-to-ADS translation      |
-| `references/visual-testing.md`        | Visual testing with Playwright MCP for theme and Figma validation       |
+| `references/visual-testing.md`        | Visual testing with /agent-browser for theme and Figma validation       |
 
 ---
 
@@ -308,29 +308,34 @@ Use sentence case with verb + noun pattern:
 
 ## Visual Testing
 
-After implementing components, validate visually using Playwright MCP browser tools.
+After implementing components, validate visually using the `/agent-browser` skill.
 
-### Quick Commands
+### How to Use
+
+Invoke the skill and describe your testing needs in natural language:
 
 ```
-# Open page
-browser_navigate(url="http://localhost:3000/jira")
-browser_wait_for(state="networkidle")
+/agent-browser
+"Take screenshots of http://localhost:3000/jira in both light and dark mode"
+```
 
-# Light mode screenshot
-browser_evaluate(expression="localStorage.setItem('ui-theme', 'light')")
-browser_navigate(url="http://localhost:3000/jira")
-browser_wait_for(state="networkidle")
-browser_take_screenshot(path="./screenshots/jira-light.png")
+### Example Prompts
 
-# Dark mode screenshot
-browser_evaluate(expression="localStorage.setItem('ui-theme', 'dark')")
-browser_navigate(url="http://localhost:3000/jira")
-browser_wait_for(state="networkidle")
-browser_take_screenshot(path="./screenshots/jira-dark.png")
+**Theme testing:**
+```
+"Navigate to http://localhost:3000/jira, set localStorage 'ui-theme' to 'light',
+take a screenshot, then switch to dark mode and take another screenshot"
+```
 
-# Cleanup
-browser_close()
+**Figma comparison:**
+```
+"Take a screenshot of http://localhost:3000/confluence in light mode"
+```
+
+**Responsive testing:**
+```
+"Test http://localhost:3000/jira at desktop (1440x900), tablet (768x1024),
+and mobile (375x812) sizes"
 ```
 
 ### Route Mapping
