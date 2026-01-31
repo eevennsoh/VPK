@@ -3,10 +3,11 @@
 # sync-pull.sh - Pull latest changes from upstream VPK
 #
 # Usage: sync-pull.sh [options]
-#   --rebase         Use rebase instead of merge
-#   --stash          Auto-stash uncommitted changes
-#   --paths "..."    Only sync specific paths (space-separated)
-#   --dry-run        Preview only
+#   --rebase                    Use rebase instead of merge
+#   --stash                     Auto-stash uncommitted changes
+#   --paths "..."               Only sync specific paths (space-separated)
+#   --allow-unrelated-histories Allow merging repos with different commit histories
+#   --dry-run                   Preview only
 
 set -e
 
@@ -22,6 +23,7 @@ USE_REBASE=false
 AUTO_STASH=false
 PATHS=""
 DRY_RUN=false
+ALLOW_UNRELATED=false
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -37,6 +39,10 @@ while [[ $# -gt 0 ]]; do
 		--paths)
 			PATHS="$2"
 			shift 2
+			;;
+		--allow-unrelated-histories)
+			ALLOW_UNRELATED=true
+			shift
 			;;
 		--dry-run)
 			DRY_RUN=true
@@ -194,9 +200,40 @@ else
 	else
 		echo "Merging upstream/$UPSTREAM_BRANCH..."
 		if ! $DRY_RUN; then
-			if git merge upstream/$UPSTREAM_BRANCH -m "Merge upstream VPK updates"; then
+			# Build merge command with optional --allow-unrelated-histories
+			MERGE_CMD="git merge upstream/$UPSTREAM_BRANCH -m 'Merge upstream VPK updates'"
+			if $ALLOW_UNRELATED; then
+				MERGE_CMD="git merge upstream/$UPSTREAM_BRANCH --allow-unrelated-histories -m 'Merge upstream VPK updates'"
+			fi
+			
+			# Attempt merge
+			MERGE_OUTPUT=""
+			MERGE_EXIT=0
+			MERGE_OUTPUT=$(eval "$MERGE_CMD" 2>&1) || MERGE_EXIT=$?
+			
+			if [[ $MERGE_EXIT -eq 0 ]]; then
 				echo -e "${GREEN}✓ Merge successful!${NC}"
 			else
+				# Check if it's an unrelated histories error
+				if echo "$MERGE_OUTPUT" | grep -q "refusing to merge unrelated histories"; then
+					echo ""
+					echo -e "${RED}✗ Unrelated histories detected${NC}"
+					echo ""
+					echo "Your repo was created without preserving VPK's commit history."
+					echo "This is common for projects created before vpk-share was updated."
+					echo ""
+					echo -e "${YELLOW}To fix this, re-run with:${NC}"
+					echo "  /vpk-sync --pull --allow-unrelated-histories"
+					echo ""
+					echo "Or manually:"
+					echo "  git merge upstream/$UPSTREAM_BRANCH --allow-unrelated-histories"
+					echo ""
+					echo -e "${BLUE}Note:${NC} New projects created with /vpk-share --create now preserve"
+					echo "commit history, so this won't be needed for future projects."
+					exit 1
+				fi
+				
+				# Regular merge conflict
 				echo ""
 				echo -e "${RED}✗ Merge conflicts detected${NC}"
 				echo ""
@@ -213,6 +250,9 @@ else
 			fi
 		else
 			echo -e "${YELLOW}[DRY RUN] Would merge upstream/$UPSTREAM_BRANCH${NC}"
+			if $ALLOW_UNRELATED; then
+				echo -e "${YELLOW}[DRY RUN] Would use --allow-unrelated-histories${NC}"
+			fi
 		fi
 	fi
 fi

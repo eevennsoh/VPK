@@ -408,9 +408,12 @@ do_create() {
 		exit 1
 	fi
 	
-	if ! command -v rsync >/dev/null 2>&1; then
-		echo "Error: rsync is not installed" >&2
-		exit 1
+	# rsync only required for standalone mode (--no-upstream)
+	if [[ "$configure_upstream" == false ]]; then
+		if ! command -v rsync >/dev/null 2>&1; then
+			echo "Error: rsync is not installed" >&2
+			exit 1
+		fi
 	fi
 	
 	# Get GitHub username for URL display
@@ -435,8 +438,10 @@ do_create() {
 	[[ -n "$gh_user" ]] && echo "Owner:        $gh_user"
 	if [[ "$configure_upstream" == true ]]; then
 		echo "Upstream:     $vpk_upstream_url"
+		echo "History:      Preserved (can sync with upstream)"
 	else
 		echo "Upstream:     (disabled - standalone project)"
+		echo "History:      Fresh (clean slate)"
 	fi
 	echo ""
 	echo "Source:       $src"
@@ -458,7 +463,196 @@ do_create() {
 		fi
 	fi
 	
-	# Step 1: Reset current project (in-place cleanup for cleaner copy)
+	# Branch based on upstream configuration
+	if [[ "$configure_upstream" == true ]]; then
+		# =====================================================================
+		# WITH UPSTREAM: Clone to preserve history for clean sync
+		# =====================================================================
+		do_create_with_upstream
+	else
+		# =====================================================================
+		# STANDALONE: rsync + git init for clean slate
+		# =====================================================================
+		do_create_standalone
+	fi
+}
+
+# -----------------------------------------------------------------------------
+# Create with upstream (preserves commit history for clean sync)
+# -----------------------------------------------------------------------------
+do_create_with_upstream() {
+	# Step 1: Clone VPK repository
+	echo "--- Step 1: Clone VPK repository ---"
+	echo ""
+	
+	if [[ "$dry_run" == true ]]; then
+		echo "[dry-run] Would clone: $vpk_upstream_url"
+		echo "[dry-run] Would clone to: $target_dir"
+	else
+		git clone --single-branch --branch main "$vpk_upstream_url" "$target_dir"
+		echo "✓ Cloned VPK repository"
+	fi
+	echo ""
+	
+	# Step 2: Configure remotes (rename origin to upstream)
+	echo "--- Step 2: Configure remotes ---"
+	echo ""
+	
+	if [[ "$dry_run" == true ]]; then
+		echo "[dry-run] Would rename origin to upstream"
+	else
+		cd "$target_dir"
+		git remote rename origin upstream
+		echo "✓ Renamed origin → upstream"
+	fi
+	echo ""
+	
+	# Step 3: Clean sensitive files
+	echo "--- Step 3: Clean sensitive files ---"
+	echo ""
+	
+	cleaned_count=0
+	if [[ "$dry_run" == true ]]; then
+		echo "[dry-run] Would clean sensitive files"
+	else
+		cd "$target_dir"
+		
+		# Remove credential/local files
+		for file in "${local_files[@]}"; do
+			if [[ -e "$file" ]]; then
+				rm -f "$file"
+				echo "✓ Removed: $file"
+				((cleaned_count++)) || true
+			fi
+		done
+		
+		# Remove .env* files except .env.local.example
+		while IFS= read -r -d '' file; do
+			rm -f "$file"
+			echo "✓ Removed: ${file#./}"
+			((cleaned_count++)) || true
+		done < <(find . -maxdepth 2 -name ".env*" ! -name ".env.local.example" -print0 2>/dev/null)
+		
+		# Remove *.local.md and *.local.json files
+		while IFS= read -r -d '' file; do
+			rm -f "$file"
+			echo "✓ Removed: ${file#./}"
+			((cleaned_count++)) || true
+		done < <(find . -maxdepth 3 \( -name "*.local.md" -o -name "*.local.json" \) -print0 2>/dev/null)
+		
+		# Remove build artifacts if they exist
+		for dir in "${build_dirs[@]}"; do
+			if [[ -d "$dir" ]]; then
+				rm -rf "$dir"
+				echo "✓ Removed: $dir/"
+				((cleaned_count++)) || true
+			fi
+		done
+		
+		if [[ $cleaned_count -eq 0 ]]; then
+			echo "✓ No sensitive files to clean"
+		fi
+	fi
+	echo ""
+	
+	# Step 4: Commit the cleanup (creates divergence point from upstream)
+	echo "--- Step 4: Commit project initialization ---"
+	echo ""
+	
+	if [[ "$dry_run" == true ]]; then
+		echo "[dry-run] Would commit: 'Initialize project from VPK boilerplate'"
+	else
+		cd "$target_dir"
+		git add -A
+		# Only commit if there are changes
+		if ! git diff --cached --quiet; then
+			git commit -q -m "Initialize project from VPK boilerplate"
+			echo "✓ Committed initialization"
+		else
+			echo "✓ No changes to commit (already clean)"
+		fi
+	fi
+	echo ""
+	
+	# Step 5: Create GitHub repo and set as origin
+	echo "--- Step 5: Create GitHub repository ---"
+	echo ""
+	
+	if [[ "$dry_run" == true ]]; then
+		echo "[dry-run] Would run: gh repo create $project_name --$visibility --source=. --remote=origin --push"
+	else
+		cd "$target_dir"
+		gh repo create "$project_name" --"$visibility" --source=. --remote=origin --push
+	fi
+	echo ""
+	
+	# Step 6: Create VPK sync configuration
+	echo "--- Step 6: Configure VPK sync ---"
+	echo ""
+	
+	if [[ "$dry_run" == true ]]; then
+		echo "[dry-run] Would create .vpk-sync.json"
+	else
+		cd "$target_dir"
+		
+		# Create .vpk-sync.json
+		cat > .vpk-sync.json << EOF
+{
+  "upstream": {
+    "url": "$vpk_upstream_url",
+    "defaultBranch": "main"
+  },
+  "sync": {
+    "strategy": "merge",
+    "excludePaths": []
+  },
+  "push": {
+    "useFork": false,
+    "forkRemote": "origin"
+  }
+}
+EOF
+		echo "✓ Created .vpk-sync.json"
+		
+		# Commit the sync config
+		git add .vpk-sync.json
+		git commit -q -m "Add VPK sync configuration"
+		git push origin main -q
+		echo "✓ Committed sync configuration"
+	fi
+	echo ""
+	
+	# Summary
+	echo "=== Success ==="
+	echo ""
+	
+	if [[ "$dry_run" == true ]]; then
+		echo "Dry run complete. No changes made."
+		echo ""
+		echo "Run without --dry-run to create the project."
+	else
+		echo "✓ Project created with preserved history!"
+		echo ""
+		[[ -n "$gh_user" ]] && echo "GitHub URL: https://github.com/$gh_user/$project_name"
+		echo "Upstream:   $vpk_upstream_url"
+		echo ""
+		echo "VPK sync is configured! You can now:"
+		echo "  • Pull VPK updates:  /vpk-sync --pull"
+		echo "  • Push improvements: /vpk-sync --push"
+		echo ""
+		echo "Next steps:"
+		echo "  cd $target_dir"
+		echo "  pnpm install"
+		echo ""
+		echo "Or run /vpk-setup for full setup including environment configuration."
+	fi
+}
+
+# -----------------------------------------------------------------------------
+# Create standalone (fresh git history, no upstream connection)
+# -----------------------------------------------------------------------------
+do_create_standalone() {
+	# Step 1: Clean source project
 	echo "--- Step 1: Clean source project ---"
 	echo ""
 	
@@ -541,56 +735,6 @@ do_create() {
 	fi
 	echo ""
 	
-	# Step 6: Configure upstream for VPK sync (optional)
-	if [[ "$configure_upstream" == true ]]; then
-		echo "--- Step 6: Configure upstream for VPK sync ---"
-		echo ""
-		
-		if [[ "$dry_run" == true ]]; then
-			echo "[dry-run] Would add upstream remote: $vpk_upstream_url"
-			echo "[dry-run] Would create .vpk-sync.json"
-		else
-			cd "$target_dir"
-			
-			# Add upstream remote
-			git remote add upstream "$vpk_upstream_url"
-			echo "✓ Added upstream remote: $vpk_upstream_url"
-			
-			# Create .vpk-sync.json
-			cat > .vpk-sync.json << EOF
-{
-  "upstream": {
-    "url": "$vpk_upstream_url",
-    "defaultBranch": "main"
-  },
-  "sync": {
-    "strategy": "merge",
-    "excludePaths": []
-  },
-  "push": {
-    "useFork": false,
-    "forkRemote": "origin"
-  }
-}
-EOF
-			echo "✓ Created .vpk-sync.json"
-			
-			# Fetch upstream to verify
-			if git fetch upstream 2>/dev/null; then
-				echo "✓ Verified upstream connection"
-			else
-				echo "⚠ Could not fetch upstream (may need access)"
-			fi
-			
-			# Commit the sync config
-			git add .vpk-sync.json
-			git commit -q -m "Add VPK sync configuration"
-			git push origin main -q
-			echo "✓ Committed sync configuration"
-		fi
-		echo ""
-	fi
-	
 	# Summary
 	echo "=== Success ==="
 	echo ""
@@ -600,19 +744,12 @@ EOF
 		echo ""
 		echo "Run without --dry-run to create the project."
 	else
-		echo "✓ Project created and pushed!"
+		echo "✓ Standalone project created!"
 		echo ""
 		[[ -n "$gh_user" ]] && echo "GitHub URL: https://github.com/$gh_user/$project_name"
-		if [[ "$configure_upstream" == true ]]; then
-			echo "Upstream:   $vpk_upstream_url"
-			echo ""
-			echo "VPK sync is configured! You can now:"
-			echo "  • Pull VPK updates:  /vpk-sync --pull"
-			echo "  • Push improvements: /vpk-sync --push"
-		else
-			echo ""
-			echo "Standalone project created (no VPK sync)."
-		fi
+		echo ""
+		echo "This is a standalone project with fresh git history."
+		echo "To add VPK sync later, run: /vpk-sync --init"
 		echo ""
 		echo "Next steps:"
 		echo "  cd $target_dir"
