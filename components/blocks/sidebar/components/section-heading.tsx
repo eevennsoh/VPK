@@ -1,9 +1,13 @@
 "use client";
 
-import React from "react";
+import { type ReactNode } from "react";
 import { token } from "@atlaskit/tokens";
 
-export function SectionHeading({ children }: { children: React.ReactNode }) {
+interface SectionHeadingProps {
+	children: ReactNode;
+}
+
+export function SectionHeading({ children }: Readonly<SectionHeadingProps>) {
 	return (
 		<div
 			style={{

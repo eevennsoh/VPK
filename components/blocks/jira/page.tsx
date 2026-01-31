@@ -6,6 +6,7 @@ import JiraHeader from "./components/jira-header";
 import BoardToolbar from "./components/board-toolbar";
 import BoardColumnsContainer from "./components/board-columns-container";
 import JiraWorkItemModal from "./components/jira-work-item-modal";
+import { AVATARS } from "./data/avatars";
 
 export default function JiraView() {
 	const [selectedTab, setSelectedTab] = useState(1);
@@ -21,16 +22,6 @@ export default function JiraView() {
 		setIsModalOpen(false);
 	};
 
-	const avatars = [
-		{ src: "/people/Avatar-1.png", name: "User 1" },
-		{ src: "/people/Avatar-2.png", name: "User 2" },
-		{ src: "/people/Avatar-3.png", name: "User 3" },
-		{ src: "/people/Avatar-4.png", name: "User 4" },
-		{ src: "/people/Avatar-5.png", name: "User 5" },
-		{ src: "/people/Avatar-6.png", name: "User 6" },
-		{ src: "/people/Avatar-7.png", name: "User 7" },
-	];
-
 	return (
 		<div style={{ height: "calc(100vh - 48px)", display: "flex", flexDirection: "column" }}>
 			{/* Header Section */}
@@ -42,7 +33,7 @@ export default function JiraView() {
 					style={{ flexGrow: 1, display: "flex", flexDirection: "column", paddingTop: token("space.200") }}
 				>
 					{/* Toolbar */}
-					<BoardToolbar avatars={avatars} />
+					<BoardToolbar avatars={[...AVATARS]} />
 
 					{/* Board columns */}
 					<BoardColumnsContainer onCardClick={handleCardClick} />

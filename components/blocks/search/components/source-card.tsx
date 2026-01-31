@@ -46,7 +46,7 @@ export default function SourceCard({ source }: Readonly<SourceCardProps>) {
 					<Text size="small">{source.excerpt}</Text>
 				</Box>
 
-				<Flex justifyContent="space-between" alignItems="center" style={{ marginTop: token("space.100") }}>
+				<div style={{ marginTop: token("space.100"), display: "flex", justifyContent: "space-between", alignItems: "center" }}>
 					<Inline space="space.050" alignBlock="center">
 						<ConfluenceIcon appearance="brand" size="xsmall" label="Confluence" shouldUseNewLogoDesign />
 						<Text size="small" color="color.text.subtle">
@@ -56,7 +56,7 @@ export default function SourceCard({ source }: Readonly<SourceCardProps>) {
 					<Button appearance="default" spacing="compact">
 						Open preview
 					</Button>
-				</Flex>
+				</div>
 			</Stack>
 		</Box>
 	);

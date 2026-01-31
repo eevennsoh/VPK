@@ -24,7 +24,7 @@
  */
 
 import { WorkItemModalProvider } from "@/app/contexts/context-work-item-modal";
-import WorkItemModal from "./work-item-modal";
+import WorkItemModal from "./work-item-modal/index";
 
 interface JiraWorkItemModalProps {
 	isOpen: boolean;

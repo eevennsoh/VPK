@@ -10,17 +10,15 @@ import type { ComponentType } from "react";
 // Icon imports - these will be used by consuming components
 import LightbulbIcon from "@atlaskit/icon/core/lightbulb";
 import BookOpenIcon from "@atlaskit/icon-lab/core/book-open";
-import EditIcon from "@atlaskit/icon/core/edit";
-import LocationIcon from "@atlaskit/icon/core/location";
-import FeedbackIcon from "@atlaskit/icon/core/feedback";
 import CalendarIcon from "@atlaskit/icon/core/calendar";
 import PersonIcon from "@atlaskit/icon/core/person";
 
 export interface RovoSuggestion {
 	id: string;
 	label: string;
-	/** ADS icon component for skills */
-	icon?: ComponentType<{ label: string; color?: string; size?: "small" | "medium" | "large" }>;
+	/** ADS icon component for skills - uses any to accommodate NewCoreIconProps */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	icon?: ComponentType<any>;
 	/** Image path for prompts with rich illustrations */
 	imageSrc?: string;
 	/** Indicates if this is a "skill" (ADS icon) or "prompt" (rich illustration) */

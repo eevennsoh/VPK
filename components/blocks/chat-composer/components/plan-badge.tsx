@@ -16,7 +16,7 @@ export interface PlanBadgeProps {
  * Plan mode pill badge shown when plan mode is active.
  * Displays a closeable badge with clipboard icon and "Plan" label in brand blue.
  */
-export default function PlanBadge({ onClose }: PlanBadgeProps) {
+export default function PlanBadge({ onClose }: Readonly<PlanBadgeProps>) {
 	return (
 		<div
 			style={{

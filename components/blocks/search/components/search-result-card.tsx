@@ -4,16 +4,15 @@ import React, { useState } from "react";
 import { token } from "@atlaskit/tokens";
 import { IconButton } from "@atlaskit/button/new";
 import Button from "@atlaskit/button/new";
-import { Text } from "@atlaskit/primitives";
 
-// Icons
 import LinkIcon from "@atlaskit/icon/core/link";
 import RovoChatIcon from "@atlaskit/icon/core/rovo-chat";
 import PagesIcon from "@atlaskit/icon/core/pages";
 
 interface SearchResultCardProps {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	icon?: React.ComponentType<any>;
-	iconColor?: string; // Accent color for the icon
+	iconColor?: string;
 	title: string;
 	metadata: string[];
 	excerpt: string;

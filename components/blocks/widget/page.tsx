@@ -58,8 +58,8 @@ export default function WorkItemsWidget({ data, onInsert, showInsertMenu, moreMe
 		return <div style={styles.errorState}>Error: Invalid widget data</div>;
 	}
 
-	const handleWorkItemClick = (item: WorkItem) => {
-		console.log("Work item clicked:", item.key);
+	const handleWorkItemClick = (_item: WorkItem) => {
+		// Click handler - implement navigation or modal as needed
 	};
 
 	const showInsertActions = showInsertMenu ?? Boolean(onInsert);

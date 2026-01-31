@@ -1,18 +1,15 @@
 "use client";
 
-import React, { forwardRef, useEffect } from "react";
+import { forwardRef, useEffect } from "react";
 import { token } from "@atlaskit/tokens";
-import Button from "@atlaskit/button/new";
-import { IconButton } from "@atlaskit/button/new";
 import TextField from "@atlaskit/textfield";
 import SearchIcon from "@atlaskit/icon/core/search";
-import ClockIcon from "@atlaskit/icon/core/clock";
-import FolderClosedIcon from "@atlaskit/icon/core/folder-closed";
-import PersonIcon from "@atlaskit/icon/core/person";
-import ChevronDownIcon from "@atlaskit/icon/core/chevron-down";
-import PageIcon from "@atlaskit/icon/core/page";
-import CustomizeIcon from "@atlaskit/icon/core/customize";
 import { RECENT_SEARCHES, RECENT_ITEMS } from "../data/search-data";
+import FilterButtonBar from "./filter-button-bar";
+import RecentSearchItem from "./recent-search-item";
+import RecentItemCard from "./recent-item-card";
+import SearchAllAppsFooter from "./search-all-apps-footer";
+import styles from "./search-suggestions-panel.module.css";
 
 interface SearchSuggestionsPanelProps {
 	isVisible: boolean;
@@ -32,7 +29,6 @@ const SearchSuggestionsPanel = forwardRef<HTMLDivElement, Readonly<SearchSuggest
 			searchValue,
 			onSearchChange,
 			onSearchKeyDown,
-			onClose,
 			onSearchAllApps,
 			onRecentItemClick,
 			onRecentSearchClick,
@@ -42,7 +38,7 @@ const SearchSuggestionsPanel = forwardRef<HTMLDivElement, Readonly<SearchSuggest
 		useEffect(() => {
 			if (isVisible) {
 				setTimeout(() => {
-					const input = document.querySelector(".focused-search-box input") as HTMLInputElement;
+					const input = document.querySelector(`.${styles.focusedSearchBox} input`) as HTMLInputElement;
 					if (input) {
 						input.focus();
 					}
@@ -76,33 +72,7 @@ const SearchSuggestionsPanel = forwardRef<HTMLDivElement, Readonly<SearchSuggest
 						marginBottom: "8px",
 					}}
 				>
-					<style
-						dangerouslySetInnerHTML={{
-							__html: `
-            .focused-search-box input {
-              height: 36px !important;
-              box-sizing: border-box !important;
-              padding: 6px 8px !important;
-              border: none !important;
-              background: transparent !important;
-            }
-            .focused-search-box input:focus {
-              outline: none !important;
-              box-shadow: none !important;
-              border: none !important;
-            }
-            .focused-search-box > div {
-              border: none !important;
-              background: transparent !important;
-            }
-            .focused-search-box > div:focus-within {
-              border: none !important;
-              box-shadow: none !important;
-            }
-          `,
-						}}
-					/>
-					<div className="focused-search-box" style={{ flex: 1 }}>
+					<div className={styles.focusedSearchBox} style={{ flex: 1 }}>
 						<TextField
 							value={searchValue}
 							onChange={(e) => onSearchChange((e.target as HTMLInputElement).value)}
@@ -130,89 +100,16 @@ const SearchSuggestionsPanel = forwardRef<HTMLDivElement, Readonly<SearchSuggest
 						overflow: "hidden",
 					}}
 				>
-					{/* Filter Button Bar */}
-					<div
-						style={{
-							padding: "0 8px 12px",
-							display: "flex",
-							justifyContent: "space-between",
-							alignItems: "center",
-							gap: "100px",
-						}}
-					>
-						{/* Left group */}
-						<div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-							<Button
-								iconBefore={FolderClosedIcon}
-								iconAfter={(iconProps: any) => <ChevronDownIcon {...iconProps} size="small" />}
-							>
-								Space
-							</Button>
-							<Button
-								iconBefore={PersonIcon}
-								iconAfter={(iconProps: any) => <ChevronDownIcon {...iconProps} size="small" />}
-							>
-								Contributor
-							</Button>
-							<IconButton icon={CustomizeIcon} label="Customize filters" appearance="subtle" />
-						</div>
-
-						{/* Right group */}
-						<div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-							<Button
-								iconBefore={() => (
-									<img src="/googledrive.png" alt="" style={{ width: "20px", height: "20px" }} />
-								)}
-							>
-								Google Drive
-							</Button>
-							<Button
-								iconBefore={() => (
-									<img src="/slacklogo.png" alt="" style={{ width: "20px", height: "20px" }} />
-								)}
-							>
-								Slack
-							</Button>
-							<Button>+47</Button>
-						</div>
-					</div>
+					<FilterButtonBar />
 
 					{/* Recent Search Items */}
 					<div style={{ padding: "0 8px" }}>
 						{RECENT_SEARCHES.map((search, index) => (
-							<div
+							<RecentSearchItem
 								key={index}
-								style={{
-									display: "flex",
-									alignItems: "center",
-									gap: "12px",
-									padding: "8px 12px",
-									borderRadius: "6px",
-									cursor: "pointer",
-									transition: "background-color 0.2s ease",
-								}}
-								onMouseEnter={(e) =>
-									(e.currentTarget.style.backgroundColor = token(
-										"color.background.neutral.subtle.hovered"
-									))
-								}
-								onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+								query={search}
 								onClick={() => onRecentSearchClick?.(search)}
-							>
-								<ClockIcon label="" color={token("color.icon.subtle")} />
-								<div style={{ flex: 1 }}>
-									<div style={{ font: token("font.body"), color: token("color.text") }}>{search}</div>
-								</div>
-								<div
-									style={{
-										font: token("font.body.small"),
-										color: token("color.text.subtlest"),
-										whiteSpace: "nowrap",
-									}}
-								>
-									Recent search
-								</div>
-							</div>
+							/>
 						))}
 					</div>
 
@@ -231,81 +128,17 @@ const SearchSuggestionsPanel = forwardRef<HTMLDivElement, Readonly<SearchSuggest
 						</div>
 
 						{RECENT_ITEMS.map((item, index) => (
-							<div
+							<RecentItemCard
 								key={index}
-								style={{
-									display: "flex",
-									alignItems: "flex-start",
-									gap: "12px",
-									padding: "8px 12px",
-									borderRadius: "6px",
-									cursor: "pointer",
-									transition: "background-color 0.2s ease",
-								}}
-								onMouseEnter={(e) =>
-									(e.currentTarget.style.backgroundColor = token(
-										"color.background.neutral.subtle.hovered"
-									))
-								}
-								onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+								title={item.title}
+								metadata={item.metadata}
+								timestamp={item.timestamp}
 								onClick={() => onRecentItemClick?.(item.title)}
-							>
-								<div style={{ marginTop: "2px" }}>
-									<PageIcon label="" color={token("color.icon.accent.blue")} />
-								</div>
-								<div style={{ flex: 1, minWidth: 0 }}>
-									<div
-										style={{ font: token("font.body"), color: token("color.text"), marginBottom: "2px" }}
-									>
-										{item.title}
-									</div>
-									<div style={{ font: token("font.body.small"), color: token("color.text.subtlest") }}>
-										{item.metadata}
-									</div>
-								</div>
-								<div
-									style={{
-										font: token("font.body.small"),
-										color: token("color.text.subtlest"),
-										whiteSpace: "nowrap",
-									}}
-								>
-									{item.timestamp}
-								</div>
-							</div>
+							/>
 						))}
 					</div>
 
-					{/* Search all apps footer */}
-					<div
-						style={{
-							marginTop: "8px",
-							padding: "8px 8px",
-							borderTop: `1px solid ${token("color.border")}`,
-						}}
-					>
-						<div
-							style={{
-								display: "flex",
-								alignItems: "center",
-								gap: "12px",
-								padding: "8px 12px",
-								borderRadius: "6px",
-								cursor: "pointer",
-								transition: "background-color 0.2s ease",
-							}}
-							onMouseEnter={(e) =>
-								(e.currentTarget.style.backgroundColor = token("color.background.neutral.subtle.hovered"))
-							}
-							onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-							onClick={onSearchAllApps}
-						>
-							<SearchIcon label="" color={token("color.icon")} />
-							<div style={{ flex: 1 }}>
-								<div style={{ font: token("font.body"), color: token("color.text") }}>Search all apps</div>
-							</div>
-						</div>
-					</div>
+					<SearchAllAppsFooter onClick={onSearchAllApps} />
 				</div>
 			</div>
 		);

@@ -2,7 +2,7 @@
 
 import React from "react";
 import dynamic from "next/dynamic";
-import { Inline } from "@atlaskit/primitives";
+import { Inline, Flex } from "@atlaskit/primitives";
 import { token } from "@atlaskit/tokens";
 import Button from "@atlaskit/button/new";
 import { IconButton } from "@atlaskit/button/new";
@@ -44,7 +44,7 @@ const BoardToolbar: React.FC<Readonly<BoardToolbarProps>> = ({ avatars }) => {
 				paddingInline: token("space.300"),
 			}}
 		>
-			<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+			<Flex justifyContent="space-between" alignItems="center">
 				<Inline space="space.200" alignBlock="center">
 					<div
 						className="search-field-wrapper"
@@ -109,7 +109,7 @@ const BoardToolbar: React.FC<Readonly<BoardToolbarProps>> = ({ avatars }) => {
 					</Button>
 					<IconButton icon={CustomizeIcon} label="Customize" />
 				</Inline>
-			</div>
+			</Flex>
 		</div>
 	);
 };

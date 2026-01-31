@@ -1,19 +1,22 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { token } from "@atlaskit/tokens";
 import { useRovoChat, Message } from "@/app/contexts/context-rovo-chat";
-import { API_ENDPOINTS } from "@/lib/api-config";
+import { useStreamingChat } from "@/app/hooks/use-streaming-chat";
 import RovoChatHeader from "./rovo-chat-header";
 import RovoChatMessages from "./rovo-chat-messages";
 import RovoChatInput from "./rovo-chat-input";
 import { useSpeechRecognition } from "../hooks/use-speech-recognition";
 import { useSuggestedQuestions } from "../hooks/use-suggested-questions";
+import { useStreamingCallbacks } from "../hooks/use-streaming-callbacks";
+import { useUrlParams } from "../hooks/use-url-params";
+import styles from "./rovo-chat-panel.module.css";
 
 interface RovoChatPanelProps {
 	onClose: () => void;
-	product: "home" | "jira" | "confluence" | "rovo";
+	product: "home" | "jira" | "confluence" | "rovo" | "search";
 }
 
 export default function RovoChatPanel({ onClose, product }: Readonly<RovoChatPanelProps>) {
@@ -24,26 +27,21 @@ export default function RovoChatPanel({ onClose, product }: Readonly<RovoChatPan
 	const [webResultsEnabled, setWebResultsEnabled] = useState(false);
 	const [companyKnowledgeEnabled, setCompanyKnowledgeEnabled] = useState(true);
 	const [selectedReasoning, setSelectedReasoning] = useState("deep-research");
-	const [userName, setUserName] = useState<string>("");
 	const { messages, setMessages } = useRovoChat();
+	const { name: userName } = useUrlParams();
+	const { streamMessage, abort } = useStreamingChat();
 
 	const [contextEnabled, setContextEnabled] = useState(product === "confluence" || product === "jira");
 
-	// Use extracted hooks
 	const { isListening, interimText, toggleDictation } = useSpeechRecognition({
 		onFinalTranscript: (transcript) => setPrompt((prev) => prev + transcript),
 	});
 	const { fetchSuggestedQuestions } = useSuggestedQuestions({ setMessages });
+	const { createStreamingCallbacks } = useStreamingCallbacks({ setMessages, fetchSuggestedQuestions });
 
 	useEffect(() => {
-		if (typeof window !== "undefined") {
-			const searchParams = new URLSearchParams(window.location.search);
-			const nameParam = searchParams.get("name");
-			if (nameParam) {
-				setUserName(nameParam);
-			}
-		}
-	}, []);
+		return () => abort();
+	}, [abort]);
 
 	useEffect(() => {
 		if (scrollRef.current) {
@@ -51,112 +49,43 @@ export default function RovoChatPanel({ onClose, product }: Readonly<RovoChatPan
 		}
 	}, [messages]);
 
-	const getContextDescription = () => {
-		if (!contextEnabled) return "";
+	const getContextDescription = useCallback(() => {
+		if (!contextEnabled) return undefined;
 		if (product === "confluence") return "You have context from the current Confluence page.";
 		if (product === "jira") return "You have context from the current Jira board.";
-		return "";
-	};
+		return undefined;
+	}, [contextEnabled, product]);
 
-	const handleSuggestedQuestionClick = async (question: string) => {
-		if (!question.trim()) return;
+	const handleSuggestedQuestionClick = useCallback(
+		async (question: string) => {
+			if (!question.trim()) return;
 
-		setMessages((prev) => prev.map((msg) => ({ ...msg, suggestedQuestions: undefined })));
+			setMessages((prev) => prev.map((msg) => ({ ...msg, suggestedQuestions: undefined })));
 
-		const userMessage: Message = {
-			id: Date.now().toString(),
-			type: "user",
-			content: question,
-		};
+			const userMessage: Message = {
+				id: Date.now().toString(),
+				type: "user",
+				content: question,
+			};
 
-		setMessages((prev) => [...prev, userMessage]);
+			setMessages((prev) => [...prev, userMessage]);
 
-		const assistantMessageId = (Date.now() + 1).toString();
-		const assistantMessage: Message = {
-			id: assistantMessageId,
-			type: "assistant",
-			content: "",
-			isStreaming: true,
-		};
-		setMessages((prev) => [...prev, assistantMessage]);
-
-		try {
 			const recentHistory = messages.slice(-6).filter((msg) => msg.id !== userMessage.id);
 
-			const response = await fetch(API_ENDPOINTS.CHAT, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					message: question,
+			await streamMessage(
+				question,
+				{
 					conversationHistory: recentHistory,
-					contextDescription: contextEnabled ? getContextDescription() : undefined,
+					contextDescription: getContextDescription(),
 					userName: userName || undefined,
-				}),
-			});
-
-			if (!response.ok) {
-				throw new Error("Failed to get response");
-			}
-
-			const reader = response.body?.getReader();
-			const decoder = new TextDecoder();
-
-			if (!reader) {
-				throw new Error("No reader available");
-			}
-
-			let fullText = "";
-
-			while (true) {
-				const { done, value } = await reader.read();
-				if (done) break;
-
-				const chunk = decoder.decode(value, { stream: true });
-				const lines = chunk.split("\n");
-
-				for (const line of lines) {
-					if (line.startsWith("data: ")) {
-						const data = line.slice(6);
-						if (data === "[DONE]") {
-							break;
-						}
-						try {
-							const parsed = JSON.parse(data);
-							if (parsed.text) {
-								fullText += parsed.text;
-								setMessages((prev) =>
-									prev.map((msg) =>
-										msg.id === assistantMessageId ? { ...msg, content: fullText, isStreaming: true } : msg
-									)
-								);
-							}
-						} catch (e) {
-							// Skip invalid JSON
-						}
-					}
-				}
-			}
-
-			setMessages((prev) =>
-				prev.map((msg) => (msg.id === assistantMessageId ? { ...msg, isStreaming: false } : msg))
+				},
+				createStreamingCallbacks(question, recentHistory)
 			);
+		},
+		[messages, userName, setMessages, streamMessage, createStreamingCallbacks, getContextDescription]
+	);
 
-			fetchSuggestedQuestions(question, recentHistory, fullText, assistantMessageId);
-		} catch (error) {
-			console.error("Error fetching AI response:", error);
-			setMessages((prev) =>
-				prev.map((msg) =>
-					msg.id === assistantMessageId
-						? { ...msg, content: "Sorry, I encountered an error. Please try again.", isStreaming: false }
-						: msg
-				)
-			);
-		}
-	};
-
-	const handleSubmit = async () => {
+	const handleSubmit = useCallback(async () => {
 		if (!prompt.trim()) return;
 
 		setMessages((prev) => prev.map((msg) => ({ ...msg, suggestedQuestions: undefined })));
@@ -171,98 +100,34 @@ export default function RovoChatPanel({ onClose, product }: Readonly<RovoChatPan
 		const currentPrompt = prompt;
 		setPrompt("");
 
-		const assistantMessageId = (Date.now() + 1).toString();
-		const assistantMessage: Message = {
-			id: assistantMessageId,
-			type: "assistant",
-			content: "",
-			isStreaming: true,
-		};
-		setMessages((prev) => [...prev, assistantMessage]);
+		const recentHistory = messages.slice(-6).filter((msg) => msg.id !== userMessage.id);
 
-		try {
-			const recentHistory = messages.slice(-6).filter((msg) => msg.id !== userMessage.id);
-
-			const response = await fetch(API_ENDPOINTS.CHAT, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					message: currentPrompt,
-					conversationHistory: recentHistory,
-					contextDescription: contextEnabled ? getContextDescription() : undefined,
-					userName: userName || undefined,
-				}),
-			});
-
-			if (!response.ok) {
-				throw new Error("Failed to get response");
-			}
-
-			const reader = response.body?.getReader();
-			const decoder = new TextDecoder();
-
-			if (!reader) {
-				throw new Error("No reader available");
-			}
-
-			let fullText = "";
-
-			while (true) {
-				const { done, value } = await reader.read();
-				if (done) break;
-
-				const chunk = decoder.decode(value, { stream: true });
-				const lines = chunk.split("\n");
-
-				for (const line of lines) {
-					if (line.startsWith("data: ")) {
-						const data = line.slice(6);
-						if (data === "[DONE]") {
-							break;
-						}
-						try {
-							const parsed = JSON.parse(data);
-							if (parsed.text) {
-								fullText += parsed.text;
-								setMessages((prev) =>
-									prev.map((msg) =>
-										msg.id === assistantMessageId ? { ...msg, content: fullText, isStreaming: true } : msg
-									)
-								);
-							}
-						} catch (e) {
-							// Skip invalid JSON
-						}
-					}
-				}
-			}
-
-			setMessages((prev) =>
-				prev.map((msg) => (msg.id === assistantMessageId ? { ...msg, isStreaming: false } : msg))
-			);
-
-			fetchSuggestedQuestions(currentPrompt, recentHistory, fullText, assistantMessageId);
-		} catch (error) {
-			console.error("Error fetching AI response:", error);
-			setMessages((prev) =>
-				prev.map((msg) =>
-					msg.id === assistantMessageId
-						? { ...msg, content: "Sorry, I encountered an error. Please try again.", isStreaming: false }
-						: msg
-				)
-			);
-		}
-	};
+		await streamMessage(
+			currentPrompt,
+			{
+				conversationHistory: recentHistory,
+				contextDescription: getContextDescription(),
+				userName: userName || undefined,
+			},
+			createStreamingCallbacks(currentPrompt, recentHistory)
+		);
+	}, [prompt, messages, userName, setMessages, streamMessage, createStreamingCallbacks, getContextDescription]);
 
 	const hasChatStarted = messages.length > 0;
 
+	const getPanelHeight = (): string => {
+		if (variant !== "floating") {
+			return "calc(100vh - 48px)";
+		}
+		return hasChatStarted ? "640px" : "340px";
+	};
+
 	return (
 		<div
+			className={styles.rovoChatPanel}
 			style={{
 				width: "400px",
-				height: variant === "floating" ? (hasChatStarted ? "640px" : "340px") : "calc(100vh - 48px)",
+				height: getPanelHeight(),
 				backgroundColor: token("elevation.surface"),
 				borderLeft: variant === "sidepanel" ? `1px solid ${token("color.border")}` : "none",
 				borderRadius: variant === "floating" ? token("radius.xlarge") : "0",
@@ -276,93 +141,6 @@ export default function RovoChatPanel({ onClose, product }: Readonly<RovoChatPan
 				transition: "height 0.3s ease",
 			}}
 		>
-			<style
-				dangerouslySetInnerHTML={{
-					__html: `
-        @keyframes fadeInSlideUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        @keyframes fadeInIcons {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-        
-        .rovo-chat-panel h1 {
-          font-size: 20px;
-          font-weight: 600;
-          margin: 16px 0 8px 0;
-          line-height: 1.3;
-        }
-        .rovo-chat-panel h2 {
-          font-size: 18px;
-          font-weight: 600;
-          margin: 14px 0 8px 0;
-          line-height: 1.3;
-        }
-        .rovo-chat-panel h3 {
-          font-size: 16px;
-          font-weight: 600;
-          margin: 12px 0 6px 0;
-          line-height: 1.3;
-        }
-        .rovo-chat-panel h1 + br,
-        .rovo-chat-panel h2 + br,
-        .rovo-chat-panel h3 + br,
-        .rovo-chat-panel h4 + br,
-        .rovo-chat-panel h5 + br,
-        .rovo-chat-panel h6 + br {
-          display: none;
-        }
-        .rovo-chat-panel * ul {
-          margin: 4px 0 !important;
-          padding-left: 20px !important;
-        }
-        .rovo-chat-panel li {
-          margin: 2px 0;
-          line-height: 1.5;
-        }
-        .rovo-chat-panel code {
-          background-color: ${token("elevation.surface.sunken")};
-          padding: 2px 6px;
-          border-radius: var(--ds-radius-xsmall);
-          font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-          font-size: 13px;
-        }
-        .rovo-chat-panel pre {
-          background-color: ${token("elevation.surface.sunken")};
-          padding: 12px;
-          border-radius: var(--ds-radius-medium);
-          overflow-x: auto;
-          margin: 12px 0;
-        }
-        .rovo-chat-panel pre code {
-          background-color: transparent;
-          padding: 0;
-          font-size: 13px;
-          line-height: 1.5;
-        }
-        .rovo-chat-panel a {
-          color: ${token("color.text.selected")};
-          text-decoration: none;
-        }
-        .rovo-chat-panel a:hover {
-          text-decoration: underline;
-        }
-      `,
-				}}
-			/>
-
 			<RovoChatHeader
 				onClose={onClose}
 				variant={variant}
@@ -379,7 +157,7 @@ export default function RovoChatPanel({ onClose, product }: Readonly<RovoChatPan
 				variant={variant}
 				hasChatStarted={hasChatStarted}
 				onSuggestedQuestionClick={handleSuggestedQuestionClick}
-				userName={userName}
+				userName={userName ?? undefined}
 			/>
 
 			<RovoChatInput

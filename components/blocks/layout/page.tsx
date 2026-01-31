@@ -9,7 +9,7 @@ import FloatingRovoButton from "@/components/blocks/rovo/components/floating-rov
 import { useSidebar } from "@/app/contexts/context-sidebar";
 import { useRovoChat } from "@/app/contexts/context-rovo-chat";
 
-type Product = "home" | "jira" | "confluence" | "rovo";
+type Product = "home" | "jira" | "confluence" | "rovo" | "search";
 
 interface AppLayoutProps {
 	product: Product;

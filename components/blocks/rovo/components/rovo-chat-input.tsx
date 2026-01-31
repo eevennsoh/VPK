@@ -21,7 +21,7 @@ interface RovoChatInputProps {
 	onToggleDictation: () => void;
 	contextEnabled: boolean;
 	onContextToggle: (enabled: boolean) => void;
-	product: "home" | "jira" | "confluence" | "rovo";
+	product: "home" | "jira" | "confluence" | "rovo" | "search";
 	selectedReasoning: string;
 	onReasoningChange: (reasoning: string) => void;
 	webResultsEnabled: boolean;

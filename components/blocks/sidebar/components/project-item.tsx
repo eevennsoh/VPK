@@ -1,10 +1,21 @@
 "use client";
 
-import React from "react";
 import { token } from "@atlaskit/tokens";
-import ShowMoreHorizontalIcon from "@atlaskit/icon/core/show-more-horizontal";
+import Image from "next/image";
 
-export function ProjectItem() {
+interface ProjectItemProps {
+	name: string;
+	imageSrc: string;
+	isSelected?: boolean;
+	onClick?: () => void;
+}
+
+export function ProjectItem({
+	name,
+	imageSrc,
+	isSelected = false,
+	onClick,
+}: Readonly<ProjectItemProps>) {
 	return (
 		<div
 			style={{
@@ -13,56 +24,61 @@ export function ProjectItem() {
 				padding: token("space.050"),
 				borderRadius: token("radius.xsmall"),
 				cursor: "pointer",
+				backgroundColor: isSelected
+					? token("color.background.accent.blue.subtlest")
+					: "transparent",
+				position: "relative",
 				gap: token("space.025"),
 				minHeight: "32px",
 			}}
+			onClick={onClick}
 		>
-			{/* Project avatar/icon */}
+			{isSelected && (
+				<div
+					style={{
+						position: "absolute",
+						left: 0,
+						top: "50%",
+						transform: "translateY(-50%)",
+						width: "2px",
+						height: "12px",
+						backgroundColor: token("color.border.selected"),
+						borderRadius: token("radius.xsmall"),
+					}}
+				/>
+			)}
+
 			<div
 				style={{
 					display: "flex",
 					alignItems: "center",
 					justifyContent: "center",
-					width: "20px",
-					height: "20px",
-					backgroundColor: token("color.background.discovery.bold"),
+					width: "24px",
+					height: "24px",
+					marginLeft: token("space.025"),
 					borderRadius: token("radius.small"),
-					marginLeft: token("space.050"),
+					overflow: "hidden",
 				}}
 			>
-				<div
-					style={{
-						width: "12px",
-						height: "12px",
-						backgroundColor: "white",
-						borderRadius: token("radius.xsmall"),
-					}}
-				/>
+				<Image src={imageSrc} alt="" width={24} height={24} />
 			</div>
 
-			{/* Project name */}
 			<span
 				style={{
 					font: token("font.body"),
 					fontWeight: token("font.weight.medium"),
-					color: token("color.text.subtle"),
+					color: isSelected
+						? token("color.text.selected")
+						: token("color.text.subtle"),
 					flex: 1,
 					paddingLeft: token("space.025"),
+					overflow: "hidden",
+					textOverflow: "ellipsis",
+					whiteSpace: "nowrap",
 				}}
 			>
-				Vitafleet
+				{name}
 			</span>
-
-			{/* More options */}
-			<div
-				style={{
-					display: "flex",
-					alignItems: "center",
-					marginRight: token("space.025"),
-				}}
-			>
-				<ShowMoreHorizontalIcon label="More options" color={token("color.icon.subtle")} size="small" />
-			</div>
 		</div>
 	);
 }

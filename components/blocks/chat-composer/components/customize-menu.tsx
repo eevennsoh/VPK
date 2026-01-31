@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { token } from "@atlaskit/tokens";
 import Toggle from "@atlaskit/toggle";
 import Heading from "@atlaskit/heading";
@@ -33,7 +32,7 @@ export default function CustomizeMenu({
 	companyKnowledgeEnabled,
 	onCompanyKnowledgeChange,
 	onClose,
-}: CustomizeMenuProps) {
+}: Readonly<CustomizeMenuProps>) {
 	return (
 		<>
 			<div

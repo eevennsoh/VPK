@@ -126,7 +126,7 @@ export default function DiscoverMoreExamples({ onExampleClick, onClose, examples
 						placeholder="Search"
 						value={searchTerm}
 						onChange={(e) => setSearchTerm((e.target as HTMLInputElement).value)}
-						spacing="compact"
+						isCompact
 						elemBeforeInput={
 							<div style={{ paddingLeft: "8px" }}>
 								<SearchIcon label="Search" size="small" />

@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Stack, Inline, Text } from "@atlaskit/primitives";
+import React, { useState } from "react";
+import { useIsMounted } from "@/components/hooks/use-is-mounted";
+import { Stack, Inline, Flex, Text, Box } from "@atlaskit/primitives";
 import { token } from "@atlaskit/tokens";
 import Avatar from "@atlaskit/avatar";
 import Tag from "@atlaskit/tag";
@@ -37,11 +38,7 @@ interface KanbanCardProps {
 
 const KanbanCard: React.FC<Readonly<KanbanCardProps>> = ({ title, code, tags, priority, avatarSrc, onClick }) => {
 	const [isHovered, setIsHovered] = useState(false);
-	const [isMounted, setIsMounted] = useState(false);
-
-	useEffect(() => {
-		setIsMounted(true);
-	}, []);
+	const isMounted = useIsMounted();
 
 	const priorityIcons = {
 		major: PriorityMajorIcon,
@@ -88,32 +85,23 @@ const KanbanCard: React.FC<Readonly<KanbanCardProps>> = ({ title, code, tags, pr
 				)}
 
 				{/* Footer */}
-				<div
-					style={{
-						display: "flex",
-						justifyContent: "space-between",
-						alignItems: "center",
-						paddingTop: token("space.050"),
-					}}
-				>
-					<div style={{ display: "flex", gap: token("space.100"), alignItems: "center" }}>
-						{/* Task Icon - always present */}
-						<div style={{ width: "16px", height: "16px", display: "flex", alignItems: "center" }}>
+				<Box paddingBlockStart="space.050">
+					<Flex justifyContent="space-between" alignItems="center">
+						<Inline space="space.100" alignBlock="center">
+							{/* Task Icon - always present */}
 							<TaskIcon label="Task" color={token("color.icon.brand")} />
-						</div>
-						{/* Code text */}
-						<Text size="small" color="color.text.subtlest" weight="semibold">
-							{code}
-						</Text>
-					</div>
+							{/* Code text */}
+							<Text size="small" color="color.text.subtlest" weight="semibold">
+								{code}
+							</Text>
+						</Inline>
 
-					<div style={{ display: "flex", gap: token("space.075"), alignItems: "center" }}>
-						<div style={{ width: "16px", height: "16px" }}>
+						<Inline space="space.075" alignBlock="center">
 							<PriorityIcon label={`${priority} priority`} color={priorityColor} />
-						</div>
-						{isMounted && <Avatar size="small" src={avatarSrc} name={code} />}
-					</div>
-				</div>
+							{isMounted && <Avatar size="small" src={avatarSrc} name={code} />}
+						</Inline>
+					</Flex>
+				</Box>
 			</Stack>
 		</div>
 	);

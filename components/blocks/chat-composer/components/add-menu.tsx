@@ -20,7 +20,7 @@ const menuItemStyle = {
 	gap: "8px",
 } as const;
 
-export default function AddMenu({ onClose }: AddMenuProps) {
+export default function AddMenu({ onClose }: Readonly<AddMenuProps>) {
 	const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
 		e.currentTarget.style.backgroundColor = token("color.background.neutral.subtle.hovered");
 	};
