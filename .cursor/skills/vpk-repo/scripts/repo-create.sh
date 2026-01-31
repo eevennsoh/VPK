@@ -4,38 +4,45 @@ set -euo pipefail
 # =============================================================================
 # repo-create.sh
 # Creates a fresh project copy and pushes it to a new GitHub repository
+# Automatically configures upstream for syncing back to VPK
 # =============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SYNC_SCRIPTS_DIR="$(cd "$SCRIPT_DIR/../../vpk-sync/scripts" && pwd)"
 
 show_help() {
 	cat <<'USAGE'
 Usage: repo-create.sh <project-name> [options]
 
 Create a fresh project copy in a sibling directory and push to a new GitHub repository.
+Automatically configures upstream remote for syncing with VPK.
 
 Arguments:
 	project-name    Name for the new project directory and GitHub repository
 
 Options:
 	--public        Create a public repository (default: private)
+	--no-upstream   Skip upstream configuration (standalone project)
 	--dry-run       Preview actions without executing
 	-h, --help      Show this help
 
 Workflow:
-	1. Resets current project (removes .env, node_modules, .next, etc.)
-	2. Creates sibling directory: ../<project-name>/
-	3. Copies project files (excludes .git, node_modules, .next, .env*)
-	4. Initializes git: git init && git add -A && git commit
-	5. Creates GitHub repo: gh repo create <name> --source=. --push
-	6. Reports the new GitHub URL
+	1. Captures VPK origin URL (for upstream configuration)
+	2. Resets current project (removes .env, node_modules, .next, etc.)
+	3. Creates sibling directory: ../<project-name>/
+	4. Copies project files (excludes .git, node_modules, .next, .env*)
+	5. Initializes git: git init && git add -A && git commit
+	6. Creates GitHub repo: gh repo create <name> --source=. --push
+	7. Configures upstream remote for VPK sync
+	8. Reports the new GitHub URL
 
 Prerequisites:
 	- GitHub CLI (gh) installed and authenticated
 
 Examples:
-	repo-create.sh my-app              # Create private repo
-	repo-create.sh my-app --public     # Create public repo
+	repo-create.sh my-app              # Create private repo with upstream
+	repo-create.sh my-app --public     # Create public repo with upstream
+	repo-create.sh my-app --no-upstream  # Create standalone repo (no sync)
 	repo-create.sh my-app --dry-run    # Preview what would happen
 USAGE
 }
@@ -43,11 +50,16 @@ USAGE
 project_name=""
 visibility="private"
 dry_run=false
+configure_upstream=true
 
 while [[ $# -gt 0 ]]; do
 	case "$1" in
 		--public)
 			visibility="public"
+			shift
+			;;
+		--no-upstream)
+			configure_upstream=false
 			shift
 			;;
 		--dry-run)
@@ -115,11 +127,26 @@ source_dir="$(pwd)"
 parent_dir="$(dirname "$source_dir")"
 target_dir="$parent_dir/$project_name"
 
+# Capture VPK origin URL BEFORE any changes (for upstream configuration)
+vpk_upstream_url=""
+if [[ "$configure_upstream" == true ]]; then
+	vpk_upstream_url=$(git remote get-url origin 2>/dev/null || echo "")
+	if [[ -z "$vpk_upstream_url" ]]; then
+		echo "Warning: No origin remote found. Upstream sync will not be configured." >&2
+		configure_upstream=false
+	fi
+fi
+
 echo "=== VPK Create ==="
 echo ""
 echo "Project name: $project_name"
 echo "Visibility:   $visibility"
 [[ -n "$gh_user" ]] && echo "Owner:        $gh_user"
+if [[ "$configure_upstream" == true ]]; then
+	echo "Upstream:     $vpk_upstream_url"
+else
+	echo "Upstream:     (disabled)"
+fi
 echo ""
 echo "Source:       $source_dir"
 echo "Target:       $target_dir"
@@ -223,6 +250,57 @@ fi
 
 echo ""
 
+# Step 6: Configure upstream for VPK sync (optional)
+if [[ "$configure_upstream" == true ]]; then
+	echo "--- Step 6: Configure upstream for VPK sync ---"
+	echo ""
+
+	if [[ "$dry_run" == true ]]; then
+		echo "[dry-run] Would add upstream remote: $vpk_upstream_url"
+		echo "[dry-run] Would create .vpk-sync.json"
+	else
+		cd "$target_dir"
+
+		# Add upstream remote
+		git remote add upstream "$vpk_upstream_url"
+		echo "✓ Added upstream remote: $vpk_upstream_url"
+
+		# Create .vpk-sync.json
+		cat > .vpk-sync.json << EOF
+{
+  "upstream": {
+    "url": "$vpk_upstream_url",
+    "defaultBranch": "main"
+  },
+  "sync": {
+    "strategy": "merge",
+    "excludePaths": []
+  },
+  "push": {
+    "useFork": false,
+    "forkRemote": "origin"
+  }
+}
+EOF
+		echo "✓ Created .vpk-sync.json"
+
+		# Fetch upstream to verify
+		if git fetch upstream 2>/dev/null; then
+			echo "✓ Verified upstream connection"
+		else
+			echo "⚠ Could not fetch upstream (may need access)"
+		fi
+
+		# Commit the sync config
+		git add .vpk-sync.json
+		git commit -m "Add VPK sync configuration" --quiet
+		git push origin main --quiet
+		echo "✓ Committed sync configuration"
+	fi
+
+	echo ""
+fi
+
 # Summary
 echo "=== Success ==="
 echo ""
@@ -235,6 +313,13 @@ else
 	echo "✓ Project created and pushed!"
 	echo ""
 	[[ -n "$gh_user" ]] && echo "GitHub URL: https://github.com/$gh_user/$project_name"
+	if [[ "$configure_upstream" == true ]]; then
+		echo "Upstream:   $vpk_upstream_url"
+		echo ""
+		echo "VPK sync is configured! You can now:"
+		echo "  • Pull VPK updates:  /vpk-sync --pull"
+		echo "  • Push improvements: /vpk-sync --push"
+	fi
 	echo ""
 	echo "Next steps:"
 	echo "  cd $target_dir"

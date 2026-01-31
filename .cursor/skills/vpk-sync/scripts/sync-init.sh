@@ -6,6 +6,10 @@
 #   --branch NAME    Default branch (default: main)
 #   --strategy STR   merge or rebase (default: merge)
 #   --dry-run        Preview only
+#
+# Handles two scenarios:
+#   1. User cloned VPK directly (origin = VPK) → renames origin to upstream
+#   2. User has own repo (origin = their repo) → adds upstream remote
 
 set -e
 
@@ -54,9 +58,24 @@ while [[ $# -gt 0 ]]; do
 	esac
 done
 
+# Detect current remotes
+CURRENT_ORIGIN=$(git remote get-url origin 2>/dev/null || echo "")
+CURRENT_UPSTREAM=$(git remote get-url upstream 2>/dev/null || echo "")
+
+# Determine if origin is VPK (user cloned VPK directly)
+IS_ORIGIN_VPK=false
+if [[ -n "$CURRENT_ORIGIN" ]] && [[ "$CURRENT_ORIGIN" == *"VPK"* || "$CURRENT_ORIGIN" == *"vpk"* ]]; then
+	IS_ORIGIN_VPK=true
+fi
+
 # Use default if no URL provided
 if [[ -z "$UPSTREAM_URL" ]]; then
-	UPSTREAM_URL="$DEFAULT_UPSTREAM"
+	if [[ "$IS_ORIGIN_VPK" == true ]]; then
+		# Origin is VPK, use it as upstream
+		UPSTREAM_URL="$CURRENT_ORIGIN"
+	else
+		UPSTREAM_URL="$DEFAULT_UPSTREAM"
+	fi
 fi
 
 # Validate strategy
@@ -70,6 +89,11 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo -e "Upstream URL:  ${GREEN}$UPSTREAM_URL${NC}"
 echo -e "Branch:        ${GREEN}$BRANCH${NC}"
 echo -e "Strategy:      ${GREEN}$STRATEGY${NC}"
+if [[ "$IS_ORIGIN_VPK" == true ]]; then
+	echo -e "Mode:          ${YELLOW}Direct clone (origin → upstream)${NC}"
+else
+	echo -e "Mode:          ${GREEN}Separate repo (adding upstream)${NC}"
+fi
 echo ""
 
 if $DRY_RUN; then
@@ -77,29 +101,44 @@ if $DRY_RUN; then
 	echo ""
 fi
 
-# Check if upstream remote already exists
-EXISTING_UPSTREAM=$(git remote get-url upstream 2>/dev/null || echo "")
-
-if [[ -n "$EXISTING_UPSTREAM" ]]; then
-	if [[ "$EXISTING_UPSTREAM" == "$UPSTREAM_URL" ]]; then
-		echo -e "${GREEN}✓ Upstream remote already configured correctly${NC}"
+# Handle scenario: origin is VPK (user cloned VPK directly without creating new repo)
+if [[ "$IS_ORIGIN_VPK" == true ]] && [[ -z "$CURRENT_UPSTREAM" ]]; then
+	echo -e "${YELLOW}Detected: You cloned VPK directly (origin points to VPK)${NC}"
+	echo -e "Renaming 'origin' → 'upstream' for sync workflow..."
+	echo ""
+	
+	if ! $DRY_RUN; then
+		git remote rename origin upstream
+		echo -e "${GREEN}✓ Renamed origin to upstream${NC}"
+		echo -e "${YELLOW}Note: You no longer have an 'origin' remote.${NC}"
+		echo -e "${YELLOW}      Use /vpk-repo --create to create your own repo, or${NC}"
+		echo -e "${YELLOW}      push via fork with /vpk-sync --push --use-fork${NC}"
 	else
-		echo -e "${YELLOW}! Upstream remote exists with different URL${NC}"
-		echo -e "  Current: $EXISTING_UPSTREAM"
-		echo -e "  New:     $UPSTREAM_URL"
-		if ! $DRY_RUN; then
-			git remote set-url upstream "$UPSTREAM_URL"
-			echo -e "${GREEN}✓ Updated upstream remote URL${NC}"
-		else
-			echo -e "${YELLOW}[DRY RUN] Would update upstream remote URL${NC}"
-		fi
+		echo -e "${YELLOW}[DRY RUN] Would rename origin to upstream${NC}"
 	fi
 else
-	if ! $DRY_RUN; then
-		git remote add upstream "$UPSTREAM_URL"
-		echo -e "${GREEN}✓ Added upstream remote${NC}"
+	# Standard case: add or update upstream remote
+	if [[ -n "$CURRENT_UPSTREAM" ]]; then
+		if [[ "$CURRENT_UPSTREAM" == "$UPSTREAM_URL" ]]; then
+			echo -e "${GREEN}✓ Upstream remote already configured correctly${NC}"
+		else
+			echo -e "${YELLOW}! Upstream remote exists with different URL${NC}"
+			echo -e "  Current: $CURRENT_UPSTREAM"
+			echo -e "  New:     $UPSTREAM_URL"
+			if ! $DRY_RUN; then
+				git remote set-url upstream "$UPSTREAM_URL"
+				echo -e "${GREEN}✓ Updated upstream remote URL${NC}"
+			else
+				echo -e "${YELLOW}[DRY RUN] Would update upstream remote URL${NC}"
+			fi
+		fi
 	else
-		echo -e "${YELLOW}[DRY RUN] Would add upstream remote${NC}"
+		if ! $DRY_RUN; then
+			git remote add upstream "$UPSTREAM_URL"
+			echo -e "${GREEN}✓ Added upstream remote${NC}"
+		else
+			echo -e "${YELLOW}[DRY RUN] Would add upstream remote${NC}"
+		fi
 	fi
 fi
 
