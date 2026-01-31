@@ -134,6 +134,7 @@ All files from upstream **except**:
 |----------|-------------|---------|
 | **Merge** (default) | Safer, preserves history | `--pull` |
 | **Rebase** | Cleaner history, more advanced | `--pull --rebase` |
+| **Allow unrelated** | Legacy repos without shared history | `--pull --allow-unrelated-histories` |
 
 ### Conflict Handling
 
@@ -164,10 +165,12 @@ If conflicts occur:
 
 4. **Execute sync**
    ```bash
-   ./.cursor/skills/vpk-sync/scripts/sync-pull.sh [--rebase] [--dry-run]
+   ./.cursor/skills/vpk-sync/scripts/sync-pull.sh [--rebase] [--allow-unrelated-histories] [--dry-run]
    ```
 
 5. **Report results** - summarize what was updated or any conflicts
+
+6. **If "unrelated histories" error occurs** - suggest re-running with `--allow-unrelated-histories`
 
 ---
 
@@ -541,9 +544,17 @@ Options:
 gh auth login
 ```
 
-### "Entirely different commit histories"
+### "Entirely different commit histories" or "refusing to merge unrelated histories"
 
-This happens when a branch was created from a fresh boilerplate export:
+This happens when your repo was created before `/vpk-share --create` was updated to preserve commit history.
+
+**For pulling updates (most common):**
+```bash
+# Re-run with --allow-unrelated-histories
+/vpk-sync --pull --allow-unrelated-histories
+```
+
+**For merging branches:**
 ```bash
 # Use the merge workflow
 /vpk-sync --merge <branch-name>
@@ -555,6 +566,8 @@ git cherry-pick <commit-sha>  # Skip the boilerplate commit
 git push -u origin <branch>-rebased
 gh pr create --base main --head <branch>-rebased
 ```
+
+**Note:** New projects created with `/vpk-share --create` now preserve VPK's commit history, so this won't be needed for future projects.
 
 ---
 
@@ -592,6 +605,9 @@ gh pr create --base main --head <branch>-rebased
 
 # Use rebase for cleaner history
 /vpk-sync --pull --rebase
+
+# For legacy repos without shared history
+/vpk-sync --pull --allow-unrelated-histories
 ```
 
 ### Contribute Back

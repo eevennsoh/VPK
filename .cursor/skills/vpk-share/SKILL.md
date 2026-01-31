@@ -23,7 +23,7 @@ Create and share VPK projects.
 ## Prerequisites
 
 - **GitHub CLI** (`gh`) installed and authenticated (for `--create`)
-- **rsync** installed (for `--create` and `--export`)
+- **rsync** installed (for `--export` and `--create --no-upstream`)
 
 ---
 
@@ -51,20 +51,31 @@ Creates a new project in a sibling directory and pushes to a new GitHub reposito
 
 ### What It Does
 
-1. **Captures VPK origin URL** (for upstream configuration, if enabled)
-2. **Cleans source project** (removes credentials and local files)
-3. **Creates sibling directory** — `../<project-name>/`
-4. **Copies project files** — excludes `.git`, `node_modules`, `.next`, `.env*`, etc.
-5. **Initializes git** — `git init && git add -A && git commit`
-6. **Creates GitHub repo** — `gh repo create <name> --source=. --push`
-7. **Configures upstream** (unless `--no-upstream`) — adds `upstream` remote + `.vpk-sync.json`
+The behavior differs based on whether upstream sync is enabled:
+
+**With upstream (default):**
+1. **Clones VPK repository** — preserves full commit history
+2. **Renames origin to upstream** — VPK becomes the upstream remote
+3. **Cleans sensitive files** — removes `.env*`, credentials, local config
+4. **Commits initialization** — marks the divergence point from VPK
+5. **Creates GitHub repo** — `gh repo create <name>` and sets as `origin`
+6. **Configures sync** — creates `.vpk-sync.json`
+
+**Standalone (`--no-upstream`):**
+1. **Copies project files** — excludes `.git`, `node_modules`, `.next`, `.env*`, etc.
+2. **Initializes fresh git** — `git init && git add -A && git commit`
+3. **Creates GitHub repo** — `gh repo create <name> --source=. --push`
 
 ### Upstream Configuration
 
-| Flag | Behavior |
-|------|----------|
-| (default) | Configures upstream remote + `.vpk-sync.json` for VPK sync |
-| `--no-upstream` | Standalone project, no VPK connection |
+| Flag | History | Sync | Use Case |
+|------|---------|------|----------|
+| (default) | Preserved | `/vpk-sync --pull` works cleanly | Contributing back to VPK |
+| `--no-upstream` | Fresh (orphan) | No sync configured | Standalone projects |
+
+**Why history matters:**
+- **Preserved history** — clean merges from upstream, no "unrelated histories" errors
+- **Fresh history** — cleaner `git log` for your project, no VPK commit noise
 
 **Use cases:**
 - **With upstream (default):** For users who may contribute improvements back to VPK
@@ -273,8 +284,9 @@ See `/vpk-sync` skill for full sync documentation.
 → Enter project name: "my-awesome-app"
 → Select "Yes" for VPK sync
 → Select "Private"
-→ Creates ../my-awesome-app/ with fresh GitHub repo
-→ Configures upstream for VPK sync
+→ Clones VPK with preserved commit history
+→ Creates ../my-awesome-app/ with GitHub repo
+→ Configures upstream for clean VPK sync
 ```
 
 ### Create standalone project
@@ -282,6 +294,7 @@ See `/vpk-sync` skill for full sync documentation.
 ```
 /vpk-share --create my-standalone-app --no-upstream
 → Creates ../my-standalone-app/
+→ Fresh git history (no VPK commits)
 → Pushes to new GitHub repo
 → No VPK connection (fully standalone)
 ```
