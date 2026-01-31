@@ -3,8 +3,8 @@ name: vpk-sync
 description: >-
   This skill should be used when the user asks to "sync with VPK", "pull updates",
   "push changes", "contribute back", "merge orphan branch", "update from VPK",
-  "get latest VPK", or wants to keep their prototype in sync with upstream VPK.
-argument-hint: "[--pull] [--push] [--merge] [--init] [--status]"
+  "get latest VPK", "contribute feature branch", or wants to keep their prototype in sync with upstream VPK.
+argument-hint: "[--pull] [--push] [--contribute] [--merge] [--init] [--status]"
 ---
 
 # VPK Sync
@@ -21,6 +21,7 @@ argument-hint: "[--pull] [--push] [--merge] [--init] [--status]"
 /vpk-sync --status     # Show sync status (commits ahead/behind)
 /vpk-sync --pull       # Pull latest updates from upstream VPK
 /vpk-sync --push       # Push local changes back to upstream via PR
+/vpk-sync --contribute # Contribute feature branches back to upstream (interactive)
 /vpk-sync --merge      # Merge an orphan branch PR back to main
 /vpk-sync --init       # Configure upstream repository connection
 ```
@@ -32,6 +33,7 @@ argument-hint: "[--pull] [--push] [--merge] [--init] [--status]"
 | `/vpk-sync` | Interactive | Choose action from menu |
 | `/vpk-sync up` | `--push` | Push changes to upstream |
 | `/vpk-sync down` | `--pull` | Pull updates from upstream |
+| `/vpk-sync contrib` | `--contribute` | Contribute feature branches |
 
 ---
 
@@ -105,7 +107,9 @@ options:
   - label: "Pull updates"
     description: "Get latest changes from upstream VPK"
   - label: "Push changes"
-    description: "Contribute improvements back to upstream"
+    description: "Contribute current branch changes to upstream"
+  - label: "Contribute feature branch"
+    description: "Select a feature branch and commits to contribute"
   - label: "Merge orphan PR"
     description: "Merge a branch with different commit history"
   - label: "Configure"
@@ -209,6 +213,157 @@ Same exclusions as pull (credentials, deployment config, personal settings).
    ```
 
 5. **Report PR URL** - provide link for user to review
+
+---
+
+## Contribute Workflow (`--contribute`)
+
+### When to Use
+
+Use this when you've developed features on **separate branches** and want to contribute
+specific branches or commits back to upstream VPK. This is different from `--push` which
+pushes commits from main.
+
+**Key scenarios:**
+
+- You developed a sidebar collapse feature on `feature/sidebar-collapse`
+- You merged it to your project's main branch
+- Now you want to contribute that feature (or specific commits from it) to upstream VPK
+- You may want to exclude project-specific commits (e.g., brand colors, custom modals)
+
+### How It Works
+
+1. **Track with git tags** — Contributed commits are marked with `vpk-contributed/<sha>` tags
+2. **Cherry-pick approach** — Selected commits are cherry-picked onto a clean branch from upstream/main
+3. **Partial contributions** — The same branch can be contributed multiple times with different commits
+4. **Status visibility** — `--list` shows which branches have pending vs. contributed commits
+
+### Command Options
+
+```bash
+/vpk-sync --contribute              # Interactive: list branches, select commits
+/vpk-sync --contribute --list       # List branches with contribution status
+/vpk-sync --contribute <branch>     # Contribute specific branch
+/vpk-sync --contribute <branch> --all                  # Include all commits
+/vpk-sync --contribute <branch> --commits "1,2,4"      # Include specific commits
+/vpk-sync --contribute <branch> --exclude "3,5"        # Exclude specific commits
+/vpk-sync --contribute <branch> --dry-run              # Preview without making changes
+```
+
+### Agent Instructions for Contribute
+
+1. **List available branches**
+   ```bash
+   ./.cursor/skills/vpk-sync/scripts/sync-contribute.sh --list
+   ```
+
+   This shows:
+   - Feature branches with commits ahead of upstream/main
+   - Number of commits on each branch
+   - Contribution status (not contributed / partially contributed / fully contributed)
+
+2. **Interactive branch selection** (if no branch specified)
+
+   Use `AskUserQuestion` to present branches:
+   ```yaml
+   header: "Select branch"
+   question: "Which branch would you like to contribute?"
+   options:
+     # Dynamically populated from --list output
+     - label: "feature/sidebar-collapse"
+       description: "5 commits ahead, not contributed"
+     - label: "feature/new-widget"
+       description: "3 commits ahead, 1/3 contributed"
+   ```
+
+3. **Show commits for selected branch**
+   ```bash
+   ./.cursor/skills/vpk-sync/scripts/sync-contribute.sh <branch>
+   ```
+
+   This displays commits with their contribution status:
+   ```
+   Commits on feature/sidebar-collapse:
+     1. abc1234 - Add collapse hook          [pending]
+     2. def5678 - Add animation              [pending]
+     3. 111aaaa - Fix z-index for our modal  [pending]
+     4. ghi9012 - Add localStorage           [contributed]
+   ```
+
+4. **Allow commit selection via AskUserQuestion**
+   ```yaml
+   header: "Commit selection"
+   question: "Enter commit numbers to EXCLUDE (or leave blank for all pending)"
+   multiSelect: false
+   options:
+     - label: "Include all pending"
+       description: "Contribute commits 1, 2, 3 (excludes already contributed)"
+     - label: "Exclude some"
+       description: "I'll specify which to exclude"
+   ```
+
+   If user chooses to exclude, ask for comma-separated numbers.
+
+5. **Execute contribution**
+   ```bash
+   ./.cursor/skills/vpk-sync/scripts/sync-contribute.sh <branch> --exclude "3,5"
+   # or
+   ./.cursor/skills/vpk-sync/scripts/sync-contribute.sh <branch> --commits "1,2,4"
+   # or
+   ./.cursor/skills/vpk-sync/scripts/sync-contribute.sh <branch> --all
+   ```
+
+6. **Report PR URL** - provide link for user to review
+
+### Conflict Resolution
+
+When a cherry-pick conflict occurs:
+
+1. Script pauses and shows conflicting files
+2. User resolves conflicts manually
+3. User runs:
+   ```bash
+   git add <resolved-files>
+   git cherry-pick --continue
+   ```
+4. Then completes the contribution:
+   ```bash
+   git push -u origin vpk-contribute/<branch>-<timestamp>
+   gh pr create --repo <upstream> --base main --title "..."
+   ```
+
+To abort instead:
+```bash
+git cherry-pick --abort
+git checkout <original-branch>
+git branch -D vpk-contribute/<branch>-<timestamp>
+```
+
+### Tracking Mechanism
+
+Contributed commits are tracked via git tags:
+
+```bash
+# Tag format
+vpk-contributed/<commit-sha>
+
+# Tag message format
+"PR #123 on 2026-01-31 from feature/sidebar-collapse"
+
+# Query all contributed commits
+git tag -l "vpk-contributed/*"
+
+# Check if specific commit was contributed
+git tag -l "vpk-contributed/abc1234"
+
+# View tag details
+git tag -l -n1 "vpk-contributed/abc1234"
+```
+
+This allows:
+- Same branch to be contributed multiple times
+- Individual commit tracking independent of branches
+- PR history visible in tag messages
 
 ---
 
@@ -463,6 +618,44 @@ gh pr create --base main --head <branch>-rebased
 
 # Useful when GitHub shows:
 # "main and <branch> are entirely different commit histories"
+```
+
+### Contribute Feature Branch
+
+```bash
+# List branches available for contribution
+/vpk-sync --contribute --list
+
+# Interactive mode: select branch and commits
+/vpk-sync --contribute
+
+# Contribute specific branch (all pending commits)
+/vpk-sync --contribute feature/sidebar-collapse
+
+# Contribute all commits including already contributed ones
+/vpk-sync --contribute feature/sidebar-collapse --all
+
+# Include only specific commits (by number from list)
+/vpk-sync --contribute feature/sidebar-collapse --commits "1,2,4"
+
+# Exclude specific commits (project-specific customizations)
+/vpk-sync --contribute feature/sidebar-collapse --exclude "3,5"
+
+# Preview without making changes
+/vpk-sync --contribute feature/sidebar-collapse --dry-run
+```
+
+### Query Contribution History
+
+```bash
+# List all contributed commits
+git tag -l "vpk-contributed/*"
+
+# Check if specific commit was contributed
+git tag -l "vpk-contributed/abc1234"
+
+# View contribution details (includes PR number and source branch)
+git tag -l -n1 "vpk-contributed/abc1234"
 ```
 
 ---
