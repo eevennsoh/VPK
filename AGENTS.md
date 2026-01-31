@@ -58,7 +58,7 @@ lsof -ti:3000,8080 | xargs kill -9     # Kill lingering port processes
 | Deploy | `/vpk-deploy` | Workflow  | Deploy to Atlassian Micros (auto-detects initial vs redeploy) |
 | Design | `/vpk-design` | Reference | ADS tokens, components, primitives, icons                     |
 | Tidy   | `/vpk-tidy`   | Utility   | Refactor React components for reusability and modularity      |
-| Share  | `/vpk-share`  | Utility   | Create GitHub repos, export boilerplate, reset projects       |
+| Share  | `/vpk-share`  | Utility   | Create GitHub repos with VPK sync, export boilerplate, reset  |
 | Sync   | `/vpk-sync`   | Utility   | Sync changes with upstream VPK (pull updates, push via PR)    |
 
 ### Skill Types
@@ -113,6 +113,7 @@ backend/
 components/
 ├── blocks/                    # Feature blocks (modular page.tsx + components/)
 │   ├── chat/
+│   ├── chat-composer/         # Rovo chat input with plan mode toggle
 │   ├── confluence/
 │   ├── jira/
 │   ├── layout/
@@ -128,8 +129,7 @@ lib/                           # Shared utilities
 rovo/                          # AI config (prompt builder)
 scripts/                       # Dev scripts
 
-.cursor/                       # Source of truth for AI configs
-.claude/, .codelassian/, .codex/  # Contain agents/ + symlink to .cursor/skills
+.cursor/                       # Source of truth for AI configs (skills + agents)
 ```
 
 ### Block Structure Pattern
@@ -298,35 +298,6 @@ No test framework configured. This is a prototype kit.
 - `ThemeSelector`
 
 ---
-
-## Gotchas
-
-### ADS Radius Tokens
-
-Use semantic names like `token("radius.large")` NOT `token("border.radius.200")`.
-
-**Available tokens:**
-
-- `radius.xsmall` (2px)
-- `radius.small` (4px)
-- `radius.medium` (6px)
-- `radius.large` (8px)
-- `radius.xlarge` (12px)
-- `radius.xxlarge` (16px)
-- `radius.full` (circular)
-- `radius.tile` (25% for tiles)
-
-### Icon Accessibility
-
-Always provide meaningful `label` props to icons.
-
-```tsx
-// Good
-<EditIcon label="Edit item" />
-
-// Bad - reduces accessibility
-<EditIcon label="" />
-```
 
 ### Dual Proxy Setup
 
