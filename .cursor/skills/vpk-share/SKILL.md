@@ -1,102 +1,308 @@
 ---
 name: vpk-share
-description: Create a sanitized boilerplate export of the VPK repo for reuse or sharing. Use when you need to strip credentials, local-only files, build artifacts, and caches before creating a clean template. Triggers include requests to "make a boilerplate," "clean repo for sharing," "remove secrets," "prepare template," or "export a clean copy."
-argument-hint: "reset (clean in-place) | export (copy to dest)"
-disable-model-invocation: true
+description: Create and share VPK projects. Use when the user asks to "create a new project", "create a repo", "export boilerplate", "share VPK", "reset project", "clean project", or wants to create a GitHub repository from VPK.
+argument-hint: "[--create <name>] [--export] [--reset] [--no-upstream] [--public]"
 ---
 
 # VPK Share
 
-## Overview
+Create and share VPK projects.
 
-Create a clean, shareable VPK boilerplate by removing credentials, local-only files, and build artifacts, then exporting a fresh copy with no git remote origin (prevents accidental pushes back to the original repo).
+## Quick Start
 
-## Quick start
+| Command | Action |
+|---------|--------|
+| `/vpk-share --create my-app` | Create GitHub repo with VPK sync (can contribute back) |
+| `/vpk-share --create my-app --no-upstream` | Create standalone GitHub repo (no VPK connection) |
+| `/vpk-share --export` | Export sanitized boilerplate (no GitHub repo) |
+| `/vpk-share --reset` | Clean current project (comprehensive) |
 
-**Option A: Reset the current repo to clean state**
+## Prerequisites
 
-```bash
-bash scripts/build_vpk_boilerplate.sh --reset
+- **GitHub CLI** (`gh`) installed and authenticated (for `--create`)
+- **rsync** installed (for `--create` and `--export`)
+
+---
+
+## Interactive Workflow (Default)
+
+When invoked without flags, use `AskUserQuestion` to determine what the user wants:
+
+```yaml
+header: "Action"
+question: "What would you like to do?"
+options:
+  - label: "Create new project with GitHub repo"
+    description: "Create repo, optionally configure VPK sync"
+  - label: "Export boilerplate"
+    description: "Sanitized copy for manual distribution (no GitHub)"
+  - label: "Reset current project"
+    description: "Comprehensive cleanup (credentials, caches, build artifacts)"
 ```
 
-This removes credentials, local files, and build artifacts (including `node_modules`) in-place.
+---
 
-**Option B: Export a sanitized copy**
+## Create Workflow (`--create`)
 
-1. Run the bundled script `scripts/build_vpk_boilerplate.sh` with `--src` pointing at the VPK repo and `--dest` for the export path.
-2. Review the export with the checklist in `references/boilerplate-checklist.md`.
-3. Push the export back to the single source of truth repo unless a different remote is explicitly requested.
+Creates a new project in a sibling directory and pushes to a new GitHub repository.
 
-## Workflow
+### What It Does
 
-### 1) Reset mode (clean up in-place)
+1. **Captures VPK origin URL** (for upstream configuration, if enabled)
+2. **Cleans source project** (removes credentials and local files)
+3. **Creates sibling directory** — `../<project-name>/`
+4. **Copies project files** — excludes `.git`, `node_modules`, `.next`, `.env*`, etc.
+5. **Initializes git** — `git init && git add -A && git commit`
+6. **Creates GitHub repo** — `gh repo create <name> --source=. --push`
+7. **Configures upstream** (unless `--no-upstream`) — adds `upstream` remote + `.vpk-sync.json`
 
-Use `--reset` to remove all local/credential files from the current repo:
+### Upstream Configuration
+
+| Flag | Behavior |
+|------|----------|
+| (default) | Configures upstream remote + `.vpk-sync.json` for VPK sync |
+| `--no-upstream` | Standalone project, no VPK connection |
+
+**Use cases:**
+- **With upstream (default):** For users who may contribute improvements back to VPK
+- **Without upstream (`--no-upstream`):** For external users or fully standalone prototypes
+
+### Agent Instructions
+
+1. If `<name>` not provided, use `AskUserQuestion`:
+   ```yaml
+   header: "Project name"
+   question: "What should the new project be named?"
+   options:
+     - label: "Enter custom name"
+       description: "Lowercase with hyphens (e.g., my-awesome-app)"
+   ```
+
+2. Ask about upstream:
+   ```yaml
+   header: "VPK Sync"
+   question: "Configure upstream sync with VPK?"
+   options:
+     - label: "Yes (Recommended)"
+       description: "Can pull VPK updates and push improvements back"
+     - label: "No (Standalone)"
+       description: "Completely independent project"
+   ```
+
+3. Ask for visibility:
+   ```yaml
+   header: "Visibility"
+   question: "Should the repository be public or private?"
+   options:
+     - label: "Private (Recommended)"
+       description: "Only you and collaborators can see it"
+     - label: "Public"
+       description: "Anyone on the internet can see it"
+   ```
+
+4. Run the script:
+   ```bash
+   bash .cursor/skills/vpk-share/scripts/build_vpk_boilerplate.sh --create <name> [--public] [--no-upstream]
+   ```
+
+5. Report the resulting GitHub URL.
+
+6. Remind the user to:
+   - `cd ../<project-name>` to enter the new project
+   - Run `pnpm install` or `/vpk-setup` to set up the new project
+
+7. If upstream was configured, mention:
+   - `/vpk-sync --pull` to get VPK updates
+   - `/vpk-sync --push` to contribute improvements back
+
+---
+
+## Export Workflow (`--export`)
+
+Exports a sanitized boilerplate copy without creating a GitHub repository.
+
+### What It Does
+
+1. **Copies project files** — excludes credentials, build artifacts, local config
+2. **Removes sensitive files** — scans for any remaining secrets
+3. **Initializes fresh git repo** — NO remote origin (prevents accidental pushes)
+4. **Verifies cleanliness** — fails if sensitive files remain
+
+### Use Cases
+
+- Distributing VPK to others who will set up their own repo manually
+- Creating a zip archive for sharing
+- Preparing a clean starting point
+
+### Agent Instructions
+
+1. Ask for destination (optional):
+   ```yaml
+   header: "Destination"
+   question: "Where should the export be created?"
+   options:
+     - label: "Default (../VPK-boilerplate)"
+       description: "Sibling directory with -boilerplate suffix"
+     - label: "Custom path"
+       description: "Specify a custom destination"
+   ```
+
+2. Run the script:
+   ```bash
+   bash .cursor/skills/vpk-share/scripts/build_vpk_boilerplate.sh --export [--dest PATH] [--force]
+   ```
+
+3. Report what was created.
+
+4. Remind the user of next steps:
+   - `cd <dest>`
+   - `pnpm install`
+   - `git remote add origin <url>`
+
+---
+
+## Reset Workflow (`--reset`)
+
+Comprehensive in-place cleanup of the current project.
+
+### What Gets Removed
+
+| Category | Items |
+|----------|-------|
+| **Credentials** | `.env.local`, `.env`, `.asap-config`, `.deploy.local` |
+| **Dev state** | `.dev-pids`, `.dev-backend-port`, `.api-routes-backup` |
+| **Local config** | `*.local.md`, `*.local.json`, `.vpk-sync.json` |
+| **Dependencies** | `node_modules/`, `backend/node_modules/` |
+| **Build artifacts** | `.next/`, `out/`, `build/`, `.turbo/`, `.cache/`, `coverage/`, `.vercel/` |
+
+### Validation
+
+After reset, the script checks `service-descriptor.yml` for placeholder values and warns if real service names are detected.
+
+### Agent Instructions
+
+1. Confirm the user wants to reset:
+   ```yaml
+   header: "Confirm Reset"
+   question: "This will remove credentials, dependencies, and build artifacts. Continue?"
+   options:
+     - label: "Yes, reset"
+     - label: "No, cancel"
+   ```
+
+2. Run the script:
+   ```bash
+   bash .cursor/skills/vpk-share/scripts/build_vpk_boilerplate.sh --reset [--dry-run]
+   ```
+
+3. Report what was cleaned.
+
+4. Remind the user to run `pnpm install` or `/vpk-setup` to restore the project.
+
+---
+
+## Script Reference
 
 ```bash
-bash scripts/build_vpk_boilerplate.sh --reset
+# Create with VPK sync (default)
+bash .cursor/skills/vpk-share/scripts/build_vpk_boilerplate.sh --create my-project
+
+# Create standalone (no VPK connection)
+bash .cursor/skills/vpk-share/scripts/build_vpk_boilerplate.sh --create my-project --no-upstream
+
+# Create public repo
+bash .cursor/skills/vpk-share/scripts/build_vpk_boilerplate.sh --create my-project --public
+
+# Export boilerplate
+bash .cursor/skills/vpk-share/scripts/build_vpk_boilerplate.sh --export
+
+# Export to custom destination
+bash .cursor/skills/vpk-share/scripts/build_vpk_boilerplate.sh --export --dest ../my-boilerplate
+
+# Reset current project
+bash .cursor/skills/vpk-share/scripts/build_vpk_boilerplate.sh --reset
+
+# Preview any operation
+bash .cursor/skills/vpk-share/scripts/build_vpk_boilerplate.sh --reset --dry-run
 ```
 
-Files removed:
-- `.deploy.local` (deployment credentials)
-- `.env.local` (environment variables)
-- `.asap-config` (ASAP credentials)
-- `.dev-pids`, `.dev-backend-port` (dev server state)
-- `*.local.md`, `*.local.json` (local config files)
+---
 
-Directories removed:
-- `node_modules/`, `backend/node_modules/` (dependencies)
-- `.next/`, `out/`, `build/` (build outputs)
-- `.turbo/`, `.cache/`, `.vercel/` (caches)
-- `coverage/` (test coverage)
+## Files Excluded from Copy
 
-Use `--dry-run` to preview what would be removed:
+When using `--create` or `--export`, these are excluded:
 
-```bash
-bash scripts/build_vpk_boilerplate.sh --reset --dry-run
+| Category | Files/Directories |
+|----------|-------------------|
+| **Git** | `.git/` |
+| **Dependencies** | `node_modules/`, `backend/node_modules/`, `.pnpm-store/` |
+| **Build artifacts** | `.next/`, `out/`, `build/`, `dist/`, `.turbo/`, `.cache/`, `coverage/` |
+| **Credentials** | `.env*`, `.asap-config`, `*.pem`, `*.key`, `*.p12`, `*.pfx`, `*.jks` |
+| **Local config** | `*.local.md`, `*.local.json`, `.vpk-sync.json` |
+| **Dev state** | `.dev-pids`, `.dev-backend-port` |
+| **IDE** | `.idea/`, `.vscode/` |
+| **Misc** | `.DS_Store`, `*.log`, `tmp/`, `.tmp/` |
+
+---
+
+## VPK Sync Integration
+
+After creating a project with upstream configured, you can:
+
+| Command | Action |
+|---------|--------|
+| `/vpk-sync --pull` | Pull latest updates from VPK |
+| `/vpk-sync --push` | Push improvements back to VPK via PR |
+| `/vpk-sync --status` | Check commits ahead/behind upstream |
+| `/vpk-sync --init` | Reconfigure upstream if needed |
+
+See `/vpk-sync` skill for full sync documentation.
+
+---
+
+## Examples
+
+### Create a new project interactively
+
+```
+/vpk-share
+→ Select "Create new project with GitHub repo"
+→ Enter project name: "my-awesome-app"
+→ Select "Yes" for VPK sync
+→ Select "Private"
+→ Creates ../my-awesome-app/ with fresh GitHub repo
+→ Configures upstream for VPK sync
 ```
 
-### 2) Pre-flight checks (for export mode)
+### Create standalone project
 
-- Confirm `.env.local` and any credential files are not required for the boilerplate.
-- Ensure `service-descriptor.yml` still uses placeholders (e.g., `YOUR-SERVICE-NAME`, `your-email@atlassian.com`).
-- Verify `.env.local.example` is present and contains only placeholders.
-- Scan for obvious secrets (private keys, tokens) before export.
-
-### 3) Build the boilerplate export
-
-Use the script bundled with this skill:
-
-```bash
-bash scripts/build_vpk_boilerplate.sh --src /path/to/VPK --dest /path/to/VPK-boilerplate
+```
+/vpk-share --create my-standalone-app --no-upstream
+→ Creates ../my-standalone-app/
+→ Pushes to new GitHub repo
+→ No VPK connection (fully standalone)
 ```
 
-Notes:
+### Export for distribution
 
-- The script excludes build outputs, caches, node_modules, env files, and common credential patterns.
-- `.env.local.example` is re-included if it exists in the source.
-- If the destination exists, pass `--force` to replace it.
-- Local files (`.deploy.local`, etc.) are automatically cleaned from the destination.
-
-### 4) Review the export
-
-- Run the checklist in `references/boilerplate-checklist.md`.
-- Verify there are no secrets or credentials in the export.
-- Confirm `pnpm install` and `pnpm run dev` work from the export.
-
-### 5) Set up your new remote
-
-The exported boilerplate has a fresh git repo with no remote origin. Add your own:
-
-```bash
-cd /path/to/VPK-boilerplate
-git remote add origin <your-new-repo-url>
-git push -u origin main
+```
+/vpk-share --export --dest ../vpk-for-team
+→ Creates sanitized copy at ../vpk-for-team/
+→ Fresh git repo, NO remote
+→ Ready for manual distribution
 ```
 
-This prevents accidental pushes back to the original prototype kit repo.
+### Clean up before committing
 
-## Resources
+```
+/vpk-share --reset
+→ Removes .env files, node_modules, .next, etc.
+→ Project is clean
+→ Run `pnpm install` to restore
+```
 
-- `scripts/build_vpk_boilerplate.sh` — create a sanitized export with sensible excludes and safety checks.
-- `references/boilerplate-checklist.md` — review list for credentials, build artifacts, and placeholders.
+---
+
+## References
+
+- [`references/boilerplate-checklist.md`](references/boilerplate-checklist.md) — Review checklist for exported boilerplate

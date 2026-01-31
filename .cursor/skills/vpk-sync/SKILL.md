@@ -44,16 +44,16 @@ argument-hint: "[--pull] [--push] [--merge] [--init] [--status]"
 
 ### Scenario A: Cloned VPK, No Separate Repo
 
-If you cloned VPK and are working directly in it (without `/vpk-repo --create`):
+If you cloned VPK and are working directly in it (without `/vpk-share --create`):
 
 1. **Configure upstream** (one time): `/vpk-sync --init`
    - This renames `origin` → `upstream` and configures sync
 2. **Pull updates**: `/vpk-sync --pull`
 3. **Push improvements**: `/vpk-sync --push` (creates PR via fork)
 
-### Scenario B: Created Separate Repo via `/vpk-repo`
+### Scenario B: Created Separate Repo via `/vpk-share`
 
-If you used `/vpk-repo --create my-project`:
+If you used `/vpk-share --create my-project`:
 
 1. **Upstream already configured** (automatic)
    - `origin` = your new repo
@@ -89,19 +89,24 @@ Shows current sync status with upstream.
 
 ---
 
-## Interactive Workflow
+## Interactive Workflow (Default)
 
-When invoked without flags, use AskUserQuestion to determine user intent:
+When invoked without flags, use `AskUserQuestion` to determine user intent:
 
-```
-Header: "Sync direction"
-Question: "What would you like to do?"
-Options:
-  - "Check status" - See how many commits ahead/behind upstream
-  - "Pull updates" - Get latest changes from upstream VPK
-  - "Push changes" - Contribute improvements back to upstream
-  - "Merge orphan PR" - Merge a branch with different commit history
-  - "Configure" - Set up or change upstream connection
+```yaml
+header: "Sync direction"
+question: "What would you like to do?"
+options:
+  - label: "Check status"
+    description: "See how many commits ahead/behind upstream"
+  - label: "Pull updates"
+    description: "Get latest changes from upstream VPK"
+  - label: "Push changes"
+    description: "Contribute improvements back to upstream"
+  - label: "Merge orphan PR"
+    description: "Merge a branch with different commit history"
+  - label: "Configure"
+    description: "Set up or change upstream connection"
 ```
 
 ---
@@ -186,11 +191,13 @@ Same exclusions as pull (credentials, deployment config, personal settings).
    ```
 
 3. **Gather PR details via AskUserQuestion**
-   ```
-   Header: "PR details"
-   Questions:
-     - "What does this change do?" (for title/description)
-     - "Which files should be included?" (if selective sync needed)
+   ```yaml
+   header: "PR details"
+   questions:
+     - prompt: "What does this change do?"
+       description: "Used for PR title and description"
+     - prompt: "Which files should be included?"
+       description: "Leave blank for all changes, or specify paths"
    ```
 
 4. **Execute push**
@@ -228,10 +235,15 @@ Use this when a branch has **no common commit history** with main. This happens 
    ```
 
 2. **Ask user which branch to merge** (if multiple)
-   ```
-   Header: "Select branch"
-   Question: "Which branch would you like to merge?"
-   Options: [list of branches/PRs]
+   ```yaml
+   header: "Select branch"
+   question: "Which branch would you like to merge?"
+   options:
+     # Dynamically populated from git branch -r output
+     - label: "<branch-name-1>"
+       description: "PR #X: <pr-title>"
+     - label: "<branch-name-2>"
+       description: "PR #Y: <pr-title>"
    ```
 
 3. **Check if branch has common history with main**
@@ -294,7 +306,7 @@ git cherry-pick --skip
 
 ### When to Use
 
-- First time setting up sync (if not using `/vpk-repo --create`)
+- First time setting up sync (if not using `/vpk-share --create`)
 - Changing upstream repository
 - Reconfiguring sync preferences
 
@@ -528,7 +540,7 @@ gh pr create --base main --head <branch>-rebased
 | Skill | Relationship |
 |-------|--------------|
 | `/vpk-setup` | Run first to configure credentials |
-| `/vpk-repo --create` | Creates new repo with upstream auto-configured |
+| `/vpk-share --create` | Creates new repo with upstream auto-configured |
 | `/vpk-deploy` | Deploy after pulling updates |
 
 ### Typical Workflow
@@ -536,7 +548,7 @@ gh pr create --base main --head <branch>-rebased
 ```
 1. Clone VPK
 2. /vpk-setup (credentials)
-3. /vpk-repo --create my-project (optional - creates separate repo)
+3. /vpk-share --create my-project (optional - creates separate repo)
 4. Develop...
 5. /vpk-sync --push (contribute back)
 6. /vpk-sync --pull (get updates periodically)

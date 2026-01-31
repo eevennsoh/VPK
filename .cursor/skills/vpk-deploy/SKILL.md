@@ -2,6 +2,7 @@
 name: vpk-deploy
 description: Deploy prototype to Atlassian Micros - auto-detects initial vs redeploy
 disable-model-invocation: true
+argument-hint: "[--status] [--initial] [--redeploy]"
 prerequisites:
   skills: [vpk-setup]
   files: [.env.local, .asap-config]
@@ -11,6 +12,76 @@ produces: [.deploy.local]
 # VPK Deploy - Deploy to Micros
 
 **Goal:** Deploy the prototype to Atlassian Micros infrastructure.
+
+## Quick Start
+
+```bash
+/vpk-deploy              # Interactive mode - auto-detects or asks
+/vpk-deploy --status     # Show deployment status (service info, env vars)
+/vpk-deploy --initial    # Force initial deployment workflow
+/vpk-deploy --redeploy   # Force redeploy workflow
+```
+
+---
+
+## Interactive Workflow (Default)
+
+When invoked without flags, first auto-detect the deployment type. If detection is ambiguous or the user just wants to check status, use `AskUserQuestion`:
+
+```yaml
+header: "Deployment action"
+question: "What would you like to do?"
+options:
+  - label: "Check status"
+    description: "View current deployment status and configuration"
+  - label: "Deploy changes"
+    description: "Build and deploy current code to Micros"
+  - label: "Initial setup"
+    description: "First-time deployment configuration"
+  - label: "View env vars"
+    description: "Check environment variables on Micros"
+```
+
+---
+
+## Status Workflow (`--status`)
+
+Shows current deployment configuration and status.
+
+### Agent Instructions for Status
+
+1. **Check local configuration**
+   ```bash
+   # Check if deploy config exists
+   if [ -f ".deploy.local" ]; then
+     source .deploy.local
+     echo "Service: $SERVICE_NAME"
+     echo "Environment: $ENV"
+   else
+     echo "No .deploy.local found"
+   fi
+   
+   # Check service-descriptor.yml
+   grep "image: docker.atl-paas.net/" service-descriptor.yml
+   ```
+
+2. **Check Micros service status** (if service name known)
+   ```bash
+   atlas micros service show -s $SERVICE_NAME -e $ENV
+   ```
+
+3. **List environment variables** (if service exists)
+   ```bash
+   atlas micros stash list -s $SERVICE_NAME -e $ENV
+   ```
+
+4. **Report status**
+   - Service name and URL
+   - Current deployment version
+   - Environment variables status (count of vars set)
+   - Any missing configuration
+
+---
 
 ## Step 0: Auto-Detect Deployment Type
 

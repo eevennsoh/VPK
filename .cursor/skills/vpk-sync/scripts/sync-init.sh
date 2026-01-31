@@ -111,7 +111,7 @@ if [[ "$IS_ORIGIN_VPK" == true ]] && [[ -z "$CURRENT_UPSTREAM" ]]; then
 		git remote rename origin upstream
 		echo -e "${GREEN}✓ Renamed origin to upstream${NC}"
 		echo -e "${YELLOW}Note: You no longer have an 'origin' remote.${NC}"
-		echo -e "${YELLOW}      Use /vpk-repo --create to create your own repo, or${NC}"
+		echo -e "${YELLOW}      Use /vpk-share --create to create your own repo, or${NC}"
 		echo -e "${YELLOW}      push via fork with /vpk-sync --push --use-fork${NC}"
 	else
 		echo -e "${YELLOW}[DRY RUN] Would rename origin to upstream${NC}"

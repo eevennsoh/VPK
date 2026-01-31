@@ -58,8 +58,7 @@ lsof -ti:3000,8080 | xargs kill -9     # Kill lingering port processes
 | Deploy | `/vpk-deploy` | Workflow  | Deploy to Atlassian Micros (auto-detects initial vs redeploy) |
 | Design | `/vpk-design` | Reference | ADS tokens, components, primitives, icons                     |
 | Tidy   | `/vpk-tidy`   | Utility   | Refactor React components for reusability and modularity      |
-| Share  | `/vpk-share`  | Utility   | Export sanitized boilerplate for sharing                      |
-| Repo   | `/vpk-repo`   | Utility   | Create new GitHub repository and push all changes             |
+| Share  | `/vpk-share`  | Utility   | Create GitHub repos, export boilerplate, reset projects       |
 | Sync   | `/vpk-sync`   | Utility   | Sync changes with upstream VPK (pull updates, push via PR)    |
 
 ### Skill Types
