@@ -90,12 +90,12 @@ sync-push.sh [options]
 
 ---
 
-## sync-merge.sh
+## sync-pull-orphan.sh
 
-Merge an orphan branch (branch with no common commit history) into main.
+Pull an orphan branch (branch with no common commit history) into main.
 
 ```bash
-sync-merge.sh [branch-name] [options]
+sync-pull-orphan.sh [branch-name] [options]
   --dry-run        Preview only, don't make changes
   --auto-merge     Automatically merge the PR after creation
   --cleanup        Delete the rebased branch after merge
@@ -104,17 +104,17 @@ sync-merge.sh [branch-name] [options]
 **Examples:**
 
 ```bash
-# Interactive merge (will prompt for branch selection)
-./.cursor/skills/vpk-sync/scripts/sync-merge.sh
+# Interactive (will prompt for branch selection)
+./.cursor/skills/vpk-sync/scripts/sync-pull-orphan.sh
 
-# Merge specific branch
-./.cursor/skills/vpk-sync/scripts/sync-merge.sh fix-composer
+# Pull specific branch
+./.cursor/skills/vpk-sync/scripts/sync-pull-orphan.sh fix-composer
 
-# Merge and auto-cleanup
-./.cursor/skills/vpk-sync/scripts/sync-merge.sh feature-branch --auto-merge --cleanup
+# Pull and auto-cleanup
+./.cursor/skills/vpk-sync/scripts/sync-pull-orphan.sh feature-branch --auto-merge --cleanup
 
 # Preview what would happen
-./.cursor/skills/vpk-sync/scripts/sync-merge.sh feature-branch --dry-run
+./.cursor/skills/vpk-sync/scripts/sync-pull-orphan.sh feature-branch --dry-run
 ```
 
 ---
@@ -148,6 +148,6 @@ git rev-list --count upstream/main..HEAD  # commits ahead
 When GitHub shows "entirely different commit histories":
 
 ```bash
-# Use the merge script
-./.cursor/skills/vpk-sync/scripts/sync-merge.sh branch-name
+# Use the pull-orphan script
+./.cursor/skills/vpk-sync/scripts/sync-pull-orphan.sh branch-name
 ```

@@ -2,9 +2,9 @@
 name: vpk-sync
 description: >-
   This skill should be used when the user asks to "sync with VPK", "pull updates",
-  "push changes", "contribute back", "merge orphan branch", "update from VPK",
+  "push changes", "contribute back", "pull orphan branch", "update from VPK",
   "get latest VPK", "contribute feature branch", or wants to keep their prototype in sync with upstream VPK.
-argument-hint: "[--pull] [--push] [--contribute] [--merge] [--init] [--status]"
+argument-hint: "[--pull] [--push] [--contribute] [--pull-orphan] [--init] [--status]"
 ---
 
 # VPK Sync
@@ -22,17 +22,17 @@ argument-hint: "[--pull] [--push] [--contribute] [--merge] [--init] [--status]"
 /vpk-sync --pull       # Pull latest updates from upstream VPK
 /vpk-sync --push       # Push local changes back to upstream via PR
 /vpk-sync --contribute # Contribute feature branches back to upstream (interactive)
-/vpk-sync --merge      # Merge an orphan branch PR back to main
+/vpk-sync --pull-orphan   # Pull an orphan branch into main
 /vpk-sync --init       # Configure upstream repository connection
 ```
 
 ### Shorthand Aliases
 
-| Alias | Equivalent | Description |
-|-------|------------|-------------|
-| `/vpk-sync` | Interactive | Choose action from menu |
-| `/vpk-sync up` | `--push` | Push changes to upstream |
-| `/vpk-sync down` | `--pull` | Pull updates from upstream |
+| Alias               | Equivalent     | Description                 |
+| ------------------- | -------------- | --------------------------- |
+| `/vpk-sync`         | Interactive    | Choose action from menu     |
+| `/vpk-sync up`      | `--push`       | Push changes to upstream    |
+| `/vpk-sync down`    | `--pull`       | Pull updates from upstream  |
 | `/vpk-sync contrib` | `--contribute` | Contribute feature branches |
 
 ---
@@ -75,12 +75,15 @@ Shows current sync status with upstream.
 ### Agent Instructions for Status
 
 1. **Check if upstream is configured**
+
    ```bash
    git remote get-url upstream 2>/dev/null
    ```
+
    If missing, suggest `/vpk-sync --init`
 
 2. **Fetch and compare**
+
    ```bash
    git fetch upstream
    BEHIND=$(git rev-list --count HEAD..upstream/main 2>/dev/null || echo "0")
@@ -110,8 +113,8 @@ options:
     description: "Contribute current branch changes to upstream"
   - label: "Contribute feature branch"
     description: "Select a feature branch and commits to contribute"
-  - label: "Merge orphan PR"
-    description: "Merge a branch with different commit history"
+  - label: "Pull orphan branch"
+    description: "Pull a branch with different commit history into main"
   - label: "Configure"
     description: "Set up or change upstream connection"
 ```
@@ -123,6 +126,7 @@ options:
 ### What Gets Synced
 
 All files from upstream **except**:
+
 - Credentials: `.env*`, `.asap-config`, `*.pem`, `*.key`
 - Deployment: `.deploy.local`, `service-descriptor.yml`
 - Personal config: `*.local.md`, `*.local.json`, `.vpk-sync.json`
@@ -130,15 +134,16 @@ All files from upstream **except**:
 
 ### Strategy Options
 
-| Strategy | When to Use | Command |
-|----------|-------------|---------|
-| **Merge** (default) | Safer, preserves history | `--pull` |
-| **Rebase** | Cleaner history, more advanced | `--pull --rebase` |
+| Strategy            | When to Use                         | Command                              |
+| ------------------- | ----------------------------------- | ------------------------------------ |
+| **Merge** (default) | Safer, preserves history            | `--pull`                             |
+| **Rebase**          | Cleaner history, more advanced      | `--pull --rebase`                    |
 | **Allow unrelated** | Legacy repos without shared history | `--pull --allow-unrelated-histories` |
 
 ### Conflict Handling
 
 If conflicts occur:
+
 1. Script identifies conflicting files
 2. Provides resolution guidance
 3. User resolves manually
@@ -147,23 +152,29 @@ If conflicts occur:
 ### Agent Instructions for Pull
 
 1. **Check for uncommitted changes**
+
    ```bash
    git status --porcelain
    ```
+
    If changes exist, ask user: stash, commit, or abort?
 
 2. **Verify upstream remote exists**
+
    ```bash
    git remote get-url upstream 2>/dev/null
    ```
+
    If missing, run init workflow first.
 
 3. **Fetch upstream**
+
    ```bash
    git fetch upstream
    ```
 
 4. **Execute sync**
+
    ```bash
    ./.cursor/skills/vpk-sync/scripts/sync-pull.sh [--rebase] [--allow-unrelated-histories] [--dry-run]
    ```
@@ -179,6 +190,7 @@ If conflicts occur:
 ### What Gets Pushed
 
 By default, all tracked changes. Use `--paths` to limit:
+
 ```bash
 /vpk-sync --push --paths "components/blocks/new-feature/"
 ```
@@ -190,17 +202,20 @@ Same exclusions as pull (credentials, deployment config, personal settings).
 ### Agent Instructions for Push
 
 1. **Check for changes to push**
+
    ```bash
    git status --porcelain
    git log upstream/main..HEAD --oneline 2>/dev/null
    ```
 
 2. **Verify GitHub CLI is authenticated**
+
    ```bash
    gh auth status
    ```
 
 3. **Gather PR details via AskUserQuestion**
+
    ```yaml
    header: "PR details"
    questions:
@@ -211,6 +226,7 @@ Same exclusions as pull (credentials, deployment config, personal settings).
    ```
 
 4. **Execute push**
+
    ```bash
    ./.cursor/skills/vpk-sync/scripts/sync-push.sh --title "Title" [--paths "..."] [--dry-run]
    ```
@@ -256,11 +272,13 @@ pushes commits from main.
 ### Agent Instructions for Contribute
 
 1. **List available branches**
+
    ```bash
    ./.cursor/skills/vpk-sync/scripts/sync-contribute.sh --list
    ```
 
    This shows:
+
    - Feature branches with commits ahead of upstream/main
    - Number of commits on each branch
    - Contribution status (not contributed / partially contributed / fully contributed)
@@ -268,6 +286,7 @@ pushes commits from main.
 2. **Interactive branch selection** (if no branch specified)
 
    Use `AskUserQuestion` to present branches:
+
    ```yaml
    header: "Select branch"
    question: "Which branch would you like to contribute?"
@@ -280,11 +299,13 @@ pushes commits from main.
    ```
 
 3. **Show commits for selected branch**
+
    ```bash
    ./.cursor/skills/vpk-sync/scripts/sync-contribute.sh <branch>
    ```
 
    This displays commits with their contribution status:
+
    ```
    Commits on feature/sidebar-collapse:
      1. abc1234 - Add collapse hook          [pending]
@@ -294,6 +315,7 @@ pushes commits from main.
    ```
 
 4. **Allow commit selection via AskUserQuestion**
+
    ```yaml
    header: "Commit selection"
    question: "Enter commit numbers to EXCLUDE (or leave blank for all pending)"
@@ -308,6 +330,7 @@ pushes commits from main.
    If user chooses to exclude, ask for comma-separated numbers.
 
 5. **Execute contribution**
+
    ```bash
    ./.cursor/skills/vpk-sync/scripts/sync-contribute.sh <branch> --exclude "3,5"
    # or
@@ -336,6 +359,7 @@ When a cherry-pick conflict occurs:
    ```
 
 To abort instead:
+
 ```bash
 git cherry-pick --abort
 git checkout <original-branch>
@@ -364,17 +388,19 @@ git tag -l -n1 "vpk-contributed/abc1234"
 ```
 
 This allows:
+
 - Same branch to be contributed multiple times
 - Individual commit tracking independent of branches
 - PR history visible in tag messages
 
 ---
 
-## Merge Workflow (`--merge`)
+## Pull Orphan Workflow (`--pull-orphan`)
 
 ### When to Use
 
 Use this when a branch has **no common commit history** with main. This happens when:
+
 - A branch was created from a fresh VPK boilerplate export
 - A branch was force-pushed with different base commits
 - GitHub shows "entirely different commit histories" error
@@ -386,19 +412,21 @@ Use this when a branch has **no common commit history** with main. This happens 
 3. Creates a PR from the rebased branch
 4. Optionally merges the PR
 
-### Agent Instructions for Merge
+### Agent Instructions for Pull Orphan
 
 1. **List open PRs or branches**
+
    ```bash
    gh pr list --state open --json number,title,headRefName,url
    git fetch origin
    git branch -r | grep -v main
    ```
 
-2. **Ask user which branch to merge** (if multiple)
+2. **Ask user which branch to pull** (if multiple)
+
    ```yaml
    header: "Select branch"
-   question: "Which branch would you like to merge?"
+   question: "Which branch would you like to pull?"
    options:
      # Dynamically populated from git branch -r output
      - label: "<branch-name-1>"
@@ -408,6 +436,7 @@ Use this when a branch has **no common commit history** with main. This happens 
    ```
 
 3. **Check if branch has common history with main**
+
    ```bash
    git merge-base --is-ancestor origin/main origin/<branch> 2>/dev/null
    # Exit code 0 = has common history (use normal merge)
@@ -415,28 +444,31 @@ Use this when a branch has **no common commit history** with main. This happens 
    ```
 
 4. **If no common history, cherry-pick approach:**
+
    ```bash
    # Get commits unique to the orphan branch
    git log origin/<branch> --oneline
-   
+
    # Create new branch from main
    git checkout main
    git checkout -b <branch>-rebased
-   
+
    # Cherry-pick each commit (skip the boilerplate base if any)
    git cherry-pick <commit-sha>
-   
+
    # Resolve conflicts if any
    # For each conflict: review, resolve, git add, git cherry-pick --continue
    ```
 
 5. **Push and create PR**
+
    ```bash
    git push -u origin <branch>-rebased
    gh pr create --base main --head <branch>-rebased --title "..." --body "..."
    ```
 
 6. **Optionally merge the PR**
+
    ```bash
    gh pr merge <number> --merge
    ```
@@ -451,12 +483,14 @@ Use this when a branch has **no common commit history** with main. This happens 
 ### Conflict Resolution During Cherry-Pick
 
 When conflicts occur:
+
 1. Check which files conflict: `git diff --name-only --diff-filter=U`
 2. Open and resolve conflicts manually
 3. Stage resolved files: `git add <file>`
 4. Continue: `git cherry-pick --continue`
 
 If a commit is entirely superseded by main, skip it:
+
 ```bash
 git cherry-pick --skip
 ```
@@ -474,6 +508,7 @@ git cherry-pick --skip
 ### Agent Instructions for Init
 
 1. **Check current configuration**
+
    ```bash
    git remote get-url upstream 2>/dev/null
    git remote get-url origin 2>/dev/null
@@ -481,6 +516,7 @@ git cherry-pick --skip
    ```
 
 2. **Determine scenario**
+
    - If `origin` points to VPK and no `upstream`: rename origin → upstream
    - If `origin` points to user's repo and no `upstream`: add upstream
 
@@ -488,6 +524,7 @@ git cherry-pick --skip
    Default: `https://github.com/eevennsoh/VPK`
 
 4. **Execute init**
+
    ```bash
    ./.cursor/skills/vpk-sync/scripts/sync-init.sh <upstream-url> [--strategy merge|rebase]
    ```
@@ -513,6 +550,7 @@ For detailed documentation, see:
 ### "No upstream remote configured"
 
 Run init first:
+
 ```bash
 /vpk-sync --init
 ```
@@ -520,6 +558,7 @@ Run init first:
 ### "Uncommitted changes detected"
 
 Options:
+
 1. Stash: `git stash` → sync → `git stash pop`
 2. Commit: `git add . && git commit -m "WIP"`
 3. Discard: `git checkout .` (loses changes)
@@ -534,6 +573,7 @@ Options:
 ### "Permission denied on push"
 
 Options:
+
 1. Use fork: `/vpk-sync --push --use-fork`
 2. Request write access to upstream
 3. Create fork manually and update config
@@ -549,15 +589,17 @@ gh auth login
 This happens when your repo was created before `/vpk-share --create` was updated to preserve commit history.
 
 **For pulling updates (most common):**
+
 ```bash
 # Re-run with --allow-unrelated-histories
 /vpk-sync --pull --allow-unrelated-histories
 ```
 
-**For merging branches:**
+**For pulling orphan branches:**
+
 ```bash
-# Use the merge workflow
-/vpk-sync --merge <branch-name>
+# Use the pull-orphan workflow
+/vpk-sync --pull-orphan <branch-name>
 
 # Or manually:
 git checkout main
@@ -623,14 +665,14 @@ gh pr create --base main --head <branch>-rebased
 /vpk-sync --push --dry-run
 ```
 
-### Merge Orphan Branch
+### Pull Orphan Branch
 
 ```bash
-# Merge a branch with no common history
-/vpk-sync --merge
+# Pull a branch with no common history
+/vpk-sync --pull-orphan
 
-# Merge specific branch
-/vpk-sync --merge fix-composer
+# Pull specific branch
+/vpk-sync --pull-orphan fix-composer
 
 # Useful when GitHub shows:
 # "main and <branch> are entirely different commit histories"
@@ -678,11 +720,11 @@ git tag -l -n1 "vpk-contributed/abc1234"
 
 ## Integration with Other Skills
 
-| Skill | Relationship |
-|-------|--------------|
-| `/vpk-setup` | Run first to configure credentials |
+| Skill                 | Relationship                                   |
+| --------------------- | ---------------------------------------------- |
+| `/vpk-setup`          | Run first to configure credentials             |
 | `/vpk-share --create` | Creates new repo with upstream auto-configured |
-| `/vpk-deploy` | Deploy after pulling updates |
+| `/vpk-deploy`         | Deploy after pulling updates                   |
 
 ### Typical Workflow
 
