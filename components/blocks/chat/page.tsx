@@ -153,6 +153,7 @@ export default function ChatPanel({ onClose }: ChatPanelProps) {
 	const [selectedReasoning, setSelectedReasoning] = useState("deep-research");
 	const [webResultsEnabled, setWebResultsEnabled] = useState(false);
 	const [companyKnowledgeEnabled, setCompanyKnowledgeEnabled] = useState(true);
+	const [planModeEnabled, setPlanModeEnabled] = useState(false);
 	const { messages, setMessages } = useChat();
 	const { customPrompt } = useSystemPrompt();
 	const { streamMessage, abort } = useStreamingChat();
@@ -295,6 +296,8 @@ export default function ChatPanel({ onClose }: ChatPanelProps) {
 				showAddMenu={true}
 				showCustomizeMenu={true}
 				showPlanMode={true}
+				planModeEnabled={planModeEnabled}
+				onPlanModeToggle={setPlanModeEnabled}
 				showMicrophone={false}
 				showDisclaimer={true}
 				customizeMenuProps={{

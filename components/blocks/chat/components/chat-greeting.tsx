@@ -67,10 +67,8 @@ function SkillListItem({
 	onClick?: () => void;
 }>) {
 	const IconComponent = suggestion.icon;
-	const isSkill = suggestion.type === "skill";
-
-	// Get icon color based on type - skills have colored icons
-	const iconColor = isSkill ? token("color.icon.discovery") : token("color.icon");
+	// Use discovery color for "Collect insights" lightbulb, subtlest for others
+	const iconColor = suggestion.id === "collect-insights" ? token("color.icon.discovery") : token("color.icon.subtlest");
 
 	return (
 		<div
@@ -94,13 +92,7 @@ function SkillListItem({
 			{/* Icon container - 32x32 bordered box */}
 			<div style={iconContainerStyles}>
 				{suggestion.imageSrc ? (
-					<Image
-						src={suggestion.imageSrc}
-						alt={suggestion.label}
-						width={20}
-						height={20}
-						style={{ objectFit: "contain" }}
-					/>
+					<Image src={suggestion.imageSrc} alt={suggestion.label} width={20} height={20} style={{ objectFit: "contain" }} />
 				) : IconComponent ? (
 					<IconComponent label={suggestion.label} size="medium" color={iconColor} />
 				) : null}
@@ -112,11 +104,7 @@ function SkillListItem({
 	);
 }
 
-export default function ChatGreeting({
-	variant = "chat",
-	heading = "Let's do this together",
-	onSuggestionClick,
-}: Readonly<ChatGreetingProps>) {
+export default function ChatGreeting({ variant = "chat", heading = "Let's do this together", onSuggestionClick }: Readonly<ChatGreetingProps>) {
 	const illustration = illustrations[variant];
 	const suggestions = variant === "plan" ? planModeSuggestions : defaultSuggestions;
 
@@ -125,13 +113,7 @@ export default function ChatGreeting({
 			<Stack space="space.300">
 				{/* Greeting section - centered */}
 				<Stack space="space.100" alignInline="center">
-					<Image
-						src={illustration.src}
-						alt={illustration.alt}
-						width={80}
-						height={80}
-						style={{ objectFit: "contain" }}
-					/>
+					<Image src={illustration.src} alt={illustration.alt} width={80} height={80} style={{ objectFit: "contain" }} />
 					<Heading size="large">{heading}</Heading>
 				</Stack>
 
@@ -139,11 +121,7 @@ export default function ChatGreeting({
 				<div style={{ width: "100%" }}>
 					<Stack space="space.050">
 						{suggestions.map((suggestion) => (
-							<SkillListItem
-								key={suggestion.id}
-								suggestion={suggestion}
-								onClick={() => onSuggestionClick?.(suggestion)}
-							/>
+							<SkillListItem key={suggestion.id} suggestion={suggestion} onClick={() => onSuggestionClick?.(suggestion)} />
 						))}
 					</Stack>
 				</div>
