@@ -306,6 +306,32 @@ Use sentence case with verb + noun pattern:
 
 ---
 
+## Figma Implementation Best Practices
+
+When implementing designs from Figma, follow these principles:
+
+### Always Start with Context
+
+Never implement based on assumptions. Always fetch `get_design_context` and `get_screenshot` first to understand the exact design specifications.
+
+### Incremental Validation
+
+Validate frequently during implementation, not just at the end. Use `/agent-browser` to check progress after completing each major section.
+
+### Document Deviations
+
+If you must deviate from the Figma design (for accessibility, technical constraints, or ADS component limitations), document why in code comments.
+
+### Reuse Over Recreation
+
+Always check for existing ADS components before creating new ones. Consistency with the design system is more important than exact Figma replication.
+
+### ADS First
+
+When translating Figma output, prefer ADS design system patterns over literal Tailwind-to-code translation. ADS components handle accessibility, theming, and interaction states automatically.
+
+---
+
 ## Visual Testing
 
 After implementing components, validate visually using the `/agent-browser` skill.
