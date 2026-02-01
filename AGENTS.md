@@ -329,6 +329,28 @@ See `.cursor/skills/vpk-design/references/visual-testing.md` for detailed workfl
 
 ## Gotchas
 
+### Worktree Port Management
+
+Each git worktree gets **deterministic port ranges** to prevent conflicts:
+
+| Worktree | Frontend Base | Backend Base |
+|----------|---------------|--------------|
+| main | 3000 | 8080 |
+| Other worktrees | 3000 + offset | 8080 + offset |
+
+The offset is calculated from the worktree name hash (0-98, even numbers). If the base port is busy, it auto-increments by 1.
+
+**Check port assignments:**
+```bash
+pnpm ports  # Shows all worktree port assignments
+```
+
+**Port files (written at runtime):**
+- `.dev-frontend-port` — Active frontend port
+- `.dev-backend-port` — Active backend port
+
+**Playwright/agent-browser integration:** A PreToolUse hook automatically provides port context before browser tools run.
+
 ### Dual Proxy Setup
 
 In dev, API calls go through Next.js proxy → Express. Check both layers when debugging.

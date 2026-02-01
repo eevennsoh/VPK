@@ -2,8 +2,9 @@ const net = require("node:net");
 const fs = require("node:fs");
 const path = require("node:path");
 const { spawn } = require("node:child_process");
+const { getBackendBasePort } = require("./lib/worktree-ports");
 
-const basePort = Number.parseInt(process.env.BACKEND_PORT ?? "8080", 10);
+const basePort = getBackendBasePort();
 const maxTries = Number.parseInt(process.env.PORT_SEARCH_MAX ?? "20", 10);
 const portFile = path.join(process.cwd(), ".dev-backend-port");
 

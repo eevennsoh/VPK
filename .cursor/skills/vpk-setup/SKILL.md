@@ -175,10 +175,16 @@ For detailed model switching instructions, see [references/guide-model-switch.md
 ### Port Auto-Discovery
 
 VPK dev servers automatically find available ports if defaults are in use:
-- **Frontend**: Tries ports 3000-3019 (configurable via `PORT` env var)
-- **Backend**: Tries ports 8080-8099 (configurable via `BACKEND_PORT` env var)
+- **Frontend**: Tries ports 3000+ (configurable via `PORT` env var)
+- **Backend**: Tries ports 8080+ (configurable via `BACKEND_PORT` env var)
 
-The actual ports are shown in terminal output when servers start. If a non-default port is used, you'll see a message like `"Port 3000 in use. Using 3001 instead."`
+**Worktree-aware:** Each git worktree gets a deterministic port range based on its name, preventing conflicts when running multiple worktrees simultaneously.
+
+```bash
+pnpm ports  # Show port assignments for all worktrees
+```
+
+The actual ports are written to `.dev-frontend-port` and `.dev-backend-port` at runtime. Playwright/agent-browser tools automatically read these files via a PreToolUse hook.
 
 ## Next Steps
 

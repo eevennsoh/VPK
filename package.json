@@ -9,7 +9,8 @@
 		"lint": "eslint",
 		"deploy:micros": "./scripts/dev-deploy-fast.sh",
 		"dev:backend": "node scripts/dev-backend.js",
-		"dev:frontend": "node scripts/dev-frontend.js"
+		"dev:frontend": "node scripts/dev-frontend.js",
+		"ports": "node scripts/show-worktree-ports.js"
 	},
 	"dependencies": {
 		"@atlaskit/app-provider": "^3.3.2",

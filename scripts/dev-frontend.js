@@ -2,8 +2,9 @@ const net = require("node:net");
 const fs = require("node:fs");
 const path = require("node:path");
 const { spawn } = require("node:child_process");
+const { getFrontendBasePort } = require("./lib/worktree-ports");
 
-const basePort = Number.parseInt(process.env.PORT ?? "3000", 10);
+const basePort = getFrontendBasePort();
 const portFile = path.join(process.cwd(), ".dev-frontend-port");
 const maxTries = Number.parseInt(process.env.PORT_SEARCH_MAX ?? "20", 10);
 
