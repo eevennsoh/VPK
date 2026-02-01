@@ -75,11 +75,11 @@ export default function ComposerActions({
 					</div>
 				)}
 
-				{showPlanMode &&
-					(planModeEnabled ? (
+				{showPlanMode && (
+					planModeEnabled ? (
 						<PlanBadge onClose={() => onPlanModeToggle?.(false)} />
 					) : (
-						<Tooltip content="Enter plan mode ⇧Tab" position="top">
+						<Tooltip content="Enter plan mode ⇧Tab" position="top" hideTooltipOnMouseDown>
 							<IconButton
 								icon={ClipboardIcon}
 								label="Enter plan mode"
@@ -88,7 +88,8 @@ export default function ComposerActions({
 								onClick={() => onPlanModeToggle?.(true)}
 							/>
 						</Tooltip>
-					))}
+					)
+				)}
 			</div>
 
 			<div style={composerStyles.buttonGroup}>
