@@ -2,7 +2,7 @@
 name: vpk-agent-design
 model: inherit
 color: magenta
-tools: ["Read", "Write", "Edit", "Glob", "Grep", "ToolSearch", "WebFetch"]
+tools: ["Read", "Write", "Edit", "Glob", "Grep", "ToolSearch", "WebFetch", "Skill"]
 description: |
   Atlassian Design System UI specialist. Use proactively when designing UI components, creating layouts, styling with tokens, or implementing any visual interface. Expert in ADS tokens, icons, components, primitives, and accessibility.
 
@@ -623,6 +623,8 @@ await ads_analyze_a11y({
 ## Visual Testing
 
 After implementing components, validate visually using the `/agent-browser` skill.
+
+> **Note:** `/agent-browser` is a **skill** (not a subagent). Invoke it using the `Skill` tool with `skill: "agent-browser"`. It uses the Playwright MCP server under the hood.
 
 ### When to Run Visual Tests
 

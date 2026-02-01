@@ -383,6 +383,8 @@ When translating Figma output, prefer ADS design system patterns over literal Ta
 
 After implementing components, validate visually using the `/agent-browser` skill.
 
+> **Note:** `/agent-browser` is a **skill** (not a subagent). It uses the Playwright MCP server for browser automation. Invoke it using the `Skill` tool.
+
 ### Finding the Port
 
 The dev server uses dynamic port allocation. Check `.dev-frontend-port` for the actual port:

@@ -4,7 +4,7 @@ Automated visual testing workflow for VPK components using the `/agent-browser` 
 
 ## Overview
 
-The `/agent-browser` skill provides browser automation capabilities powered by Playwright. Instead of calling Playwright MCP tools directly, describe what you want to test in natural language.
+The `/agent-browser` skill provides browser automation capabilities. It is a **skill** (invoked via the `Skill` tool), not a subagent. It uses the **Playwright MCP server** under the hood. Instead of calling Playwright MCP tools directly, describe what you want to test in natural language.
 
 ## Prerequisites
 
