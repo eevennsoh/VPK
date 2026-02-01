@@ -27,6 +27,14 @@ Extract the file key and node ID from the URL:
 - File key: `kL9xQn2VwM8pYrTb4ZcHjF`
 - Node ID: `42-15`
 
+**Important — Node ID Format Conversion:**
+
+When extracting the node ID from a Figma URL, convert the format:
+- URL format uses hyphens: `node-id=42-15`
+- MCP tools expect colons: `nodeId="42:15"`
+
+Always convert hyphens to colons when calling Figma MCP tools.
+
 #### Option B: Use Current Selection (figma-desktop MCP only)
 
 When using `figma-desktop` MCP without a URL, tools automatically use the currently selected node from the open Figma file.
@@ -36,21 +44,21 @@ When using `figma-desktop` MCP without a URL, tools automatically use the curren
 ### Step 2: Fetch Design Context
 
 ```
-get_design_context(fileKey=":fileKey", nodeId="1-2")
+get_design_context(fileKey=":fileKey", nodeId="1:2")
 ```
 
 Returns layout properties, typography, colors, component structure, and spacing.
 
 **If the response is truncated:**
 
-1. Run `get_metadata(fileKey=":fileKey", nodeId="1-2")` to get the node map
+1. Run `get_metadata(fileKey=":fileKey", nodeId="1:2")` to get the node map
 2. Identify specific child nodes from metadata
 3. Fetch each with `get_design_context(fileKey=":fileKey", nodeId=":childNodeId")`
 
 ### Step 3: Capture Visual Reference
 
 ```
-get_screenshot(fileKey=":fileKey", nodeId="1-2")
+get_screenshot(fileKey=":fileKey", nodeId="1:2")
 ```
 
 This screenshot is the source of truth for validation. Keep it accessible throughout implementation.
@@ -228,9 +236,9 @@ User says: "Implement this Figma button: https://figma.com/design/kL9xQn2VwM8pYr
 
 **Actions:**
 
-1. Parse URL: fileKey=`kL9xQn2VwM8pYrTb4ZcHjF`, nodeId=`42-15`
-2. Run `get_design_context(fileKey="kL9xQn2VwM8pYrTb4ZcHjF", nodeId="42-15")`
-3. Run `get_screenshot(fileKey="kL9xQn2VwM8pYrTb4ZcHjF", nodeId="42-15")`
+1. Parse URL: fileKey=`kL9xQn2VwM8pYrTb4ZcHjF`, nodeId=`42:15` (convert hyphen to colon)
+2. Run `get_design_context(fileKey="kL9xQn2VwM8pYrTb4ZcHjF", nodeId="42:15")`
+3. Run `get_screenshot(fileKey="kL9xQn2VwM8pYrTb4ZcHjF", nodeId="42:15")`
 4. Download any button icons from assets endpoint
 5. Check if project has existing button component
 6. If yes, extend with new variant; if no, create using VPK conventions
@@ -243,7 +251,7 @@ User says: "Build this dashboard: https://figma.com/design/pR8mNv5KqXzGwY2JtCfL4
 
 **Actions:**
 
-1. Parse URL: fileKey=`pR8mNv5KqXzGwY2JtCfL4D`, nodeId=`10-5`
+1. Parse URL: fileKey=`pR8mNv5KqXzGwY2JtCfL4D`, nodeId=`10:5` (convert hyphen to colon)
 2. Run `get_metadata` to understand page structure
 3. Identify main sections (header, sidebar, content, cards) and their node IDs
 4. Run `get_design_context` for each major section
@@ -281,15 +289,30 @@ User says: "Build this dashboard: https://figma.com/design/pR8mNv5KqXzGwY2JtCfL4
 
 ## Validation Checklist
 
+### Code Quality
+
 - [ ] Used `@atlaskit/tokens` for all colors, spacing, shadows, radii
 - [ ] Used ADS primitives (Stack, Inline, Box, Flex) for layout
 - [ ] Used Heading/Text components instead of raw HTML elements
 - [ ] Icons have meaningful `label` props
 - [ ] Component is under 150 lines (split if needed)
 - [ ] Props interface is defined with `Readonly<>`
+
+### Visual Fidelity
+
+- [ ] Layout matches (spacing, alignment, sizing)
+- [ ] Typography matches (font, size, weight, line height)
+- [ ] Colors match exactly
+- [ ] Interactive states work as designed (hover, active, disabled)
+- [ ] Responsive behavior follows Figma constraints
+- [ ] Assets render correctly
+
+### Validation Steps
+
 - [ ] Visual output matches Figma screenshot 1:1
 - [ ] Implementation screenshot captured via /agent-browser
 - [ ] Dark mode renders correctly
+- [ ] Accessibility standards met (WCAG)
 
 ## Additional Resources
 
