@@ -336,43 +336,53 @@ When translating Figma output, prefer ADS design system patterns over literal Ta
 
 After implementing components, validate visually using the `/agent-browser` skill.
 
+### Finding the Port
+
+The dev server uses dynamic port allocation. Check `.dev-frontend-port` for the actual port:
+
+```bash
+cat .dev-frontend-port  # Returns the port number (e.g., 3000, 3001, etc.)
+```
+
 ### How to Use
 
 Invoke the skill and describe your testing needs in natural language:
 
 ```
 /agent-browser
-"Take screenshots of http://localhost:3000/jira in both light and dark mode"
+"Take screenshots of http://localhost:<port>/jira in both light and dark mode"
 ```
+
+Replace `<port>` with the value from `.dev-frontend-port`.
 
 ### Example Prompts
 
 **Theme testing:**
 ```
-"Navigate to http://localhost:3000/jira, set localStorage 'ui-theme' to 'light',
+"Navigate to http://localhost:<port>/jira, set localStorage 'ui-theme' to 'light',
 take a screenshot, then switch to dark mode and take another screenshot"
 ```
 
 **Figma comparison:**
 ```
-"Take a screenshot of http://localhost:3000/confluence in light mode"
+"Take a screenshot of http://localhost:<port>/confluence in light mode"
 ```
 
 **Responsive testing:**
 ```
-"Test http://localhost:3000/jira at desktop (1440x900), tablet (768x1024),
+"Test http://localhost:<port>/jira at desktop (1440x900), tablet (768x1024),
 and mobile (375x812) sizes"
 ```
 
 ### Route Mapping
 
-| Block Location                  | Test URL                           |
-| ------------------------------- | ---------------------------------- |
-| `components/blocks/jira/`       | `http://localhost:3000/jira`       |
-| `components/blocks/confluence/` | `http://localhost:3000/confluence` |
-| `components/blocks/rovo/`       | `http://localhost:3000/rovo`       |
-| `components/blocks/search/`     | `http://localhost:3000/search`     |
-| `components/blocks/widget/`     | `http://localhost:3000/widgets`    |
+| Block Location                  | Test URL                            |
+| ------------------------------- | ----------------------------------- |
+| `components/blocks/jira/`       | `http://localhost:<port>/jira`       |
+| `components/blocks/confluence/` | `http://localhost:<port>/confluence` |
+| `components/blocks/rovo/`       | `http://localhost:<port>/rovo`       |
+| `components/blocks/search/`     | `http://localhost:<port>/search`     |
+| `components/blocks/widget/`     | `http://localhost:<port>/widgets`    |
 
 See `references/visual-testing.md` for comprehensive visual testing documentation.
 

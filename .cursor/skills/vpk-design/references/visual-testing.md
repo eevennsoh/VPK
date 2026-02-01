@@ -8,22 +8,27 @@ The `/agent-browser` skill provides browser automation capabilities powered by P
 
 ## Prerequisites
 
-1. **Dev server running** at `http://localhost:3000`
+1. **Dev server running**
    ```bash
    pnpm run dev
    ```
 
-2. **Browser skill available** — invoke with `/agent-browser`
+2. **Find the frontend port** — The dev server uses dynamic port allocation:
+   ```bash
+   cat .dev-frontend-port  # Returns the port number (e.g., 3000, 3001, etc.)
+   ```
+
+3. **Browser skill available** — invoke with `/agent-browser`
 
 ---
 
 ## Core Workflow
 
-Invoke the skill and describe your testing needs:
+Invoke the skill and describe your testing needs (replace `<port>` with the value from `.dev-frontend-port`):
 
 ```
 /agent-browser
-"Navigate to http://localhost:3000/jira and take a screenshot"
+"Navigate to http://localhost:<port>/jira and take a screenshot"
 ```
 
 The skill handles browser launch, navigation, waiting, and cleanup automatically.
@@ -32,16 +37,16 @@ The skill handles browser launch, navigation, waiting, and cleanup automatically
 
 ## Route Mapping
 
-| Block Location                  | Test URL                           |
-| ------------------------------- | ---------------------------------- |
-| `components/blocks/jira/`       | `http://localhost:3000/jira`       |
-| `components/blocks/confluence/` | `http://localhost:3000/confluence` |
-| `components/blocks/rovo/`       | `http://localhost:3000/rovo`       |
-| `components/blocks/search/`     | `http://localhost:3000/search`     |
-| `components/blocks/widget/`     | `http://localhost:3000/widgets`    |
-| `components/blocks/chat/`       | `http://localhost:3000/chat`       |
-| `components/blocks/sidebar/`    | `http://localhost:3000/jira` (visible in layout) |
-| `components/blocks/navigation/` | `http://localhost:3000/jira` (visible in layout) |
+| Block Location                  | Test URL                             |
+| ------------------------------- | ------------------------------------ |
+| `components/blocks/jira/`       | `http://localhost:<port>/jira`       |
+| `components/blocks/confluence/` | `http://localhost:<port>/confluence` |
+| `components/blocks/rovo/`       | `http://localhost:<port>/rovo`       |
+| `components/blocks/search/`     | `http://localhost:<port>/search`     |
+| `components/blocks/widget/`     | `http://localhost:<port>/widgets`    |
+| `components/blocks/chat/`       | `http://localhost:<port>/chat`       |
+| `components/blocks/sidebar/`    | `http://localhost:<port>/jira` (visible in layout) |
+| `components/blocks/navigation/` | `http://localhost:<port>/jira` (visible in layout) |
 
 ---
 
@@ -55,7 +60,7 @@ VPK uses `ThemeWrapper` which persists theme to localStorage with key `ui-theme`
 
 ```
 /agent-browser
-"Take screenshots of http://localhost:3000/jira in both light and dark mode.
+"Take screenshots of http://localhost:<port>/jira in both light and dark mode.
 Set localStorage 'ui-theme' to 'light', take a screenshot, then set it to 'dark' and take another."
 ```
 
@@ -63,7 +68,7 @@ Set localStorage 'ui-theme' to 'light', take a screenshot, then set it to 'dark'
 
 ```
 /agent-browser
-"Navigate to http://localhost:3000/confluence, set localStorage 'ui-theme' to 'dark',
+"Navigate to http://localhost:<port>/confluence, set localStorage 'ui-theme' to 'dark',
 reload the page, and take a screenshot."
 ```
 
@@ -78,7 +83,7 @@ After implementing a Figma design, validate visually:
 2. **Capture implementation:**
    ```
    /agent-browser
-   "Take a screenshot of http://localhost:3000/[route] in light mode"
+   "Take a screenshot of http://localhost:<port>/[route] in light mode"
    ```
 
 3. **Compare side-by-side** — check for:
@@ -96,7 +101,7 @@ After implementing a Figma design, validate visually:
 
 ```
 /agent-browser
-"Test http://localhost:3000/jira at desktop (1440x900), tablet (768x1024),
+"Test http://localhost:<port>/jira at desktop (1440x900), tablet (768x1024),
 and mobile (375x812) sizes. Take a screenshot at each size."
 ```
 
@@ -104,7 +109,7 @@ and mobile (375x812) sizes. Take a screenshot at each size."
 
 ```
 /agent-browser
-"Navigate to http://localhost:3000/jira, click the 'Create' button,
+"Navigate to http://localhost:<port>/jira, click the 'Create' button,
 wait for the modal to appear, and take a screenshot."
 ```
 
@@ -112,7 +117,7 @@ wait for the modal to appear, and take a screenshot."
 
 ```
 /agent-browser
-"Go to http://localhost:3000/search, type 'test query' in the search input,
+"Go to http://localhost:<port>/search, type 'test query' in the search input,
 press Enter, wait for results, and take a screenshot."
 ```
 
@@ -127,6 +132,15 @@ press Enter, wait for results, and take a screenshot."
 **Solution:** Start the dev server first:
 ```bash
 pnpm run dev
+```
+
+### Wrong Port
+
+**Symptom:** Navigation fails with connection refused.
+
+**Solution:** Check the actual port:
+```bash
+cat .dev-frontend-port
 ```
 
 ### Theme Not Applied
