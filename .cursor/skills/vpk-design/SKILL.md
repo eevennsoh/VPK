@@ -4,7 +4,9 @@ description: >-
   This skill should be used when the user asks to "use ADS", "add Atlassian component",
   "style with tokens", "ADS button/form/table", "add icon", "use primitives",
   "design system", "implement design", "Figma to code", "build Figma design",
-  "add @atlaskit", "use design tokens", or wants to implement UI using the Atlassian Design System.
+  "add @atlaskit", "use design tokens", "verify design", "check ADS compliance",
+  "audit tokens", "validate accessibility", "review UI code", "check design language",
+  or wants to implement or verify UI using the Atlassian Design System.
 ---
 
 # Atlassian Design System Quick Reference
@@ -38,6 +40,7 @@ For comprehensive documentation, see these reference files:
 | `references/search.md`                | How to find ADS components, icons, tokens                               |
 | `references/implement-figma-design.md`| Figma-to-code workflow, MCP tools, and Tailwind-to-ADS translation      |
 | `references/visual-testing.md`        | Visual testing with /agent-browser for theme and Figma validation       |
+| `references/verification.md`          | ADS compliance verification workflow and checklists                     |
 
 ---
 
@@ -291,6 +294,50 @@ Use sentence case with verb + noun pattern:
 
 - ✅ "Save changes", "Delete project", "Send message"
 - ❌ "Message", "Send"
+
+---
+
+## Design Verification
+
+Use this skill to verify existing UI code follows ADS patterns.
+
+### Verification Modes
+
+**Single component:**
+```
+"verify this component follows ADS patterns"
+"check tokens in SearchModal.tsx"
+```
+
+**Directory scan:**
+```
+"audit components/blocks/jira/ for ADS compliance"
+"check all components in the search folder"
+```
+
+### What Gets Verified
+
+1. **Token Compliance** - No hardcoded colors, spacing, fonts
+2. **Component Usage** - ADS components over native HTML
+3. **Accessibility** - Icon labels, form labels, keyboard access
+4. **Content Standards** - Sentence case, contractions, vocabulary
+
+### Verification Report Format
+
+Reports include pass/fail status per category:
+
+```
+## ADS Compliance Report: [target]
+
+### Token Compliance: ✓ PASS / ✗ FAIL
+### Component Usage: ✓ PASS / ✗ FAIL
+### Accessibility: ✓ PASS / ✗ FAIL
+### Content Standards: ✓ PASS / ✗ FAIL
+
+### Summary: X of 4 checks passed
+```
+
+For comprehensive verification documentation, see `references/verification.md`.
 
 ---
 
