@@ -1,7 +1,10 @@
 const net = require("node:net");
+const fs = require("node:fs");
+const path = require("node:path");
 const { spawn } = require("node:child_process");
 
 const basePort = Number.parseInt(process.env.PORT ?? "3000", 10);
+const portFile = path.join(process.cwd(), ".dev-frontend-port");
 const maxTries = Number.parseInt(process.env.PORT_SEARCH_MAX ?? "20", 10);
 
 const unsupportedErrors = new Set([
@@ -78,12 +81,26 @@ const findAvailablePort = async (minPort = basePort) => {
 	);
 };
 
+const writePortFile = (port) => {
+	fs.writeFileSync(portFile, String(port));
+};
+
+const cleanupPortFile = () => {
+	try {
+		fs.unlinkSync(portFile);
+	} catch {
+		// ignore missing file
+	}
+};
+
 const MAX_PORT_RETRIES = 5;
 
 const startNext = async (port, attempt = 0) => {
 	if (attempt === 0 && port !== basePort) {
 		console.log(`Port ${basePort} in use. Using port ${port} instead.`);
 	}
+
+	writePortFile(port);
 
 	const nextBin = require.resolve("next/dist/bin/next");
 	let stderr = "";
@@ -111,6 +128,8 @@ const startNext = async (port, attempt = 0) => {
 	process.on("SIGTERM", forwardSignal);
 
 	child.on("exit", async (code, signal) => {
+		cleanupPortFile();
+
 		if (signal) {
 			process.kill(process.pid, signal);
 			return;
@@ -144,6 +163,7 @@ const run = async () => {
 };
 
 run().catch((error) => {
+	cleanupPortFile();
 	console.error(error);
 	process.exit(1);
 });

@@ -45,6 +45,7 @@ yarn-error.log*
 # Dev process management
 .dev-pids
 .dev-backend-port
+.dev-frontend-port
 .api-routes-backup
 
 # vercel
