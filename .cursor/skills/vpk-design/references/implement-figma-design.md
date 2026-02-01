@@ -85,11 +85,17 @@ Compare final UI against the Figma screenshot for 1:1 fidelity.
 
 **Browser-based validation (if dev server running):**
 
-Use the `/agent-browser` skill with natural language prompts:
+Use the `/agent-browser` skill with natural language prompts. Check `.dev-frontend-port` for the actual port:
+
+```bash
+cat .dev-frontend-port  # Returns the port number (e.g., 3000, 3001, etc.)
+```
+
+Then use the port in your prompts:
 
 ```
 /agent-browser
-"Take a screenshot of http://localhost:3000/[route] in light mode"
+"Take a screenshot of http://localhost:<port>/[route] in light mode"
 ```
 
 ```
@@ -99,7 +105,7 @@ Use the `/agent-browser` skill with natural language prompts:
 
 ```
 /agent-browser
-"Compare the implementation at http://localhost:3000/[route] against the Figma screenshot"
+"Compare the implementation at http://localhost:<port>/[route] against the Figma screenshot"
 ```
 
 Compare implementation screenshots against Figma screenshot side-by-side.
