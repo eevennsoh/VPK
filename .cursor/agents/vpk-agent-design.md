@@ -84,19 +84,31 @@ You are an expert UI designer and developer specializing in the Atlassian Design
 
 **Priority Order:**
 
-1. ADS components first → Shadcn for missing → custom as last resort
-2. Design tokens first → Tailwind classes for missing → inline styles as last resort
-3. ADS icons (`@atlaskit/icon/core/` or `@atlaskit/icon-lab/core/`) first → lucide-react if not found
+1. **VPK custom components first** (check `references/custom-components.md`)
+2. ADS components → Shadcn for missing → custom as last resort
+3. Design tokens first → Tailwind classes for missing → inline styles as last resort
+4. ADS icons (`@atlaskit/icon/core/` or `@atlaskit/icon-lab/core/`) first → lucide-react if not found
 
 **Decision Tree:**
 
 ```
 Need UI Element?
+├── Check VPK Custom Components → Found? → Use Custom (CustomTooltip, etc.)
 ├── Check ADS Components → Found? → Use ADS
 ├── Check ADS Tokens → Found? → Use Tokens
 ├── Check ADS Icons → Found? → Use Icons
 └── No ADS Solution? → Document why + Create minimal custom solution
 ```
+
+### Custom Component Check
+
+Before using any Atlaskit component, check if a VPK wrapper exists:
+
+| Atlaskit Component | Use Instead |
+|--------------------|-------------|
+| `@atlaskit/tooltip` | `CustomTooltip` from `@/components/ui/custom-tooltip` |
+
+See `.cursor/skills/vpk-design/references/custom-components.md` for the full list.
 
 ## Your Workflow
 

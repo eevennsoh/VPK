@@ -27,14 +27,15 @@ pnpm run dev:backend      # Backend only (Express)
 
 ```bash
 pnpm run build            # Next.js build
+pnpm run start            # Start production server (after build)
 ```
 
 ### Deployment
 
 ```bash
 /vpk-deploy                                              # Via skill (recommended)
-./.claude/skills/vpk-deploy/scripts/deploy.sh <service> <version> [env]
-./.claude/skills/vpk-deploy/scripts/deploy-check.sh     # Pre-deploy validation
+./.cursor/skills/vpk-deploy/scripts/deploy.sh <service> <version> [env]
+./.cursor/skills/vpk-deploy/scripts/deploy-check.sh     # Pre-deploy validation
 pnpm run deploy:micros                                   # Fast redeploy shortcut
 ```
 
@@ -71,6 +72,22 @@ lsof -ti:3000,8080 | xargs kill -9     # Kill lingering port processes
 
 - **vpk-agent-design** — ADS UI specialist (invoked proactively for UI work)
 - **vpk-agent-tidy** — React component refactoring specialist (invoked proactively when tidying up components)
+
+### Subagent Usage
+
+**Always wait** for all subagents to complete before yielding control back to the user.
+
+**Spawn subagents when:**
+
+- **Parallelizable work** — Independent tasks that can run simultaneously (e.g., `pnpm install` + lint check, `npm test` + typecheck, multiple file searches)
+- **Long-running operations** — Tasks that block but don't require immediate results (e.g., builds, deployments, comprehensive code audits)
+- **Isolation for risky changes** — Exploratory or potentially destructive operations that benefit from sandboxed execution
+
+**Don't spawn subagents for:**
+
+- Single, quick operations (reading one file, simple edits)
+- Tasks with tight dependencies where parallelization isn't possible
+- Trivial lookups that complete faster inline
 
 ---
 
