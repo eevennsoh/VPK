@@ -41,6 +41,8 @@ For comprehensive documentation, see these reference files:
 | `references/implement-figma-design.md`| Figma-to-code workflow, MCP tools, and Tailwind-to-ADS translation      |
 | `references/visual-testing.md`        | Visual testing with /agent-browser for theme and Figma validation       |
 | `references/verification.md`          | ADS compliance verification workflow and checklists                     |
+| `references/custom-components.md`     | VPK custom component wrappers (CustomTooltip, etc.)                     |
+| `references/dropdown-positioning.md`  | ADS DropdownMenu parent-relative positioning pattern                    |
 
 ---
 
@@ -350,6 +352,30 @@ For comprehensive verification documentation, see `references/verification.md`.
 - [ ] Importing from `@atlaskit/primitives` paths
 - [ ] Icons have required `label` prop
 - [ ] Following sentence case for UI text
+
+---
+
+## Custom Components
+
+VPK provides custom wrappers for certain Atlaskit components. **Always check for a custom
+component before importing Atlaskit directly.**
+
+### Available Custom Components
+
+| Component | Import | Purpose |
+|-----------|--------|---------|
+| `CustomTooltip` | `@/components/ui/custom-tooltip` | Tooltip with VPK defaults |
+| `FooterDisclaimer` | `@/components/ui/footer-disclaimer` | AI disclaimer footer |
+| `LivePageIcon` | `@/components/ui/icon-livepage` | Custom LivePage icon |
+
+### Priority Order (Updated)
+
+1. **Custom components first** (check `references/custom-components.md`)
+2. ADS components (Button, TextField, etc.)
+3. shadcn for missing components
+4. Custom as last resort
+
+See `references/custom-components.md` for full documentation.
 
 ---
 

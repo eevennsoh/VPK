@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { IconButton } from "@atlaskit/button/new";
-import Tooltip from "@atlaskit/tooltip";
+import CustomTooltip from "@/components/ui/custom-tooltip";
 import AddIcon from "@atlaskit/icon/core/add";
 import CustomizeIcon from "@atlaskit/icon/core/customize";
 import ClipboardIcon from "@atlaskit/icon/core/clipboard";
@@ -79,7 +79,7 @@ export default function ComposerActions({
 					planModeEnabled ? (
 						<PlanBadge onClose={() => onPlanModeToggle?.(false)} />
 					) : (
-						<Tooltip content="Enter plan mode ⇧Tab" position="top" hideTooltipOnMouseDown>
+						<CustomTooltip content="Enter plan mode ⇧Tab">
 							<IconButton
 								icon={ClipboardIcon}
 								label="Enter plan mode"
@@ -87,7 +87,7 @@ export default function ComposerActions({
 								shape="circle"
 								onClick={() => onPlanModeToggle?.(true)}
 							/>
-						</Tooltip>
+						</CustomTooltip>
 					)
 				)}
 			</div>
