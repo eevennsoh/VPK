@@ -1,6 +1,6 @@
 # VPK (Venn Prototype Kit)
 
-> This file provides project context for AI assistants. Symlinked as `CLAUDE.md` and `.agent.md`.
+> This file provides project context for AI assistants.
 > Skills are defined in `.cursor/skills/`. Agents are defined in `.cursor/agents/`.
 
 Next.js 16 + Express backend with AI Gateway integration.
