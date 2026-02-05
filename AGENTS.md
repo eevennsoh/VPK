@@ -10,6 +10,13 @@ Next.js 16 + Express backend with AI Gateway integration.
 - Component architecture patterns @.cursor/skills/vpk-tidy/SKILL.md
 - ADS design system and Figma integration @.cursor/skills/vpk-design/SKILL.md
 
+## Rules
+
+- Cursor rules live in `.cursor/rules` (`.mdc` format).
+- Claude rules should live in `.claude/rules` (`.md` format).
+- Codex rules should live in `.codex/rules` (`.rules` Starlark format).
+- Always-on Cursor rules: `.cursor/rules/vpk-prototyping.mdc`, `.cursor/rules/motion-react.mdc`, `.cursor/rules/motion-base-ui.mdc`.
+
 ---
 
 ## Commands
