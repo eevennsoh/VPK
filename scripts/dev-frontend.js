@@ -6,6 +6,7 @@ const { getFrontendBasePort } = require("./lib/worktree-ports");
 
 const basePort = getFrontendBasePort();
 const portFile = path.join(process.cwd(), ".dev-frontend-port");
+const lockFile = path.join(process.cwd(), ".next", "dev", "lock");
 const maxTries = Number.parseInt(process.env.PORT_SEARCH_MAX ?? "20", 10);
 
 const unsupportedErrors = new Set([
@@ -140,6 +141,10 @@ const startNext = async (port, attempt = 0) => {
 			code === 1 &&
 			(stderr.includes("EADDRINUSE") || stderr.includes("address already in use"));
 
+		const isLockError =
+			code === 1 &&
+			stderr.includes("Unable to acquire lock");
+
 		if (isEaddrInUse && attempt < MAX_PORT_RETRIES - 1) {
 			try {
 				const nextPort = await findAvailablePort(port + 1);
@@ -154,11 +159,79 @@ const startNext = async (port, attempt = 0) => {
 			}
 		}
 
+		if (isLockError && attempt < MAX_PORT_RETRIES - 1) {
+			try {
+				process.removeListener("SIGINT", forwardSignal);
+				process.removeListener("SIGTERM", forwardSignal);
+				await cleanLockAndRetry(port, attempt + 1);
+				return;
+			} catch (err) {
+				console.error(err);
+				process.exit(1);
+			}
+		}
+
 		process.exit(code ?? 0);
 	});
 };
 
+const cleanStaleLock = async () => {
+	if (!fs.existsSync(lockFile)) {
+		return;
+	}
+
+	// Check which port to test - use recorded port if available, otherwise base port
+	let portToCheck = basePort;
+	if (fs.existsSync(portFile)) {
+		try {
+			const recordedPort = Number.parseInt(fs.readFileSync(portFile, "utf8").trim(), 10);
+			if (!Number.isNaN(recordedPort) && recordedPort > 0) {
+				portToCheck = recordedPort;
+			}
+		} catch {
+			// Ignore read errors, fall back to base port
+		}
+	}
+
+	// Check if a process is actually using the port
+	const portInUse = !(await isPortAvailable(portToCheck));
+	if (portInUse) {
+		// Lock is legitimate - a Next.js instance is running
+		return;
+	}
+
+	// Also check the base port if different
+	if (portToCheck !== basePort) {
+		const basePortInUse = !(await isPortAvailable(basePort));
+		if (basePortInUse) {
+			return;
+		}
+	}
+
+	// Lock exists but no process on port - stale lock
+	console.log("Removing stale Next.js lock file from previous run...");
+	try {
+		fs.unlinkSync(lockFile);
+	} catch {
+		// Ignore errors (file might have been cleaned up already)
+	}
+	// Also clean up the stale port file
+	cleanupPortFile();
+};
+
+const cleanLockAndRetry = async (port, attempt) => {
+	console.log("Lock file conflict detected. Cleaning up and retrying...");
+	try {
+		fs.unlinkSync(lockFile);
+	} catch {
+		// Ignore
+	}
+	cleanupPortFile();
+	await startNext(port, attempt);
+};
+
 const run = async () => {
+	await cleanStaleLock();
 	const port = await findAvailablePort();
 	await startNext(port);
 };

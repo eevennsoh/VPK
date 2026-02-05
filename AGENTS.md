@@ -228,6 +228,42 @@ Mandatory patterns for all React components. Full details: @.cursor/skills/vpk-t
 
 **Quick rules:** Components <150 lines, logic in hooks, static data in `data/` files, `Readonly<Props>` interfaces.
 
+### Context Providers (State/Actions/Meta Pattern)
+
+Contexts follow the State/Actions/Meta pattern for clean separation:
+
+```tsx
+interface FooState { /* read-only values */ }
+interface FooActions { /* state mutations */ }
+interface FooMeta { /* external dependencies */ }
+```
+
+- Reference implementation: `app/contexts/context-work-item-modal.tsx`
+- Contexts go in `app/contexts/context-[name].tsx`
+- Export convenience hooks: `useFooState()`, `useFooActions()`, `useFooMeta()`
+
+### Compound Components
+
+Use namespace pattern for related compound components:
+
+```tsx
+// components/blocks/[feature]/components/[name]/index.tsx
+export const Composer = {
+  Container: ComposerContainer,
+  Textarea: ComposerTextarea,
+  Actions: ComposerActions,
+} as const;
+
+// Usage
+<Composer.Container>
+  <Composer.Textarea />
+  <Composer.Actions />
+</Composer.Container>
+```
+
+- Each sub-component reads from context (no prop drilling)
+- Keep each sub-component under 100 lines
+
 ---
 
 ## Frontend/UI Design
@@ -376,11 +412,11 @@ In dev, API calls go through Next.js proxy → Express. Check both layers when d
 
 | Context | File | Purpose |
 |---------|------|---------|
-| Chat panel | `app/contexts/context-chat.tsx` | Generic chat panel state |
+| Chat panel | `app/contexts/context-chat.tsx` | Generic chat panel state (component-level) |
 | Rovo chat | `app/contexts/context-rovo-chat.tsx` | AI chat with streaming/widgets |
 | Sidebar | `app/contexts/context-sidebar.tsx` | Sidebar visibility and route |
 | System prompt | `app/contexts/context-system-prompt.tsx` | Custom AI prompts |
-| Work item modal | `app/contexts/context-work-item-modal.tsx` | Work item detail modal |
+| Work item modal | `app/contexts/context-work-item-modal.tsx` | Work item detail modal (State/Actions/Meta pattern) |
 | Theme | `components/utils/theme-wrapper.tsx` | Light/dark/system mode |
 
 **Active in provider tree:** AppProvider → ThemeWrapper → SidebarProvider → RovoChatProvider → SystemPromptProvider
@@ -396,6 +432,11 @@ ESLint rule `react-hooks/set-state-in-effect` prohibits calling setState synchro
 ### Model Switching
 
 VPK supports Claude (default) and GPT. Use `/vpk-setup` skill to switch models by updating `AI_GATEWAY_URL` in `.env.local`.
+
+### ADS Dropdown Positioning
+
+Use `shouldRenderToParent` with CSS override on `[data-ds--level="1"]` for parent-relative dropdown menus.
+See `.cursor/skills/vpk-design/references/dropdown-positioning.md` for pattern.
 
 ---
 
