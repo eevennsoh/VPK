@@ -447,6 +447,113 @@ See `.cursor/skills/vpk-design/references/dropdown-positioning.md` for pattern.
 
 ---
 
+## Claude Behavioral Rules
+
+These rules prevent common friction patterns identified from usage analysis.
+
+### Verify File Location Before UI Edits
+
+When implementing UI changes, always verify the exact file/component location before editing. Use Grep to search for distinctive text or class names from the UI rather than assuming based on file names.
+
+**Do this:**
+```
+1. Grep for distinctive UI text (button labels, placeholder text, class names)
+2. Confirm the correct file with user if ambiguous
+3. Then make the edit
+```
+
+### macOS Shell Compatibility
+
+This is a macOS environment. Use BSD-compatible commands:
+
+- Use `sed -i ''` (not `sed -i`) for in-place edits
+- Or use `perl -i -pe` for portable in-place substitution
+- When writing shell scripts, prefer portable approaches
+
+### Front-load Figma Design Specs
+
+When implementing Figma designs, ask for or verify these values BEFORE implementing:
+
+- Exact shadow token (e.g., `elevation.shadow.raised` vs `elevation.shadow.overlay`)
+- Spacing values in px (padding, margin, gap)
+- Width constraints
+- Border radius token (e.g., `radius.large` not `border.radius.200`)
+
+Use the project's design token system from `@atlaskit/tokens`.
+
+### Prefer Simple Solutions
+
+Try the simplest approach first:
+
+- Prompt-type hooks before custom bash scripts
+- Direct solutions before abstractions
+- Built-in features before custom implementations
+
+Avoid over-engineering when a straightforward solution exists.
+
+---
+
+## Autonomous Workflows
+
+These workflows enable Claude to work more independently, reducing back-and-forth corrections.
+
+### Autonomous Validation Loops
+
+When implementing features, validate before presenting to user:
+
+1. **Implement** the feature or fix
+2. **Validate** by running available checks:
+   - `pnpm run lint` for ESLint errors
+   - `pnpm tsc --noEmit` for TypeScript errors
+   - Visual check via `/agent-browser` for UI changes
+3. **Fix** any errors found
+4. **Repeat** until all validations pass
+5. **Present** only the final working implementation
+
+For UI implementations specifically:
+- Verify design tokens exist in the project's token system
+- Check that imports reference correct file paths
+- Confirm component placement follows block structure pattern
+
+### Parallel Agent Exploration
+
+When exploring the codebase for feature implementation, spawn parallel agents to:
+
+1. **Find existing patterns** — Search for similar implementations
+2. **Catalog relevant tokens/components** — Check design system usage
+3. **Review documentation standards** — Ensure consistency
+
+Synthesize findings into a comprehensive plan before writing code.
+
+**Example spawn pattern:**
+```
+Spawn 3 parallel Task agents:
+- Agent 1: Find all existing [feature type] implementations
+- Agent 2: Catalog design tokens used for [UI element]
+- Agent 3: Check component structure in similar blocks
+```
+
+### Self-Correcting PR Workflow
+
+Before creating a PR, run this validation sequence:
+
+1. **Lint check**: `pnpm run lint` — fix any errors
+2. **Type check**: `pnpm tsc --noEmit` — fix any type errors
+3. **Token verification**: Grep design-tokens usage matches project conventions
+4. **Import verification**: Confirm all imports resolve correctly
+5. **Create PR** only after all validations pass
+
+Include validation results in PR description:
+```markdown
+## Validation
+- [x] ESLint: passed
+- [x] TypeScript: passed
+- [x] Design tokens: verified
+- [x] Imports: resolved
+```
+
+---
+
 ## Customization
 
 Create `.local.md` files alongside skills/agents for personal overrides (gitignored):
